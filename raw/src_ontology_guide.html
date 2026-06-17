@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIBUNNY — 온톨로지 구현 완전 가이드 (초보용)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1310;--ink-soft:#3A2E27;--porcelain:#F2ECE6;--porcelain-2:#EAE2DA;
+    --oxblood:#6B1620;--oxblood-deep:#46101A;--sheen:#B0844A;--sheen-soft:#C9A66B;
+    --blush:#E6D0C9;--mist:#8C7E76;--line:rgba(26,19,16,.14);--green:#2E5D4E;--code:#1c1611;
+    --serif:'Cormorant Garamond',serif;--sans:'Pretendard',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--porcelain);color:var(--ink);line-height:1.66;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--oxblood);color:var(--porcelain)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  header.hero{background:linear-gradient(160deg,#241015,var(--oxblood-deep) 46%,#2A1117);color:var(--porcelain);padding:54px 0 46px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.07) 50%,transparent 62%)}
+  .hero .wrap{position:relative;z-index:2}
+  .kick{font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:600;color:var(--sheen-soft)}
+  .mast{font-family:var(--serif);font-weight:600;font-size:clamp(28px,5.5vw,50px);line-height:1.06;margin:13px 0 8px}
+  .mast em{font-style:italic;color:var(--sheen-soft)}
+  .hnote{margin-top:14px;max-width:660px;font-size:14px;color:rgba(242,236,230,.88)}
+  .meta{margin-top:16px;font-size:12px;color:var(--sheen-soft);letter-spacing:.05em}
+
+  .toc{background:var(--porcelain-2);padding:22px 0}
+  .toc h4{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--oxblood);margin-bottom:12px;font-weight:700}
+  .toc .wrap{}
+  .toc ol{columns:2;column-gap:22px;list-style:none;padding:0;margin:0}
+  @media(max-width:640px){.toc ol{columns:1}}
+  .toc li{font-size:13px;padding:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--ink)}
+  .toc a b{color:var(--oxblood);margin-right:6px}
+
+  .part{padding:40px 0 6px;border-bottom:2px solid var(--line)}
+  .part-tag{display:inline-block;font-family:var(--serif);font-style:italic;font-size:15px;color:#fff;background:var(--oxblood);padding:5px 15px;border-radius:18px;margin-bottom:12px}
+  .part h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,34px);line-height:1.1;margin-bottom:6px}
+  .part .intro{font-size:14.5px;color:var(--ink-soft);margin-bottom:8px;max-width:780px}
+  .part .intro b{color:var(--ink)}
+
+  .s{counter-reset:none;background:#fff;border:1px solid var(--line);border-radius:11px;padding:15px 17px;margin:11px 0}
+  .s .st{font-size:14.5px;font-weight:700;color:var(--oxblood-deep);margin-bottom:8px}
+  .steps{list-style:none;counter-reset:st;padding:0;margin:0}
+  .steps>li{counter-increment:st;position:relative;padding:7px 0 7px 34px;font-size:13.5px;color:var(--ink-soft);border-top:1px dashed var(--line)}
+  .steps>li:first-child{border-top:none}
+  .steps>li::before{content:counter(st);position:absolute;left:0;top:7px;width:23px;height:23px;background:var(--sheen);color:#fff;border-radius:50%;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .steps>li b{color:var(--ink)}
+  .btn{display:inline-block;background:#efe2d2;color:var(--oxblood-deep);font-weight:700;font-size:12.5px;padding:1px 8px;border-radius:5px;border:1px solid #e0cfba;white-space:nowrap}
+
+  code{background:#efe7df;padding:1.5px 6px;border-radius:4px;font-size:12.5px;font-family:ui-monospace,Menlo,monospace;color:var(--oxblood-deep);word-break:break-all}
+  pre{background:var(--code);color:#e9dfd3;border-radius:9px;padding:13px 15px;overflow-x:auto;font-size:12px;line-height:1.55;margin:9px 0}
+  pre .c{color:#9a8b7a}
+  pre .k{color:#d9a679}
+  .note{background:#eef3f0;border-left:4px solid var(--green);border-radius:6px;padding:12px 15px;margin:11px 0;font-size:13px;color:var(--ink-soft)}
+  .note b{color:var(--green)}
+  .warn{background:#fbefe9;border-left:4px solid var(--oxblood);border-radius:6px;padding:12px 15px;margin:11px 0;font-size:13px;color:var(--ink-soft)}
+  .warn b{color:var(--oxblood)}
+  .tip{background:#faf6f1;border-left:4px solid var(--sheen);border-radius:6px;padding:12px 15px;margin:11px 0;font-size:13px;color:var(--ink-soft)}
+  .tip b{color:var(--sheen)}
+  .os{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:10px 0}
+  @media(max-width:640px){.os{grid-template-columns:1fr}}
+  .os>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#faf6f1}
+  .os h5{font-size:12.5px;color:var(--oxblood-deep);margin-bottom:7px;font-weight:700}
+  .out{font-size:12.5px;color:var(--green);font-weight:600;margin-top:9px;display:block;padding-left:2px}
+  .out::before{content:"✓ 여기까지 되면 — ";color:var(--mist);font-weight:400;font-style:italic}
+  table.t{width:100%;border-collapse:collapse;margin:11px 0;font-size:12.5px;background:#fff;border-radius:8px;overflow:hidden}
+  table.t th{background:var(--oxblood);color:#fff;text-align:left;padding:9px 11px;font-size:12px}
+  table.t td{padding:8px 11px;border-top:1px solid var(--line);vertical-align:top}
+  table.t tr:nth-child(even) td{background:#faf6f1}
+  table.t td:first-child{font-weight:600;color:var(--oxblood-deep)}
+  h3.mini{font-size:14px;color:var(--oxblood-deep);margin:16px 0 5px;font-weight:700}
+  footer{background:var(--ink);color:var(--porcelain);padding:26px 0;font-size:12.5px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer span{color:var(--mist);font-style:italic}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kick">Ontology Build · 완전 초보용 · 설치부터 운영까지</span>
+    <div class="mast">하나부터 열까지<em>,</em> 따라만 하면 된다.</div>
+    <p class="hnote">Obsidian으로 우리 사업 전용 온톨로지를 직접 구축한다. 어떤 화면에서 어떤 버튼을 누르는지, Git·GitHub·Antigravity 설치와 백업까지 — 한 단계도 건너뛰지 않는다.</p>
+    <div class="meta">PART A 개념 · B~D 설치 · E~G 구축 · H~I 백업·자동화 · J 운영</div>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <h4>목차</h4>
+  <ol>
+    <li><a href="#A"><b>A</b> 온톨로지란? 우리 구조의 특징·규칙</a></li>
+    <li><a href="#B"><b>B</b> Obsidian 설치</a></li>
+    <li><a href="#C"><b>C</b> Vault 만들기 + 폴더 구조 짓기</a></li>
+    <li><a href="#D"><b>D</b> 플러그인 설치(Dataview·Git)</a></li>
+    <li><a href="#E"><b>E</b> 객체(노트) 만들기 — 스키마 입력</a></li>
+    <li><a href="#F"><b>F</b> 패턴 객체 + 관계 연결</a></li>
+    <li><a href="#G"><b>G</b> 대시보드 작동(Dataview)</a></li>
+    <li><a href="#H"><b>H</b> Git 설치 + GitHub 백업</a></li>
+    <li><a href="#I"><b>I</b> Antigravity + 분류 스크립트</a></li>
+    <li><a href="#J"><b>J</b> 매일 운영 루틴</a></li>
+    <li><a href="#X"><b>부록</b> 트러블슈팅</a></li>
+  </ol>
+</div></nav>
+
+<div class="wrap">
+
+<!-- PART A -->
+<section class="part" id="A">
+  <span class="part-tag">PART A</span>
+  <h2>온톨로지란? 우리 구조의 특징·규칙</h2>
+  <p class="intro">코드를 짜기 전에 "무엇을 만드는지" 먼저 이해하면 훨씬 쉬워진다. 5분만 읽자.</p>
+
+  <h3 class="mini">온톨로지 = "내 데이터를 정리하는 약속(규칙)"</h3>
+  <p class="intro">어렵게 들리지만 간단하다. <b>온톨로지는 "내 사업의 정보를 어떤 객체로 나누고, 객체끼리 어떻게 연결할지 정한 지도"</b>다. 우리는 콘텐츠(릴스/게시물)를 만들고 그 반응을 쌓는데, 그냥 쌓으면 뒤죽박죽이다. 온톨로지가 있으면 "이건 훅 객체, 이건 주제 객체, 이 콘텐츠는 저 훅을 썼다"처럼 <b>구조화</b>되어, 나중에 "어떤 훅이 잘 먹혔나"를 한눈에 본다.</p>
+
+  <div class="note"><b>왜 이게 무기인가:</b> 콘텐츠가 100개, 500개 쌓이면 머리로 기억 못 한다. 온톨로지로 쌓으면 "물어뜯기 주제 + 충격질문 훅 + 비포애프터 포맷이 저장률 6%로 최고"라는 <b>패턴이 데이터로</b> 나온다. 경쟁사는 감으로 하지만 우리는 데이터로 한다. 이게 시간이 갈수록 복리로 쌓이는 해자다.</p>
+
+  <h3 class="mini">우리 온톨로지의 5가지 객체(Entity)</h3>
+  <table class="t">
+    <thead><tr><th>객체</th><th>뜻</th><th>예시</th></tr></thead>
+    <tbody>
+      <tr><td>Content</td><td>릴스/게시물 1개</td><td>"20년 뜯은 손톱 4주 기록"</td></tr>
+      <tr><td>Hook</td><td>첫 3초 유형</td><td>충격질문 / 공감고백</td></tr>
+      <tr><td>Format</td><td>영상 구성 방식</td><td>비포애프터 / 길거리투표</td></tr>
+      <tr><td>Topic</td><td>주제(부위·페인)</td><td>물어뜯기 / 셀프젤손상</td></tr>
+      <tr><td>Episode</td><td>부위별 시즌</td><td>EP1 손톱 / EP2 입술</td></tr>
+    </tbody>
+  </table>
+  <p class="intro">각 Content는 자기가 어떤 Hook·Format·Topic·Episode를 썼는지 <b>링크로 연결</b>된다. 이 연결이 온톨로지의 핵심이다.</p>
+
+  <h3 class="mini">객체화(objectification)란?</h3>
+  <p class="intro">"객체화"는 <b>각 정보를 노트 1개로 만들고, 그 노트 머리에 속성(frontmatter)을 붙이는 것</b>이다. 예를 들어 릴스 하나를 노트로 만들고 머리에 "저장률 0.05, 훅=충격질문"이라고 적으면, 그 노트가 하나의 "객체"가 된다. Dataview가 이 속성들을 읽어 표로 만들어준다.</p>
+
+  <h3 class="mini">3가지 규칙 (꼭 지킨다)</h3>
+  <table class="t">
+    <tbody>
+      <tr><td>규칙 1</td><td><b>콘텐츠 1개 = 노트 1개.</b> 절대 한 노트에 여러 콘텐츠 섞지 않는다.</td></tr>
+      <tr><td>규칙 2</td><td><b>입력변수는 발행 즉시 손으로 기록.</b> 훅·포맷·주제·제작방식(real/ai)은 플랫폼이 안 알려주니 내가 적는다.</td></tr>
+      <tr><td>규칙 3</td><td><b>성공 판정은 저장률 기준.</b> save_rate ≥ 0.04 + 도달 중앙값 이상 → 성공 폴더. (재구매 선행지표)</td></tr>
+    </tbody>
+  </table>
+  <span class="out">"객체·연결·규칙" 개념이 머리에 들어왔다. 이제 만들러 가자.</span>
+</section>
+
+<!-- PART B -->
+<section class="part" id="B">
+  <span class="part-tag">PART B</span>
+  <h2>Obsidian 설치</h2>
+  <p class="intro">온톨로지를 담을 그릇(앱)을 깐다.</p>
+  <div class="os">
+    <div><h5>🪟 Windows</h5>
+      <ol class="steps">
+        <li>브라우저 주소창에 <code>obsidian.md</code> 입력 → 접속</li>
+        <li>화면 중앙(또는 우상단)의 <span class="btn">Download</span> 버튼 클릭 → Windows용이 자동 선택됨</li>
+        <li>다운로드된 <code>Obsidian-x.x.x.exe</code> 더블클릭</li>
+        <li>설치 진행(자동) → 완료되면 Obsidian이 자동 실행</li>
+      </ol>
+    </div>
+    <div><h5>🍎 Mac</h5>
+      <ol class="steps">
+        <li>브라우저에 <code>obsidian.md</code> → 접속</li>
+        <li><span class="btn">Download</span> 클릭 → <code>.dmg</code> 파일 다운로드</li>
+        <li>받은 <code>.dmg</code> 더블클릭 → Obsidian 아이콘을 <b>Applications 폴더로 드래그</b></li>
+        <li>Launchpad에서 Obsidian 실행 ("확인되지 않은 개발자" 뜨면 <b>열기</b>)</li>
+      </ol>
+    </div>
+  </div>
+  <span class="out">Obsidian 첫 화면(보관소 만들기 창)이 떴다.</span>
+</section>
+
+<!-- PART C -->
+<section class="part" id="C">
+  <span class="part-tag">PART C</span>
+  <h2>Vault 만들기 + 폴더 구조 짓기</h2>
+  <p class="intro">Vault(보관소)는 우리 온톨로지가 사는 폴더다. 제공한 <code>LIBUNNY-VAULT.zip</code>을 쓰거나, 직접 만든다. 둘 다 설명한다.</p>
+
+  <div class="s">
+    <div class="st">방법 ① 제공된 vault 쓰기 (빠름, 권장)</div>
+    <ol class="steps">
+      <li><code>LIBUNNY-VAULT.zip</code> 파일을 <b>마우스 우클릭 → 압축 풀기</b> (Windows) / 더블클릭 (Mac) → <b>문서(Documents)</b> 폴더 같은 기억하기 쉬운 곳에 풀기</li>
+      <li>Obsidian 첫 화면에서 <span class="btn">Open folder as vault</span> 클릭</li>
+      <li>파일 탐색기가 열리면 방금 푼 <code>LIBUNNY-VAULT</code> 폴더를 선택 → <b>폴더 선택</b></li>
+      <li>"Trust author and enable plugins?" 창이 뜨면 <span class="btn">Trust author and enable plugins</span> 클릭</li>
+    </ol>
+    <span class="out">왼쪽에 0_System, 1_Content… 폴더가 보인다. → PART D로.</span>
+  </div>
+
+  <div class="s">
+    <div class="st">방법 ② 직접 만들기 (구조를 손으로 익히고 싶다면)</div>
+    <ol class="steps">
+      <li>Obsidian 첫 화면에서 <span class="btn">Create new vault</span> 클릭</li>
+      <li><b>Vault name</b>에 <code>LIBUNNY-VAULT</code> 입력</li>
+      <li><b>Location</b> 옆 <span class="btn">Browse</span> → 저장할 위치(문서 폴더) 선택</li>
+      <li><span class="btn">Create</span> 클릭 → 빈 vault 생성</li>
+      <li>왼쪽 파일 영역에서 <b>폴더 아이콘(새 폴더)</b> 클릭 → 아래 폴더들을 하나씩 만든다:</li>
+    </ol>
+    <pre><span class="c"># 만들 폴더 (왼쪽에서 새 폴더 버튼으로 하나씩)</span>
+0_System
+1_Content
+1_Content/_Inbox
+1_Content/Success
+1_Content/Fail
+2_Patterns
+2_Patterns/Hooks
+2_Patterns/Formats
+2_Patterns/Topics
+2_Patterns/Episodes
+3_Products
+4_Analytics
+_Templates</pre>
+    <div class="tip"><b>하위 폴더 만들기:</b> 폴더 이름에 <code>/</code>를 넣으면 자동으로 하위 폴더가 된다. 예: 새 폴더 이름을 <code>1_Content/_Inbox</code>로 입력하면 1_Content 안에 _Inbox가 생긴다.</div>
+    <span class="out">왼쪽에 위 폴더 구조가 다 보인다.</span>
+  </div>
+
+  <h3 class="mini">우리 폴더 구조의 의미</h3>
+  <table class="t">
+    <tbody>
+      <tr><td>0_System</td><td>규칙·스키마·대시보드 (뇌)</td></tr>
+      <tr><td>1_Content</td><td>콘텐츠 노트들. _Inbox(대기)→Success/Fail로 이동</td></tr>
+      <tr><td>2_Patterns</td><td>Hook·Format·Topic·Episode 패턴(재사용 객체)</td></tr>
+      <tr><td>3_Products</td><td>제품 정보·메시지 규제 가드</td></tr>
+      <tr><td>4_Analytics</td><td>주간 집계·raw 백업</td></tr>
+      <tr><td>_Templates</td><td>새 노트 찍어내는 틀</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- PART D -->
+<section class="part" id="D">
+  <span class="part-tag">PART D</span>
+  <h2>플러그인 설치 (Dataview · Git)</h2>
+  <p class="intro">대시보드가 작동하려면 <b>Dataview</b>가, 백업 자동화엔 <b>Obsidian Git</b>이 필요하다.</p>
+
+  <div class="s">
+    <div class="st">D-1. Dataview 설치 (대시보드 엔진)</div>
+    <ol class="steps">
+      <li>왼쪽 <b>맨 아래 톱니바퀴(⚙ 설정)</b> 클릭</li>
+      <li>왼쪽 메뉴에서 <span class="btn">Community plugins</span> (커뮤니티 플러그인) 클릭</li>
+      <li>"Restricted mode"(제한 모드)가 켜져 있으면 <span class="btn">Turn off</span> 클릭해서 끈다</li>
+      <li><span class="btn">Browse</span> 클릭 → 플러그인 검색창이 열림</li>
+      <li>검색창에 <code>Dataview</code> 입력 → 목록에서 <b>Dataview</b> 선택</li>
+      <li><span class="btn">Install</span> 클릭 → 끝나면 <span class="btn">Enable</span> 클릭</li>
+      <li>설정 창 닫기</li>
+    </ol>
+    <div class="note"><b>JavaScript 쿼리 켜기(중요):</b> 설정 → Community plugins → Dataview 옆 <b>톱니바퀴</b> → "Enable JavaScript Queries"를 <b>켠다</b>. 일부 대시보드가 이게 있어야 작동.</div>
+    <span class="out">Dataview가 설치·활성화됨.</span>
+  </div>
+
+  <div class="s">
+    <div class="st">D-2. (선택) Obsidian Git 설치 — 자동 백업</div>
+    <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:6px">PART H에서 Git을 설치한 뒤 이걸 쓰면, 버튼 없이도 vault가 GitHub에 자동 백업된다. 지금은 건너뛰고 PART H 후에 와도 된다.</p>
+    <ol class="steps">
+      <li>설정 → Community plugins → <span class="btn">Browse</span></li>
+      <li>검색창에 <code>Obsidian Git</code> 입력 → 선택 → <span class="btn">Install</span> → <span class="btn">Enable</span></li>
+      <li>설정에서 자동 commit 주기(예: 10분)·자동 push 설정</li>
+    </ol>
+    <span class="out">설치만 해두고 PART H에서 연결.</span>
+  </div>
+</section>
+
+<!-- PART E -->
+<section class="part" id="E">
+  <span class="part-tag">PART E</span>
+  <h2>객체(노트) 만들기 — 스키마 입력</h2>
+  <p class="intro">이제 진짜 온톨로지를 만든다. 콘텐츠 1개를 "객체"로 찍어낸다.</p>
+
+  <div class="s">
+    <div class="st">E-1. 템플릿 보고 콘텐츠 노트 만들기</div>
+    <ol class="steps">
+      <li>왼쪽에서 <code>_Templates/콘텐츠_템플릿.md</code> 클릭해 내용 확인(제공 vault에 있음). 없으면 아래 내용을 새 노트로 만든다.</li>
+      <li><code>1_Content/_Inbox</code> 폴더 우클릭 → <span class="btn">New note</span></li>
+      <li>노트 이름: <code>R-20260616-01</code> (R=릴스, 날짜, 순번)</li>
+      <li>노트 맨 위에 아래를 그대로 입력 (이게 "객체의 속성"):</li>
+    </ol>
+    <pre><span class="c">---  ← 이 세 줄표시가 frontmatter 시작/끝</span>
+<span class="k">type</span>: content
+<span class="k">id</span>: R-20260616-01
+<span class="k">status</span>: inbox
+<span class="k">platform</span>: reels
+<span class="k">episode</span>: "[[EP1 손톱]]"
+<span class="k">hook</span>: "[[Hook - 충격질문]]"
+<span class="k">format</span>: "[[Format - 비포애프터]]"
+<span class="k">topic</span>: "[[Topic - 물어뜯기회복]]"
+<span class="k">made_by</span>: real
+<span class="k">cta</span>: "21일챌린지"
+<span class="k">publish_at</span>: 2026-06-16T20:00
+<span class="k">views</span>: 0
+<span class="k">reach</span>: 0
+<span class="k">saves</span>: 0
+<span class="k">shares</span>: 0
+<span class="k">save_rate</span>: 0
+<span class="k">verdict</span>: ""
+<span class="k">reason</span>: ""
+---
+
+<span class="c"># 여기 아래는 콘티 내용(자유롭게)</span>
+## 콘티
+- 훅(0~3초):
+- 전개(3~15초):
+- CTA(15~25초):</pre>
+    <div class="tip"><b>frontmatter란?</b> 노트 맨 위 <code>---</code>와 <code>---</code> 사이의 속성 목록. Dataview가 이걸 읽어 표로 만든다. <b>띄어쓰기·콜론(:) 형식을 정확히</b> 지켜야 한다.</div>
+    <span class="out">_Inbox에 첫 콘텐츠 객체 노트 1개 생김.</span>
+  </div>
+
+  <div class="s">
+    <div class="st">E-2. 속성 뜻 (입력값 가이드)</div>
+    <table class="t">
+      <tbody>
+        <tr><td>status</td><td>inbox(대기) → 나중에 success/fail로 바뀜</td></tr>
+        <tr><td>made_by</td><td>real(실촬영) 또는 higgsfield(AI)</td></tr>
+        <tr><td>save_rate</td><td>saves ÷ reach. 발행 후 계산해 입력</td></tr>
+        <tr><td>[[...]]</td><td>다른 노트로 연결하는 링크. 패턴 객체와 묶인다</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PART F -->
+<section class="part" id="F">
+  <span class="part-tag">PART F</span>
+  <h2>패턴 객체 + 관계 연결</h2>
+  <p class="intro">위에서 <code>[[Hook - 충격질문]]</code>처럼 링크를 걸었다. 이제 그 링크가 가리킬 <b>패턴 객체</b>를 만든다. 이게 "객체끼리 연결"이다.</p>
+
+  <div class="s">
+    <div class="st">F-1. Hook 패턴 노트 만들기</div>
+    <ol class="steps">
+      <li><code>2_Patterns/Hooks</code> 폴더 우클릭 → <span class="btn">New note</span></li>
+      <li>이름: <code>Hook - 충격질문</code> (콘텐츠에서 링크한 이름과 <b>정확히 같게</b>)</li>
+      <li>아래 입력:</li>
+    </ol>
+    <pre><span class="c">---</span>
+<span class="k">type</span>: pattern
+<span class="k">category</span>: hook
+<span class="k">title</span>: 충격질문 훅
+---
+<span class="c"># 충격질문 훅</span>
+## 정의
+첫 3초에 불안·호기심을 찌르는 질문으로 스크롤을 멈춤.
+## 이 훅을 쓴 콘텐츠 (자동 집계)
+```dataview
+TABLE save_rate, reach, verdict
+FROM "1_Content"
+WHERE contains(string(hook), "충격질문")
+SORT save_rate DESC
+```</pre>
+    <div class="note"><b>마법:</b> 위 ```dataview 블록이 "이 훅을 쓴 모든 콘텐츠와 그 성과"를 자동으로 표로 만든다. 콘텐츠가 쌓일수록 이 훅이 잘 먹히는지 한눈에 보인다.</div>
+  </div>
+
+  <div class="s">
+    <div class="st">F-2. 같은 방식으로 나머지 패턴 객체 만들기</div>
+    <ol class="steps">
+      <li><code>2_Patterns/Formats/Format - 비포애프터</code></li>
+      <li><code>2_Patterns/Topics/Topic - 물어뜯기회복</code></li>
+      <li><code>2_Patterns/Episodes/EP1 손톱</code></li>
+    </ol>
+    <p style="font-size:13.5px;color:var(--ink-soft)">각각 type/category만 바꾸고 같은 구조로. (제공 vault엔 이미 들어있음)</p>
+    <span class="out">콘텐츠 노트의 링크를 클릭하면 패턴 노트로 이동된다 = 객체가 연결됨.</span>
+  </div>
+
+  <h3 class="mini">에피소드(부위) 객체 — 우리만의 특화</h3>
+  <p class="intro">Episode 객체는 "신체 부위 시즌"이다. EP1 손톱 → EP2 입술 → EP3 발… 각 콘텐츠가 어느 에피소드인지 태깅하면, <b>어느 부위 콘텐츠가 반응이 좋은지</b> 데이터로 나와서 "다음에 뭘 제품화할지"를 수치로 정한다.</p>
+  <pre><span class="c"># EP 객체에 넣을 dataview (이 부위 콘텐츠 성과 집계)</span>
+```dataview
+TABLE save_rate, topic, verdict
+FROM "1_Content"
+WHERE contains(string(episode), "손톱")
+SORT save_rate DESC
+```</pre>
+</section>
+
+<!-- PART G -->
+<section class="part" id="G">
+  <span class="part-tag">PART G</span>
+  <h2>대시보드 작동 (Dataview)</h2>
+  <p class="intro">흩어진 객체를 한 화면에 모으는 "상황판"을 만든다.</p>
+  <div class="s">
+    <div class="st">G-1. 대시보드 노트 확인/생성</div>
+    <ol class="steps">
+      <li><code>0_System/대시보드.md</code> 열기 (제공 vault에 있음)</li>
+      <li>없으면 <code>0_System</code>에 <code>대시보드</code> 노트 새로 만들고 아래 입력:</li>
+    </ol>
+    <pre><span class="c"># 성공 콘텐츠 (저장률 순)</span>
+```dataview
+TABLE save_rate AS "저장률", reach AS "도달", topic AS "주제"
+FROM "1_Content/Success"
+SORT save_rate DESC
+```
+
+<span class="c"># 대기중 (Inbox)</span>
+```dataview
+TABLE publish_at AS "발행예정", made_by AS "제작"
+FROM "1_Content/_Inbox"
+```</pre>
+    <p style="font-size:13.5px;color:var(--ink-soft);padding-top:6px">우상단 <b>읽기 모드(책 아이콘)</b>로 보면 표가 렌더링된다.</p>
+    <div class="warn"><b>표가 안 보이면?</b> ① Dataview 켜졌는지 ② ```dataview 철자 정확한지 ③ frontmatter 형식(콜론·따옴표) 맞는지 확인. 부록 참고.</div>
+    <span class="out">대시보드에 콘텐츠가 표로 나타난다.</span>
+  </div>
+</section>
+
+<!-- PART H -->
+<section class="part" id="H">
+  <span class="part-tag">PART H</span>
+  <h2>Git 설치 + GitHub 백업</h2>
+  <p class="intro">vault가 컴퓨터 고장으로 날아가면 끝이다. GitHub에 백업한다.</p>
+
+  <div class="s">
+    <div class="st">H-1. Git 설치</div>
+    <div class="os">
+      <div><h5>🪟 Windows</h5><ol class="steps">
+        <li>브라우저 → <code>git-scm.com/download/win</code> → 자동 다운로드</li>
+        <li>받은 설치파일 실행 → 모든 옵션 <b>기본값</b>으로 <span class="btn">Next</span> 반복 → <span class="btn">Install</span></li>
+        <li>시작 메뉴 → <code>cmd</code> 검색 → 명령 프롬프트 열기</li>
+        <li><code>git --version</code> 입력 → 버전 뜨면 성공</li>
+      </ol></div>
+      <div><h5>🍎 Mac</h5><ol class="steps">
+        <li>Launchpad → <code>터미널</code> 검색해 열기</li>
+        <li><code>git --version</code> 입력</li>
+        <li>설치 팝업 뜨면 <span class="btn">설치</span> 클릭</li>
+        <li>다시 <code>git --version</code> 확인</li>
+      </ol></div>
+    </div>
+  </div>
+
+  <div class="s">
+    <div class="st">H-2. Git 첫 설정</div>
+    <p style="font-size:13.5px;color:var(--ink-soft)">cmd(터미널)에 한 줄씩:</p>
+    <pre>git config --global user.name "본인이름"
+git config --global user.email "가입한Gmail주소"</pre>
+  </div>
+
+  <div class="s">
+    <div class="st">H-3. GitHub 레포 만들기</div>
+    <ol class="steps">
+      <li>브라우저 → <code>github.com</code> 로그인</li>
+      <li>우상단 <span class="btn">+</span> → <span class="btn">New repository</span></li>
+      <li>Repository name: <code>libunny-vault</code></li>
+      <li><span class="btn">Private</span> 선택 (비공개)</li>
+      <li><span class="btn">Create repository</span> 클릭</li>
+      <li>다음 화면에 나오는 <code>https://github.com/...libunny-vault.git</code> 주소 복사해둠</li>
+    </ol>
+  </div>
+
+  <div class="s">
+    <div class="st">H-4. vault를 GitHub에 올리기 (첫 push)</div>
+    <p style="font-size:13.5px;color:var(--ink-soft)">cmd(터미널)에서 vault 폴더로 이동 후 한 줄씩:</p>
+    <pre><span class="c"># vault 폴더로 이동 (경로는 본인 위치에 맞게)</span>
+cd Documents/LIBUNNY-VAULT
+
+git init
+git add .
+git commit -m "first backup"
+git branch -M main
+git remote add origin <span class="c">[H-3에서 복사한 주소]</span>
+git push -u origin main</pre>
+    <ol class="steps">
+      <li>마지막 줄에서 브라우저 인증창이 뜨면 <b>GitHub 로그인</b> → 허용</li>
+      <li>GitHub 레포 페이지 새로고침 → vault 파일들이 올라와 있으면 성공</li>
+    </ol>
+    <div class="tip"><b>이후 백업은 3줄:</b> <code>git add .</code> → <code>git commit -m "update"</code> → <code>git push</code>. 또는 D-2의 Obsidian Git 플러그인이 자동으로 해준다.</div>
+    <span class="out">GitHub에 vault가 백업됨. 컴퓨터 날아가도 안전.</span>
+  </div>
+</section>
+
+<!-- PART I -->
+<section class="part" id="I">
+  <span class="part-tag">PART I</span>
+  <h2>Antigravity + 분류 스크립트</h2>
+  <p class="intro">지표를 보고 성공/실패를 자동으로 나누는 단계. 코딩 못 해도 자연어로 시킨다.</p>
+
+  <div class="s">
+    <div class="st">I-1. Antigravity 설치</div>
+    <ol class="steps">
+      <li>브라우저에 <code>Antigravity Google</code> 검색 → 공식 다운로드 페이지 접속</li>
+      <li>OS에 맞는 설치파일 다운로드 → 실행 → 설치</li>
+      <li>실행 → Google 계정(가입한 Gmail)으로 로그인</li>
+      <li><span class="btn">Open folder</span> → <code>LIBUNNY-VAULT</code> 폴더 열기</li>
+    </ol>
+    <div class="warn"><b>못 찾겠으면?</b> VS Code(code.visualstudio.com) + Python으로 대체 가능. "파이썬 실행 환경"이면 무엇이든 OK.</div>
+  </div>
+
+  <div class="s">
+    <div class="st">I-2. 필요한 파이썬 라이브러리 설치</div>
+    <p style="font-size:13.5px;color:var(--ink-soft)">Antigravity 안의 터미널(또는 cmd)에서:</p>
+    <pre>pip install python-frontmatter</pre>
+  </div>
+
+  <div class="s">
+    <div class="st">I-3. 분류 스크립트 — 자연어로 시키기</div>
+    <p style="font-size:13.5px;color:var(--ink-soft)">Antigravity 채팅창에 그대로 붙여넣기:</p>
+    <pre><span class="c"># Antigravity에 시킬 말 (복붙)</span>
+LIBUNNY-VAULT/1_Content/_Inbox 폴더의 .md 노트들을 읽어서,
+frontmatter의 save_rate가 0.04 이상이고 reach가 나머지
+노트들의 중앙값 이상이면 status를 success로, 아니면 fail로
+바꾸고, 각각 1_Content/Success 또는 1_Content/Fail 폴더로
+옮기는 파이썬 스크립트를 만들어서 실행해줘.
+python-frontmatter 라이브러리를 사용해.</pre>
+    <ol class="steps">
+      <li>Antigravity가 코드를 만들어 보여줌 → <span class="btn">실행(Run)</span></li>
+      <li>에러가 나면 그 에러 메시지를 <b>복사해서 다시 붙여넣고</b> "이 에러 고쳐줘"</li>
+      <li>_Inbox 노트가 Success/Fail로 옮겨지면 성공</li>
+    </ol>
+    <div class="note"><b>AI 사용감 핵심:</b> 코드를 몰라도 된다. "시키고 → 실행 → 에러 붙여넣고 고치고"의 반복이 곧 AI 협업 훈련이다. 이 경험 자체가 준비기간의 목적이다.</div>
+    <span class="out">스크립트가 콘텐츠를 성공/실패로 자동 분류한다.</span>
+  </div>
+</section>
+
+<!-- PART J -->
+<section class="part" id="J">
+  <span class="part-tag">PART J</span>
+  <h2>매일 운영 루틴</h2>
+  <p class="intro">구축이 끝났다. 이제 매일 이것만 돌린다.</p>
+  <table class="t">
+    <thead><tr><th>주기</th><th>할 일</th></tr></thead>
+    <tbody>
+      <tr><td>매일 아침 (15분)</td><td>대시보드 열기 → 어제 콘텐츠 인스타 인사이트 보고 reach·saves 입력 → save_rate 계산 → 분류 스크립트 실행</td></tr>
+      <tr><td>매일 (30~40분)</td><td>릴스 1 + 게시물 1 발행 → 노트에 입력변수(hook·format·topic·episode) 기록 → _Inbox에 저장</td></tr>
+      <tr><td>매주 월 (40분)</td><td>대시보드에서 성공 패턴 확인 → Claude에 피드백해 다음 주 콘티 생성 → <code>git add . / commit / push</code> 백업</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>이게 복리다:</b> 매일 1개씩만 쌓아도 한 달이면 30개, 1년이면 365개의 구조화된 데이터. 어느 훅·주제·에피소드가 먹히는지 점점 또렷해진다. 이게 경쟁사가 못 가진 우리만의 무기다.</div>
+</section>
+
+<!-- 부록 -->
+<section class="part" id="X">
+  <span class="part-tag">부록</span>
+  <h2>트러블슈팅</h2>
+  <table class="t">
+    <thead><tr><th>증상</th><th>해결</th></tr></thead>
+    <tbody>
+      <tr><td>대시보드 표가 안 보임</td><td>① 설정→Community plugins에서 Dataview가 Enable인지 ② 읽기모드(책 아이콘)로 보는지 ③ ```dataview 철자 ④ Dataview 설정에서 JavaScript Queries 켰는지</td></tr>
+      <tr><td>frontmatter가 본문에 그냥 보임</td><td>맨 위 <code>---</code>가 노트 <b>첫 줄</b>에 있어야 함. 위에 빈 줄/글자 있으면 안 됨</td></tr>
+      <tr><td>링크가 빨갛게(연결 안 됨)</td><td>링크 이름과 패턴 노트 파일명이 <b>정확히 같아야</b> 함(띄어쓰기·기호까지)</td></tr>
+      <tr><td>git push 인증 실패</td><td>브라우저 인증창에서 GitHub 로그인. 안 뜨면 Personal Access Token 방식 검색</td></tr>
+      <tr><td>pip 명령 안 먹음</td><td>Python 설치 시 "Add to PATH" 체크했는지. 안 했으면 재설치</td></tr>
+      <tr><td>Antigravity 스크립트 에러</td><td>에러 전문을 복사해 Antigravity에 "이 에러 고쳐줘"로 붙여넣기</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>막히면:</b> 어느 PART 몇 번에서 어떤 화면·에러인지 캡처해서 물어보면 그 지점만 콕 집어 풀어줄 수 있다.</div>
+</section>
+
+</div>
+<footer><div class="wrap">
+  <span>LIBUNNY · 온톨로지 구현 완전 가이드 · 2026</span>
+  <span>객체 · 연결 · 규칙 · 백업 · 자동화</span>
+</div></footer>
+</body>
+</html>

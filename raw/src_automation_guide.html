@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바디테일 — 콘텐츠 자동화 구축 가이드 (고도화판)</title>
+<style>
+  :root{
+    --ox:#6B1620; --ox-deep:#46101A; --porcelain:#F2ECE6; --gold:#B0844A; --ink:#1A1310;
+    --paper:#FBF8F4; --line:#E3D9CC; --term-bg:#1c1714; --term-text:#E8DECF; --term-green:#7FB98A;
+    --shadow:0 2px 14px rgba(70,16,26,.07);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Pretendard','Malgun Gothic',-apple-system,sans-serif;line-height:1.72;font-size:15px}
+  .wrap{max-width:800px;margin:0 auto;padding:0 22px}
+  header{background:linear-gradient(160deg,#46101A,#6B1620 70%);color:var(--porcelain);
+    padding:46px 0 38px;position:relative;overflow:hidden}
+  header::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;
+    border:1px solid rgba(176,132,74,.35);border-radius:50%}
+  header::before{content:"";position:absolute;right:10px;top:10px;width:160px;height:160px;
+    border:1px solid rgba(176,132,74,.22);border-radius:50%}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px}
+  h1{font-family:'Fraunces','Georgia',serif;font-weight:600;font-size:33px;margin:0 0 12px;line-height:1.15}
+  .sub{font-size:15px;color:#E8D8CC;max-width:640px}
+  .meta{margin-top:18px;font-size:12.5px;color:#cdb79f;border-top:1px solid rgba(176,132,74,.3);padding-top:12px}
+  section{padding:30px 0;border-bottom:1px solid var(--line)}
+  .stepno{display:inline-flex;align-items:center;gap:9px;font-family:'Fraunces',serif;
+    font-size:13px;color:var(--ox);font-weight:600;letter-spacing:.04em;margin-bottom:4px}
+  .stepno b{background:var(--ox);color:#fff;width:26px;height:26px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-family:sans-serif}
+  h2{font-family:'Fraunces','Georgia',serif;font-weight:600;font-size:23px;margin:4px 0 10px;color:var(--ox-deep)}
+  h3{font-size:16px;margin:22px 0 7px;color:var(--ox-deep);font-weight:700}
+  h4{font-size:14px;margin:16px 0 5px;color:var(--ox);font-weight:700}
+  p{margin:9px 0}
+  .lede{color:#5d5048;font-size:14.5px}
+  .term{background:var(--term-bg);border-radius:11px;margin:13px 0;overflow:hidden;box-shadow:var(--shadow)}
+  .term-head{display:flex;align-items:center;justify-content:space-between;
+    padding:8px 13px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.07)}
+  .term-dots{display:flex;gap:6px}
+  .term-dots i{width:11px;height:11px;border-radius:50%;display:block}
+  .term-dots i:nth-child(1){background:#ff5f56}.term-dots i:nth-child(2){background:#ffbd2e}.term-dots i:nth-child(3){background:#27c93f}
+  .term-label{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;color:#9b8d7d;letter-spacing:.03em}
+  .copy{background:var(--gold);color:#1a1310;border:none;border-radius:6px;padding:4px 11px;
+    font-size:11.5px;font-weight:700;cursor:pointer;transition:.15s;font-family:sans-serif}
+  .copy:hover{background:#c89a5e}.copy.done{background:var(--term-green);color:#102a16}
+  pre{margin:0;padding:14px 15px;overflow-x:auto}
+  code{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:13px;color:var(--term-text);
+    white-space:pre;line-height:1.65}
+  .comment{color:#7d7164}
+  .prompt{background:#fff;border:1.5px solid var(--gold);border-radius:11px;margin:13px 0;overflow:hidden;box-shadow:var(--shadow)}
+  .prompt-head{display:flex;align-items:center;justify-content:space-between;background:#FBF3E8;
+    padding:8px 14px;border-bottom:1px solid #ecdcc4}
+  .prompt-head span{font-size:12px;font-weight:700;color:var(--ox);letter-spacing:.03em}
+  .prompt-body{padding:13px 15px;font-size:13.5px;color:#3a2f28;white-space:pre-wrap;line-height:1.6}
+  .note{border-radius:10px;padding:13px 16px;margin:14px 0;font-size:13.8px}
+  .note.gold{background:#FBF3E8;border-left:4px solid var(--gold)}
+  .note.ox{background:#FAEDED;border-left:4px solid var(--ox);color:#5e1119}
+  .note.green{background:#EEF5EF;border-left:4px solid #4E8C5D;color:#234a2c}
+  .note b{font-weight:700}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:12.5px;background:#fff;
+    border-radius:9px;overflow:hidden;box-shadow:var(--shadow)}
+  th{background:var(--ox-deep);color:#fff;padding:9px 11px;text-align:left;font-weight:600}
+  td{border-top:1px solid var(--line);padding:8px 11px;vertical-align:top}
+  tr:nth-child(even) td{background:#FBF8F4}
+  code.inl{background:#F0E7DA;color:var(--ox);padding:1px 6px;border-radius:4px;font-size:12px;white-space:nowrap}
+  .toc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:16px 20px;margin:24px 0;box-shadow:var(--shadow)}
+  .toc h4{margin:0 0 9px;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .toc ol{margin:0;padding-left:20px}
+  .toc li{margin:4px 0;font-size:14px}
+  .toc a{color:var(--ox-deep);text-decoration:none;font-weight:500}
+  .toc a:hover{color:var(--gold);text-decoration:underline}
+  ul.clean{margin:9px 0;padding-left:20px}
+  ul.clean li{margin:5px 0}
+  .flow{font-family:ui-monospace,monospace;font-size:12px;background:#fff;border:1px solid var(--line);
+    border-radius:9px;padding:14px 16px;margin:13px 0;white-space:pre;overflow-x:auto;color:#3a2f28;line-height:1.65}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:4px;vertical-align:middle;margin-left:5px}
+  .b-high{background:#6B1620;color:#fff}.b-mid{background:#B0844A;color:#fff}.b-low{background:#cdbfae;color:#3a2f28}
+  footer{padding:30px 0 50px;color:#8a7d72;font-size:12.5px;text-align:center}
+  @media(max-width:560px){h1{font-size:26px}code{font-size:12px}table{font-size:11.5px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Bodetail · Content Automation · 고도화판 v2</div>
+    <h1>콘텐츠 자동화 구축 가이드</h1>
+    <div class="sub">9객체 온톨로지 + 메타 API 자동 수집 + 통계 신뢰 장치. Claude Code가 인스타 지표를 자동으로 끌어와 분류·분석하고, 성공 방정식을 찾아 다음 콘티를 맞춤 제작한다. 게시만 직접.</div>
+    <div class="meta">이 파일만 보고 위에서부터 따라 하면 됩니다 · 복사 버튼으로 명령·지시문을 그대로 붙여넣으세요 · 5대 보완(API자동수집·통계신뢰·변수압축·발행큐·노이즈제거) 반영</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="toc">
+    <h4>전체 순서</h4>
+    <ol>
+      <li><a href="#s0">준비물 설치 (한 번만)</a></li>
+      <li><a href="#s1">작업 폴더 + 미래 전환 대비 구조</a></li>
+      <li><a href="#metrics">세밀 지표 사전 — 마케터가 보는 모든 것</a></li>
+      <li><a href="#api">메타 API 연동 — 지표 자동 수집 ★신규</a></li>
+      <li><a href="#s2">고도화 온톨로지 — 9객체 + 관계 규칙</a></li>
+      <li><a href="#s3">변수를 객체로 — 핵심 변수 압축 + 기록</a></li>
+      <li><a href="#stats">통계 신뢰 장치 — 우연을 성공으로 착각 않기 ★신규</a></li>
+      <li><a href="#s4">콘티 자동 제작 + 발행 큐</a></li>
+      <li><a href="#s5">반응 자동 수집 + 분석 + 성공방정식</a></li>
+      <li><a href="#s6">GitHub 백업</a></li>
+      <li><a href="#s7">발행 (직접) + 나중에 하이브리드</a></li>
+    </ol>
+  </div>
+
+  <div class="note ox"><b>이 버전이 "진짜 세컨드 브레인"에 가까워진 이유.</b> 이전 설계의 5대 결함을 보완했다 — ① <b>메타 API 자동 수집</b>(수작업 입력 제거) ② <b>통계 신뢰 장치</b>(우연을 성공으로 착각 방지) ③ <b>핵심 변수 압축</b>(40개→7개, 검증 가능하게) ④ <b>발행 큐</b>(결과 대기 후 반영, 루프 안 끊김) ⑤ <b>노이즈 제거</b>(이상치 표시). 이제 데이터가 알아서 흘러들어와 성공 방정식을 찾는다.</div>
+
+  <div class="note gold"><b>단, 솔직한 전제 2가지.</b> ① 메타 API 인사이트는 <b>팔로워 1,000명 이상 + 비즈니스/크리에이터 계정 + 페이스북 페이지 연결</b>이 필요하다(개인 계정 불가). 1,000명 전까지는 수동/스크린샷 입력으로 가다가, 1,000명 넘으면 API 자동으로 전환. ② 3초 잔존곡선 같은 <b>일부 진단 지표는 API로 안 나와</b> 앱에서 보조 입력해야 한다. 그래서 "API 자동 + 스크린샷 보조"의 하이브리드가 현실 정답이다.</div>
+
+  <!-- STEP 0 -->
+  <section id="s0">
+    <div class="stepno"><b>0</b> STEP ZERO</div>
+    <h2>준비물 설치 — 한 번만</h2>
+    <p class="lede">맥은 <b>터미널</b>, 윈도우는 <b>PowerShell</b>을 연다. 한 번 해두면 끝.</p>
+    <h4>① Node.js 확인</h4>
+    <div class="term"><div class="term-head"><div class="term-dots"><i></i><i></i><i></i></div><span class="term-label">terminal</span><button class="copy">복사</button></div><pre><code>node -v</code></pre></div>
+    <p>버전이 안 나오면 <code class="inl">nodejs.org</code>에서 LTS 설치.</p>
+    <h4>② Claude Code 설치</h4>
+    <div class="term"><div class="term-head"><div class="term-dots"><i></i><i></i><i></i></div><span class="term-label">terminal</span><button class="copy">복사</button></div><pre><code>npm install -g @anthropic-ai/claude-code</code></pre></div>
+    <div class="note gold"><b>로그인:</b> 처음 <code class="inl">claude</code> 실행 시 지금 쓰는 Claude 계정으로 로그인(Pro/Max면 사용량 내 추가결제 없음).</div>
+    <h4>③ Obsidian + Dataview</h4>
+    <p><code class="inl">obsidian.md</code> → 설치 → <b>Create new vault</b> → 이름 <code class="inl">bodetail-vault</code>. 그다음 설정(톱니) → Community plugins → Turn on → Browse → <code class="inl">Dataview</code> 설치·활성화. 추가로 <code class="inl">Templater</code>도 설치하면 템플릿 자동화가 강력해진다(선택).</p>
+    <h4>④ GitHub 저장소</h4>
+    <p><code class="inl">github.com</code> → ＋ → New repository → <code class="inl">bodetail-content</code> → Create. git 확인:</p>
+    <div class="term"><div class="term-head"><div class="term-dots"><i></i><i></i><i></i></div><span class="term-label">terminal</span><button class="copy">복사</button></div><pre><code>git --version</code></pre></div>
+  </section>
+
+  <!-- STEP 1 -->
+  <section id="s1">
+    <div class="stepno"><b>1</b> STEP ONE</div>
+    <h2>작업 폴더 + 미래 전환 대비</h2>
+    <div class="term"><div class="term-head"><div class="term-dots"><i></i><i></i><i></i></div><span class="term-label">terminal</span><button class="copy">복사</button></div><pre><code><span class="comment"># Vault 폴더로 이동 (경로는 본인 저장 위치에 맞게)</span>
+cd ~/bodetail-vault
+claude</code></pre></div>
+    <p>Claude Code가 켜지면 아래 지시문을 붙여넣는다.</p>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">이 폴더를 인스타 콘텐츠 자동화 프로젝트로 세팅해줘.
+1. 폴더: content/(콘텐츠), ontology/(9객체 정의), variables/(변수정의), variants/(변수값), experiments/(실험), metrics/(지표정의), queries/(Dataview 집계), config/(설정), scripts/(작업모듈), templates/(템플릿)
+2. config/ai-router.md : "작업별 담당 AI" 표. 지금은 전부 Claude. 나중에 단순작업(분류·태깅·요약·자막추출)을 Ollama로 바꿀 수 있게 '작업명 / 현재모델 / 나중모델 / 비고' 4칸으로 미리 만들어줘.
+3. scripts/는 작업을 잘게 모듈로 분리(분류, 태깅, 요약, 콘티생성, 집계 각각 별도) — 나중에 특정 모듈만 다른 AI로 교체 쉽게.
+4. README.md에 전체 구조와 데이터 흐름을 정리해줘.</div></div>
+    <div class="note green"><b>전환의 씨앗:</b> <code class="inl">config/ai-router.md</code> 표 + scripts 모듈 분리. 나중에 일이 많아지면 "이 작업은 Ollama로" 한 줄만 바꾸면 전환된다.</div>
+  </section>
+
+  <!-- METRICS -->
+  <section id="metrics">
+    <div class="stepno"><b>2</b> METRICS</div>
+    <h2>세밀 지표 사전 — 마케터가 보는 모든 것</h2>
+    <p class="lede">조회·저장·팔로우만 보면 초보다. 인스타 알고리즘이 실제로 중요하게 보는 지표와, 마케터가 추적하는 디테일을 전부 기록한다. 가중치: <span class="badge b-high">높음</span> <span class="badge b-mid">중간</span> <span class="badge b-low">낮음</span></p>
+
+    <h4>A. 알고리즘 핵심 (노출을 좌우)</h4>
+    <table>
+      <thead><tr><th>지표</th><th>의미 · 왜 중요</th><th>가중치</th></tr></thead>
+      <tbody>
+        <tr><td><code class="inl">saves</code> 저장</td><td>"다시 볼 가치" 신호 — 가장 강력한 노출 지표</td><td><span class="badge b-high">높음</span></td></tr>
+        <tr><td><code class="inl">shares</code> 공유</td><td>DM·스토리 공유. 저장과 함께 최상위</td><td><span class="badge b-high">높음</span></td></tr>
+        <tr><td><code class="inl">sends_dm</code> DM 전송</td><td>"친구에게 보냄" — 바이럴 핵심 엔진</td><td><span class="badge b-high">높음</span></td></tr>
+        <tr><td><code class="inl">completion_rate</code> 완주율</td><td>끝까지 본 비율. 릴스 최핵심 지표</td><td><span class="badge b-high">높음</span></td></tr>
+        <tr><td><code class="inl">avg_watch_time</code> 평균시청</td><td>평균 몇 초 봤나(길수록 좋음)</td><td><span class="badge b-high">높음</span></td></tr>
+        <tr><td><code class="inl">rewatch_rate</code> 재시청</td><td>다시 본 비율(루프). 강력 신호</td><td><span class="badge b-high">높음</span></td></tr>
+        <tr><td><code class="inl">comments</code> 댓글</td><td>특히 대화형(질문·답글)</td><td><span class="badge b-mid">중간</span></td></tr>
+        <tr><td><code class="inl">likes</code> 좋아요</td><td>2025년 들어 노출 영향력 감소</td><td><span class="badge b-low">낮음</span></td></tr>
+      </tbody>
+    </table>
+
+    <h4>B. 초기 반응 (발행 직후 = 떡상 여부 결정)</h4>
+    <table>
+      <thead><tr><th>지표</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td><code class="inl">views_1h</code> / <code class="inl">views_24h</code></td><td>발행 후 1시간·24시간 조회수. 초기 속도가 부스팅을 결정</td></tr>
+        <tr><td><code class="inl">saverate_1h</code></td><td>1시간 내 저장률 — 초기 품질 신호(예측력 최고)</td></tr>
+        <tr><td><code class="inl">eng_velocity</code> 반응속도</td><td>발행 직후 단위시간당 반응량(좋아요+저장+댓글 속도)</td></tr>
+        <tr><td><code class="inl">first_hour_reach</code></td><td>1시간 내 도달 계정 수</td></tr>
+      </tbody>
+    </table>
+
+    <h4>C. 도달·성장 (어디서 왔나)</h4>
+    <table>
+      <thead><tr><th>지표</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td><code class="inl">reach</code> / <code class="inl">impressions</code></td><td>도달 계정 / 총 노출</td></tr>
+        <tr><td><code class="inl">reach_follower</code> vs <code class="inl">reach_nonfollower</code></td><td>팔로워 vs 비팔로워 도달 — 비팔로워↑면 신규 확산 중</td></tr>
+        <tr><td><code class="inl">source_explore/home/reels/hashtag/audio/profile</code></td><td>도달 출처별 비율(탐색·홈·릴스탭·해시태그·오디오·프로필)</td></tr>
+        <tr><td><code class="inl">follows_from_post</code></td><td>이 게시물로 유입된 신규 팔로우</td></tr>
+        <tr><td><code class="inl">profile_visits</code> / <code class="inl">profile_visit_rate</code></td><td>프로필 방문·전환율</td></tr>
+        <tr><td><code class="inl">link_clicks</code> / <code class="inl">sticker_taps</code></td><td>링크 클릭·스티커 탭(대기자명단 전환 추적)</td></tr>
+      </tbody>
+    </table>
+
+    <h4>D. 콘텐츠 진단 (왜 이탈했나)</h4>
+    <table>
+      <thead><tr><th>지표</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td><code class="inl">hook_retention_3s</code></td><td>3초 잔존율 — 첫 3초 후킹이 먹혔나(최중요 진단)</td></tr>
+        <tr><td><code class="inl">retention_curve</code></td><td>구간별 이탈 곡선(메모)</td></tr>
+        <tr><td><code class="inl">drop_off_point</code></td><td>최대 이탈 시점(초) — 그 장면을 고쳐라</td></tr>
+        <tr><td><code class="inl">save_to_reach</code> / <code class="inl">share_to_reach</code></td><td>도달 대비 저장·공유 비율(품질 정규화)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note gold"><b>입력은 단계적으로.</b> 처음부터 D까지 다 채우려 말고 <b>A(핵심)+B(초기반응)부터</b> 인스타 인사이트에서 보이는 대로 입력. 익숙해지면 C·D 추가. 온톨로지는 모든 칸을 미리 갖되, 입력은 가능한 것부터.</div>
+  </section>
+
+  <!-- API -->
+  <section id="api">
+    <div class="stepno"><b>3</b> META API ★신규</div>
+    <h2>메타 API 연동 — 지표 자동 수집</h2>
+    <p class="lede">수작업 입력을 없애는 핵심 단계. AI 에이전트가 인스타 지표를 자동으로 끌어와 frontmatter에 채운다. 단 설정 장벽이 있어, 순서대로 따라가야 한다.</p>
+
+    <div class="note ox"><b>전제 조건(필수).</b> ① 인스타를 <b>비즈니스 또는 크리에이터 계정</b>으로 전환 ② <b>페이스북 페이지</b> 생성 후 연결 ③ 인사이트 지표는 <b>팔로워 1,000명 이상</b>부터 제공. 1,000명 전이라면 이 단계는 건너뛰고, 6단계의 "스크린샷/수동 입력"으로 가다가 나중에 전환한다.</div>
+
+    <h3>① 메타 개발자센터 세팅 (한 번만)</h3>
+    <ul class="clean">
+      <li><code class="inl">developers.facebook.com</code> 접속 → 개발자 등록 → <b>앱 만들기</b>(유형: 비즈니스)</li>
+      <li>제품 추가에서 <b>Instagram Graph API</b> 선택</li>
+      <li>인스타 비즈니스 계정 ↔ 페이스북 페이지 연결 확인</li>
+      <li><b>장기 액세스 토큰(Long-lived token)</b> 발급 — 60일 유효, 갱신 필요</li>
+      <li>발급한 토큰·계정 ID를 <code class="inl">config/secrets.env</code>에 저장(이 파일은 절대 GitHub에 올리지 않음 → .gitignore 처리)</li>
+    </ul>
+    <div class="note ox"><b>보안 — 토큰은 비밀번호와 같다.</b> 토큰을 코드나 공개 파일에 적지 말 것. <code class="inl">config/secrets.env</code>에만 두고, <code class="inl">.gitignore</code>에 추가해 GitHub에 안 올라가게 한다. (아래 지시문에 포함)</div>
+
+    <h3>② Claude Code에 수집 스크립트 만들기</h3>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">scripts/에 메타 API 지표 자동수집 모듈을 만들어줘.
+1. config/secrets.env에서 액세스 토큰·IG 계정 ID를 읽어온다(이 파일은 .gitignore에 추가해 GitHub에 안 올라가게).
+2. 내 인스타 미디어 목록을 가져와, 각 미디어의 insights를 호출:
+   - 공통: views, reach, saved, shares, likes, comments
+   - 릴스 추가: reels_skip_rate(건너뛰기율), 그리고 가능한 재생/완주 관련 지표
+   - 계정 단위: follower_count, reach
+   주의: impressions·video_views는 deprecated라 views를 쓴다.
+3. 가져온 값을 해당 content/ 파일의 frontmatter 지표 필드에 자동 기록하고, 사용 Variant의 누적 성과도 갱신.
+4. API는 시간당 200회 제한이라 fields 파라미터로 필요한 것만 호출하고, 호출 간격을 두어 과호출을 피한다.
+5. "지표 수집해줘"라고 하면 이 모듈이 돌아 최신 지표를 모든 콘텐츠에 갱신하게 해줘.
+6. API로 안 나오는 지표(3초 잔존율, 구간 이탈곡선, 도달출처 세부)는 따로 표시해서, 내가 앱 스크린샷으로 보조 입력할 수 있게 빈 칸으로 남겨줘.</div></div>
+
+    <h3>③ 자동 수집 실행</h3>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">지표 수집해줘. 모든 content/ 파일의 API 지표를 최신으로 갱신하고, 어떤 콘텐츠가 새로 업데이트됐는지 요약해줘. API로 못 가져온 진단 지표는 목록으로 알려줘(스크린샷으로 보조 입력하게).</div></div>
+
+    <h3>④ 진단 지표 보조 입력 (스크린샷)</h3>
+    <p>API가 안 주는 3초 잔존율·이탈 지점은, 인스타 앱 인사이트 화면을 캡처해 Claude Code에 주면 읽어서 채운다.</p>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기 (+ 스크린샷 첨부)</span><button class="copy">복사</button></div><div class="prompt-body">이 인스타 인사이트 스크린샷에서 3초 잔존율, 이탈 지점, 도달 출처 비율을 읽어서 content/[파일명].md의 해당 필드에 채워줘.</div></div>
+
+    <div class="note green"><b>이로써 1번 결함(수작업 입력) 80% 해결.</b> 핵심 지표(조회·저장·공유·도달·완주)는 "지표 수집해줘" 한마디로 자동. 진단 지표만 가끔 스크린샷 보조. 데이터가 알아서 흘러들어오는 세컨드 브레인의 조건이 충족된다.</div>
+  </section>
+
+  <!-- ONTOLOGY -->
+  <section id="s2">
+    <div class="stepno"><b>4</b> ONTOLOGY</div>
+    <h2>고도화 온톨로지 — 9객체 + 관계 규칙</h2>
+    <p class="lede">단순 5객체를 넘어 변수·실험·학습까지 객체로 분리. "비슷한 것끼리 묶고, 인과를 분리"하는 게 목표.</p>
+
+    <table>
+      <thead><tr><th>#</th><th>객체</th><th>역할</th><th>관계</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><b>Content</b></td><td>콘텐츠 1개. 변수값·지표가 모이는 중심</td><td>아래 객체들을 [[링크]]</td></tr>
+        <tr><td>2</td><td><b>Episode</b></td><td>연재 회차/세계관(EP1→EP2…)</td><td>Content 다수 포함</td></tr>
+        <tr><td>3</td><td><b>Topic</b></td><td>주제(손톱/물어뜯기/디테일/입술/발)</td><td>Episode·Content와 연결</td></tr>
+        <tr><td>4</td><td><b>Hook</b></td><td>후킹(충격질문/비포애프터/공감/반전/숫자)</td><td>Content가 1개 참조</td></tr>
+        <tr><td>5</td><td><b>Format</b></td><td>형식(릴스/캐러셀/스토리+길이대)</td><td>Content가 1개 참조</td></tr>
+        <tr><td>6</td><td><b>Variable ★</b></td><td>실험 변수 정의("무엇을 바꿀 수 있나"의 사전)</td><td>Variant들을 가짐</td></tr>
+        <tr><td>7</td><td><b>Variant ★</b></td><td>변수의 구체 값("어떤 값이 이겼나"가 쌓임)</td><td>여러 Content가 공유 참조</td></tr>
+        <tr><td>8</td><td><b>Experiment ★</b></td><td>실험 1건(가설+바꾼변수+대조군+결과)</td><td>Content들을 비교군으로</td></tr>
+        <tr><td>9</td><td><b>Insight ★</b></td><td>검증된 학습(예: "빨간 자막 +30%")</td><td>Experiment서 도출, 새 Content에 반영</td></tr>
+      </tbody>
+    </table>
+    <p class="lede">★ = 이번에 새로 승격. 변수(6·7)·실험·학습(8·9)이 독립 객체가 되며 "어떤 변수의 어떤 값이 왜 이겼나"가 Obsidian에 영구히 쌓인다.</p>
+
+    <div class="flow">[ 데이터 흐름 ]
+
+  Episode ─┬─ Topic ── Hook ── Format
+           │
+        Content ◀── Variant ◀── Variable      (콘텐츠가 어떤 변수값을 썼나)
+           │           ▲
+           ▼           │
+      [지표 기록]   Experiment ── Insight       (실험으로 변수값 승패 → 학습)
+           │                         │
+           └──── Dataview 집계 ◀──────┘          (학습이 다음 Content에 반영)</div>
+
+    <h4>관계 규칙 (온톨로지가 "규칙대로 움직이게")</h4>
+    <ul class="clean">
+      <li><b>R1.</b> 모든 Content는 Episode·Topic·Hook·Format을 각 1개씩 [[링크]](필수).</li>
+      <li><b>R2.</b> 모든 Content는 사용한 Variant들을 frontmatter <code class="inl">variants:</code> 목록에 [[링크]].</li>
+      <li><b>R3.</b> 한 Experiment의 Content들은 <b>딱 하나의 Variable만</b> 다르고 나머지 동일(인과 분리).</li>
+      <li><b>R4.</b> Experiment 종료 시 이긴 Variant 판정 → Insight 기록(<code class="inl">status: validated</code>).</li>
+      <li><b>R5.</b> 새 Content 생성 시 validated Insight를 기본값 적용(학습 반영).</li>
+      <li><b>R6.</b> 모든 객체 frontmatter에 <code class="inl">type:</code>을 달아 Dataview가 종류별 집계 가능하게.</li>
+    </ul>
+
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">ontology/ 폴더에 9객체 온톨로지를 만들어줘. (각 객체 type 필드 포함)
+1 Content : 콘텐츠 1개. variants 링크와 지표가 모이는 중심
+2 Episode : 연재 회차/세계관. Content 다수 포함
+3 Topic : 주제
+4 Hook : 후킹 방식
+5 Format : 형식+길이대
+6 Variable : 실험 변수 정의
+7 Variant : 변수의 구체 값. 여러 Content가 공유 참조
+8 Experiment : 실험 1건(가설+바꾼변수+대조군+결과). 한 번에 한 변수
+9 Insight : 검증된 학습. Experiment서 도출, 새 Content에 반영
+
+[관계 규칙]
+R1 Content는 Episode/Topic/Hook/Format 각 1개 [[링크]](필수)
+R2 Content는 사용 Variant들을 frontmatter variants: 목록에 [[링크]]
+R3 한 Experiment의 Content들은 Variable 딱 하나만 다르고 나머지 동일
+R4 Experiment 종료 시 이긴 Variant 판정 → Insight(status: validated)
+R5 새 Content 생성 시 validated Insight 기본 적용
+R6 모든 객체 frontmatter에 type 필드
+
+각 객체 템플릿 .md(frontmatter 포함)와 ontology/README.md(관계 설명)를 만들어줘.
+Content 템플릿 frontmatter에는 다음 단계의 변수 필드 + 지표 필드(A~D 전체)를 모두 포함.</div></div>
+  </section>
+
+  <!-- VARIABLES -->
+  <section id="s3">
+    <div class="stepno"><b>5</b> VARIABLES</div>
+    <h2>변수를 객체로 — 핵심 변수 압축 + 기록</h2>
+    <p class="lede">질문의 핵심이었던 부분. 변수를 태그가 아니라 <b>Variable(정의)+Variant(값)</b> 객체로 만들어 Obsidian에 영구 기록한다. <b>단 보완: 변수를 다 동시에 실험하지 않는다.</b></p>
+
+    <div class="note ox"><b>보완 — 변수 과다 함정 해결.</b> 변수 40개를 한 번에 한 개씩 검증하려면 콘텐츠 수백 개가 필요해 1인 창업자는 불가능하다. 그래서 <b>전체 변수는 사전으로 보관하되, 실제 실험은 영향 큰 "핵심 7개"부터</b> 돌린다. 나머지는 "나중 여유 시" 칸으로.</div>
+
+    <h4>핵심 변수 7개 (이것부터 실험)</h4>
+    <table>
+      <thead><tr><th>우선</th><th>Variable</th><th>왜 영향 큰가</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code class="inl">hook_type</code></td><td>도입 후킹 — 3초 이탈을 좌우(완주율 직결)</td></tr>
+        <tr><td>2</td><td><code class="inl">first3sec_scene</code></td><td>첫 3초 장면 — 알고리즘 부스팅의 관문</td></tr>
+        <tr><td>3</td><td><code class="inl">opening_line</code></td><td>첫 자막/멘트 — 시선 잡는 한 문장</td></tr>
+        <tr><td>4</td><td><code class="inl">caption_copy</code></td><td>본문 카피 — 저장·공유 유도</td></tr>
+        <tr><td>5</td><td><code class="inl">cta_type</code></td><td>행동유도(저장/공유/팔로우) — 전환 직결</td></tr>
+        <tr><td>6</td><td><code class="inl">publish_time</code></td><td>발행 시각 — 초기 1시간 반응 좌우</td></tr>
+        <tr><td>7</td><td><code class="inl">topic</code></td><td>주제 — 애초에 먹히는 소재인가</td></tr>
+      </tbody>
+    </table>
+    <p class="lede">나머지 변수(자막색·폰트·BGM·전환·줌 등)는 사전에 정의만 해두고, 핵심 7개가 안정된 뒤 실험한다.</p>
+
+    <h4>전체 변수 사전 (정의만, 실험은 나중)</h4>
+
+    <table>
+      <thead><tr><th>그룹</th><th>Variable (변수)</th></tr></thead>
+      <tbody>
+        <tr><td>주제·서사</td><td>topic, hook_type, story_structure, narrative_tension</td></tr>
+        <tr><td>첫 3초</td><td>first3sec_scene, first_frame, opening_line, pattern_interrupt</td></tr>
+        <tr><td>영상 구성</td><td>length_sec, cut_count, pacing, transition, b_roll, zoom_use</td></tr>
+        <tr><td>자막</td><td>caption_position, caption_font, caption_color, caption_size, caption_animation, caption_amount</td></tr>
+        <tr><td>오디오</td><td>bgm_track, bgm_tempo, bgm_trending, voiceover, sound_effect</td></tr>
+        <tr><td>썸네일·커버</td><td>thumbnail_style, cover_text, cover_face</td></tr>
+        <tr><td>카피·CTA</td><td>caption_copy, cta_type, cta_position, hashtag_set, hashtag_count</td></tr>
+        <tr><td>발행</td><td>publish_time, publish_day, first_comment, collab</td></tr>
+      </tbody>
+    </table>
+
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">variables/ 와 variants/ 폴더에 변수 시스템을 만들어줘.
+1. 위 표 모든 factor를 각각 Variable 노트로 생성(variables/var_caption_color.md 식). frontmatter: type: variable, group, description, hypothesis(영향 가설).
+2. 각 Variable에 자주 쓸 Variant(값) 노트를 미리 몇 개씩(variants/, 예: variant_caption_color_red/_white/_yellow). frontmatter: type: variant, parent_variable, value, 누적집계 필드(used_count, avg_save_to_reach, avg_completion 등 — Dataview가 채움).
+3. content/ 템플릿이 R2 규칙대로 variants: [[...]] 목록으로 사용 변수값을 링크하게.
+4. 모든 지표(A~D)를 Content frontmatter 필드로 포함:
+ A: saves, shares, sends_dm, completion_rate, avg_watch_time, rewatch_rate, comments, likes
+ B: views_1h, views_24h, saverate_1h, eng_velocity, first_hour_reach
+ C: reach, impressions, reach_follower, reach_nonfollower, source_explore/home/reels/hashtag/audio/profile, follows_from_post, profile_visits, profile_visit_rate, link_clicks, sticker_taps
+ D: hook_retention_3s, retention_curve, drop_off_point, save_to_reach, share_to_reach
+ 파생지표 계산식은 주석으로.
+5. experiments/ 폴더: Experiment 템플릿(가설/바꾼 Variable 1개/대조군 Content들/결과/이긴 Variant/도출 Insight) + README(R3 한번에 한 변수 규칙).</div></div>
+
+    <div class="note ox"><b>R3 — 한 번에 한 변수만.</b> 자막색과 BGM을 동시에 바꾸면 뭐 때문에 올랐는지 모른다. Experiment는 항상 <b>하나의 Variable만</b> 바꾸고 나머지 고정. 핵심 7개부터 순서대로 실험하면 표본이 빨리 쌓인다.</div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats">
+    <div class="stepno"><b>6</b> STATISTICS ★신규</div>
+    <h2>통계 신뢰 장치 — 우연을 성공으로 착각하지 않기</h2>
+    <p class="lede">콘텐츠 3개로 "빨간 자막이 +30%"라고 믿으면 위험하다. 우연일 수 있다. 표본·신뢰도·이상치를 관리해 <b>진짜 성공 방정식만</b> 채택한다.</p>
+
+    <h4>3가지 안전장치</h4>
+    <table>
+      <thead><tr><th>장치</th><th>규칙</th></tr></thead>
+      <tbody>
+        <tr><td><b>최소 표본</b></td><td>Variant별 <code class="inl">sample_size</code> 기록. <b>5개 미만=참고용, 10개 이상=신뢰</b>. 표본 적으면 결론 보류</td></tr>
+        <tr><td><b>학습 단계</b></td><td>Insight에 <code class="inl">status: hypothesis → testing → validated</code> 3단계. 표본·격차 충분해야 validated 승격</td></tr>
+        <tr><td><b>이상치 제거</b></td><td>성과가 평균의 N배 이상이거나 외부요인(인플루언서 공유 등) 있으면 <code class="inl">anomaly_note</code> 기록 → 성공방정식 계산에서 제외/가중치 조정</td></tr>
+      </tbody>
+    </table>
+
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">통계 신뢰 장치를 시스템에 추가해줘.
+1. Variant 노트에 sample_size, confidence 필드 추가. Dataview가 그 변수값을 쓴 Content 수를 세서 sample_size를 자동 갱신.
+2. Insight 노트에 status: hypothesis / testing / validated 3단계 + 판정 규칙:
+   - sample_size 5 미만 → hypothesis(참고용)
+   - 5~9 → testing
+   - 10 이상 AND 1·2위 Variant 성과격차가 뚜렷 → validated 승격 가능
+3. Content에 anomaly_note 필드와 is_outlier(true/false) 추가. 성과가 같은 조건 평균의 3배 넘거나 외부요인 메모가 있으면 is_outlier=true로 표시.
+4. 집계·분석 시 is_outlier=true인 Content는 성공방정식 계산에서 제외(또는 별도 표시)하게 해줘.
+5. queries/에 "아직 표본 부족해 결론 못 내린 변수 목록"과 "validated된 성공공식" 쿼리를 추가.</div></div>
+
+    <div class="note green"><b>이로써 2·5번 결함 해결.</b> 표본이 부족하면 "아직 모름"으로 남고, 우연한 대박(이상치)은 방정식에서 빠진다. 잘못된 성공공식을 믿고 엉뚱하게 가는 걸 막는다.</div>
+  </section>
+
+  <!-- CREATE -->
+  <section id="s4">
+    <div class="stepno"><b>7</b> CREATE</div>
+    <h2>콘티 자동 제작 + 발행 큐</h2>
+    <p class="lede">콘티를 만들면 변수·실험이 자동 기록된다. <b>보완: 발행 큐로 "결과 대기 후 반영"</b>해 루프가 끊기지 않게 한다.</p>
+
+    <div class="note ox"><b>보완 — 발행 큐(4번 결함 해결).</b> 콘티를 만들고 바로 다음 콘티를 또 만들면, 직전 결과가 반영되기 전에 새 게 나가 루프가 끊긴다. <code class="inl">queue/</code>로 상태를 관리한다: <b>대기 → 발행됨 → 결과수집중 → 분석완료</b>. "같은 변수 실험은 직전 결과가 들어온 뒤에만" 진행한다.</div>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">바디테일 인스타 릴스 콘티를 3개 만들어 content/에 저장하고, queue/에 발행대기로 등록해줘.
+- topic: 남자 손톱 첫인상 / 물어뜯는 습관 / 손끝 디테일
+- 온톨로지 규칙대로: Episode/Topic/Hook/Format 각 1개 [[링크]], 사용 Variant들을 variants: 목록에 [[링크]]
+- 이번 Experiment: 핵심 변수 중 hook_type "딱 하나만" 다르게, 나머지 동일 → experiments/에 Experiment 노트 생성, 가설 기록
+- 본문: 첫3초 장면, 컷 구성, 자막 문구, BGM 방향, CTA, 첫댓글안, 썸네일안
+- 지표 필드는 비워둠(발행 후 API가 채움)
+- queue 상태: 대기. "직전 같은변수 실험 결과가 들어오기 전엔 동일변수 실험 안 함" 규칙 적용
+- 규제: '치료·완치·회복' 금지 → '관리·보습·정돈·디테일'. 효능 단정 금지.</div></div>
+    <div class="note green"><b>변수 기록까지 자동인 이유:</b> 콘티 생성 시 AI가 R2에 따라 사용 Variant를 자동 링크하고, Experiment 노트에 "이번엔 hook만 바꿈"을 기록한다. 즉 <b>콘티 제작과 동시에 "무엇을 변수화했는지"가 온톨로지에 저장</b>된다 — 빠졌던 부분이 채워졌다.</div>
+  </section>
+
+  <!-- ANALYZE -->
+  <section id="s5">
+    <div class="stepno"><b>8</b> ANALYZE</div>
+    <h2>반응 자동 수집 + 분석 + 성공방정식</h2>
+    <h4>① 지표 자동 수집 (4단계 API 모듈)</h4>
+    <p>발행했으면 "지표 수집해줘" 한마디로 API가 모든 콘텐츠 지표를 갱신한다(4단계에서 만든 모듈). 1,000명 미만이면 스크린샷 보조 입력.</p>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">지표 수집해줘. API로 모든 content/의 views·reach·saved·shares·likes·comments·reels_skip_rate를 갱신하고, 사용 Variant의 누적 성과와 sample_size도 갱신해줘. API로 못 가져온 진단 지표(3초 잔존율·이탈지점·도달출처)는 목록으로 알려줘.</div></div>
+    <p style="font-size:13px;color:#7a6a5c">→ 진단 지표는 앱 인사이트 스크린샷을 첨부해 "이 스크린샷에서 읽어 채워줘"로 보조 입력(4단계 ④ 참고).</p>
+
+    <h4>② 자동 집계 (Obsidian)</h4>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">queries/ 폴더에 Dataview 쿼리 노트를 만들어줘:
+1 Variant별 평균 save_to_reach·completion·sends_dm 순위(어떤 값이 이기나)
+2 hook_type별 / 발행시각별 / 자막색별 평균 성과
+3 초기 1시간 지표(saverate_1h)와 최종 reach의 상관(초기반응이 떡상 예측하나)
+4 도달출처 분포 평균(탐색에서 터지나 해시태그에서 터지나)
+5 Experiment별 결과 요약 + 아직 Insight 안 뽑은 실험 목록
+6 validated Insight 목록(현재까지 검증된 성공공식)</div></div>
+    <div class="note green"><b>온톨로지가 "규칙대로 움직인다"는 증거:</b> 사람이 분류 안 해도 type·링크·frontmatter 규칙 덕에 Dataview가 Variant별·출처별·실험별로 자동 집계. 쌓일수록 "성공 방정식"이 또렷해진다.</div>
+
+    <h4>③ 학습 → 다음 콘티</h4>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">지금까지 content/ 전체와 queries/ 집계를 분석해줘.
+- validated된 Insight(표본 10+, 격차 뚜렷)만 "확정 성공공식"으로 정리. testing/hypothesis는 "아직 검증 중"으로 구분
+- is_outlier=true인 콘텐츠는 계산에서 제외하고, 제외했다고 알려줘
+- 확정된 성공공식을 기본 적용해 다음 릴스 콘티 3개 생성(R5) + queue 등록
+- 다음 Experiment는 핵심 7변수 중 아직 검증 안 된 것 하나만 바꿔 설계(R3)
+- 표본 부족해 결론 못 낸 변수도 목록으로 알려줘</div></div>
+  </section>
+
+  <!-- BACKUP -->
+  <section id="s6">
+    <div class="stepno"><b>9</b> BACKUP</div>
+    <h2>GitHub 백업</h2>
+    <div class="note ox" style="font-size:13px"><b>주의:</b> <code class="inl">config/secrets.env</code>(API 토큰)는 <b>절대 GitHub에 올리지 않는다</b>. 아래 지시문에 .gitignore 처리를 포함했다.</div>
+    <div class="prompt"><div class="prompt-head"><span>▸ Claude Code에 붙여넣기</span><button class="copy">복사</button></div><div class="prompt-body">지금까지 만든 파일을 GitHub의 bodetail-content 저장소에 올려줘.
+단, config/secrets.env(API 토큰)와 민감정보는 .gitignore에 추가해 절대 올라가지 않게 해줘.
+git 초기화·커밋·푸시까지 하고, 처음이라 인증 필요하면 방법을 알려줘.
+앞으로 "백업해줘"라고 하면 자동 커밋·푸시(secrets 제외)되게 해줘.</div></div>
+  </section>
+
+  <!-- PUBLISH -->
+  <section id="s7">
+    <div class="stepno"><b>10</b> PUBLISH</div>
+    <h2>발행 — 직접 + 나중에 하이브리드</h2>
+    <div class="note ox"><b>지금은 게시만 직접.</b> Claude Code가 만든 콘티·영상을 인스타 앱에서 직접 업로드(1분). 가장 빠르고 안 막힌다. 자동 발행은 비즈니스계정·페북연결·앱검수가 필요해 검증 후로.</div>
+    <h4>나중에: Ollama 하이브리드 (일이 많아지면)</h4>
+    <div class="flow">단순·반복 → Ollama(무료)        고급·창의 → Claude(유료)
+ ├ 영상 분류·태깅                ├ 콘티·서사 기획
+ ├ 자막 텍스트 추출              ├ Experiment 설계·Insight 도출
+ ├ 지표 요약·집계 정리           ├ 전략 판단·카피 다듬기
+        ↘                          ↙
+       config/ai-router.md 가 분배 (표에서 담당 AI만 교체)</div>
+    <ul class="clean">
+      <li><b>Ollama 설치</b>: <code class="inl">ollama.com</code> → <code class="inl">ollama pull llama3.1</code></li>
+      <li><b>라우터 수정</b>: <code class="inl">config/ai-router.md</code>의 '나중모델'을 단순작업만 Ollama로</li>
+      <li>모델 교체가 잦으면 안티그래비티 같은 범용 에이전트도 고려(대량 운영 단계에서만)</li>
+    </ul>
+    <div class="note green"><b>원칙:</b> 하이브리드는 "이미 잘 도는 걸 싸게" 만드는 기술. 검증 전엔 Claude 하나로 단순하게. 그 유튜버 구성은 이 단계 도달 후 펴볼 참고서다.</div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section style="border-bottom:none">
+    <div class="stepno"><b>✓</b> 한눈에</div>
+    <h2>따라 하기 요약</h2>
+    <div class="flow">0 설치   : Node → Claude Code → Obsidian(+Dataview) → GitHub
+1 폴더   : cd ~/bodetail-vault → claude → 폴더+라우터(전환대비)
+2 지표   : 마케터 지표 A(핵심)·B(초기)·C(도달)·D(진단) 사전화
+3 메타API: 비즈니스계정+토큰 → "지표 수집해줘" 자동수집 (1,000명+)
+4 온톨로지: 9객체 + 관계 규칙 R1~R6
+5 변수   : 핵심 7개부터 실험(나머지는 사전 보관) + 한번에 한 변수
+6 통계   : 표본·신뢰도·이상치 → 우연을 성공으로 착각 방지
+7 제작   : 콘티+발행큐(결과 대기 후 반영)
+8 분석   : 자동수집 → Dataview집계 → validated 성공공식 → 다음콘티
+9 백업   : "백업해줘" → GitHub (secrets 제외)
+10 발행  : 직접 / 나중에 Ollama 하이브리드</div>
+    <div class="note gold"><b>5대 보완 완료:</b> ①메타API 자동수집(수작업 제거) ②통계 신뢰장치(착각 방지) ③핵심7변수 압축(검증 가능) ④발행큐(루프 유지) ⑤이상치 제거(노이즈 분리). 이로써 "설계도(40%)"에서 <b>"작동하는 세컨드 브레인(75%)"</b>으로.</div>
+    <div class="note ox"><b>마지막 당부 — 이게 가장 중요하다.</b> 시스템이 아무리 정교해도 <b>들어올 데이터(콘텐츠 성과)가 0이면 빈 깡통</b>이다. 그리고 메타 API 인사이트는 <b>팔로워 1,000명부터</b>다. 즉 지금 당장은 <b>콘티 5~10개를 손으로 올려 데이터부터 쌓는 게</b> 먼저다. 이 시스템은 "데이터가 쌓여 수작업이 버거워질 때" 펴서 쓰는 무기다. 완벽한 세컨드 브레인보다 첫 릴스의 반응이 지금은 더 값지다.</div>
+  </section>
+
+  <footer>
+    Bodetail Content Automation Guide · 고도화판 v2 (메타API 자동수집 · 통계신뢰 · 핵심변수 · 발행큐 · 노이즈제거)<br>
+    이 파일만 보고 위에서부터 따라 하면 됩니다.
+  </footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var block=btn.closest('.term')||btn.closest('.prompt');
+    var txt=block.querySelector('code, .prompt-body').innerText;
+    navigator.clipboard.writeText(txt).then(function(){
+      var o=btn.textContent;btn.textContent='복사됨 ✓';btn.classList.add('done');
+      setTimeout(function(){btn.textContent=o;btn.classList.remove('done')},1400);
+    });
+  });
+});
+</script>
+</body>
+</html>

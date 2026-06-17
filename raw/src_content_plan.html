@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIBUNNY — 브랜드 런칭 & 콘텐츠 플랜</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1310;--ink-soft:#3A2E27;--porcelain:#F2ECE6;--porcelain-2:#EAE2DA;
+    --oxblood:#6B1620;--oxblood-deep:#46101A;--sheen:#B0844A;--sheen-soft:#C9A66B;
+    --blush:#E6D0C9;--mist:#8C7E76;--line:rgba(26,19,16,.14);--green:#2E5D4E;
+    --serif:'Cormorant Garamond',serif;--sans:'Pretendard',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--porcelain);color:var(--ink);line-height:1.64;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--oxblood);color:var(--porcelain)}
+  .wrap{max-width:940px;margin:0 auto;padding:0 26px}
+  header.hero{background:linear-gradient(160deg,#241015,var(--oxblood-deep) 46%,#2A1117);color:var(--porcelain);padding:58px 0 50px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.07) 50%,transparent 62%)}
+  .hero .wrap{position:relative;z-index:2}
+  .kick{font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:600;color:var(--sheen-soft)}
+  .mast{font-family:var(--serif);font-weight:600;font-size:clamp(31px,6vw,56px);line-height:1.04;margin:14px 0 8px}
+  .mast em{font-style:italic;color:var(--sheen-soft)}
+  .hnote{margin-top:16px;max-width:700px;font-size:14.5px;color:rgba(242,236,230,.88)}
+
+  .toc{background:var(--porcelain-2);padding:22px 0}
+  .toc .wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px}
+  .toc a{text-decoration:none;color:var(--ink);font-size:12.5px;padding:8px 11px;background:#fff;border-radius:8px;border:1px solid var(--line);display:flex;gap:7px}
+  .toc a b{color:var(--oxblood);white-space:nowrap}
+
+  .block{padding:42px 0 8px;border-bottom:1px solid var(--line)}
+  .bh{display:flex;align-items:baseline;gap:13px;margin-bottom:6px;flex-wrap:wrap}
+  .bh .hr{font-family:var(--serif);font-style:italic;font-size:14.5px;color:#fff;background:var(--oxblood);padding:5px 13px;border-radius:18px;white-space:nowrap}
+  .bh h2{font-family:var(--serif);font-weight:600;font-size:clamp(23px,3.5vw,33px);line-height:1.12}
+  .goal{font-size:13.5px;color:var(--mist);font-style:italic;margin:2px 0 16px}
+  .lead{font-size:15.5px;color:var(--ink-soft);margin-bottom:14px;max-width:850px}
+  .lead b{color:var(--ink)}
+
+  .bigidea{background:var(--ink);color:var(--porcelain);border-radius:14px;padding:24px 26px;margin:16px 0}
+  .bigidea .t{font-family:var(--serif);font-style:italic;font-size:24px;color:var(--sheen-soft);margin-bottom:8px}
+  .bigidea p{font-size:14.5px;color:rgba(242,236,230,.9)}
+  .bigidea b{color:#fff}
+
+  .step{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+  .step h4{font-size:15.5px;margin-bottom:9px;display:flex;gap:9px;align-items:baseline}
+  .step h4 .n{font-size:12px;font-weight:700;color:#fff;background:var(--sheen);min-width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step p{font-size:13.5px;color:var(--ink-soft);margin-bottom:7px}
+  .step ul,.step ol{margin:6px 0 8px 2px;padding-left:20px}
+  .step li{font-size:13.5px;color:var(--ink-soft);margin-bottom:6px}
+
+  .phase{display:grid;grid-template-columns:90px 1fr;gap:0;margin:14px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+  .phase .ph{background:var(--oxblood);color:#fff;padding:16px 12px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .phase .ph .p{font-family:var(--serif);font-style:italic;font-size:20px}
+  .phase .ph .w{font-size:10.5px;opacity:.85;margin-top:3px}
+  .phase .body{padding:14px 18px}
+  .phase .body h4{font-size:15px;color:var(--oxblood-deep);margin-bottom:5px}
+  .phase .body p{font-size:13px;color:var(--ink-soft);margin-bottom:5px}
+  .phase .body .tag{font-size:11px;color:var(--sheen);font-weight:700;letter-spacing:.04em}
+
+  table.ue{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  table.ue th{background:var(--oxblood);color:var(--porcelain);text-align:left;padding:10px 12px;font-weight:600;font-size:12px}
+  table.ue td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+  table.ue tr:nth-child(even) td{background:#faf6f1}
+  table.ue td:first-child{font-weight:600;color:var(--oxblood-deep)}
+
+  .note{background:#eef3f0;border-left:4px solid var(--green);border-radius:6px;padding:13px 16px;margin:12px 0;font-size:13px;color:var(--ink-soft)}
+  .note b{color:var(--green)}
+  .warn{background:#fbefe9;border-left:4px solid var(--oxblood);border-radius:6px;padding:13px 16px;margin:12px 0;font-size:13px;color:var(--ink-soft)}
+  .warn b{color:var(--oxblood)}
+  .prompt{border-left:3px solid var(--sheen);background:#faf6f1;margin:10px 0;border-radius:0 8px 8px 0;padding:12px 15px}
+  .prompt .lbl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--sheen);display:block;margin-bottom:5px}
+  .prompt p{font-size:13px;color:var(--ink-soft);font-style:italic}
+  h3.mini{font-size:14.5px;color:var(--oxblood-deep);margin:16px 0 5px;font-weight:700}
+
+  footer{background:var(--ink);color:var(--porcelain);padding:26px 0;font-size:12.5px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer span{color:var(--mist);font-style:italic}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kick">Brand Launch & Content Plan</span>
+    <div class="mast">뾰족하게 들어가서<em>,</em> 넓게 키운다.</div>
+    <p class="hnote">"브랜드부터냐 손톱부터냐"의 답 — 둘 다. 브랜드 그릇은 넓게(디테일 케어), 첫 화살은 손톱 하나로. 막막함을 없애는 순서·콘텐츠·수요검증·타이밍을 한 번에 정리한다.</p>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#p1"><b>01</b> 브랜드 포지셔닝 결정</a>
+  <a href="#p2"><b>02</b> 페이즈별 콘텐츠 로드맵</a>
+  <a href="#p3"><b>03</b> 릴스 반응유도 설계</a>
+  <a href="#p4"><b>04</b> 수요검증(스모크 테스트)</a>
+  <a href="#p5"><b>05</b> 임상·교육 타이밍</a>
+  <a href="#p6"><b>06</b> 통합 타임라인</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- 1 포지셔닝 -->
+<section class="block" id="p1">
+  <div class="bh"><span class="hr">01</span><h2>브랜드 포지셔닝 — 그릇은 넓게, 화살은 손톱</h2></div>
+  <p class="goal">가장 큰 고민의 답: 둘은 충돌하지 않는다. 층을 나누면 된다.</p>
+
+  <div class="bigidea">
+    <div class="t">하나의 원칙</div>
+    <p><b>브랜드 정체성(간판)은 넓게</b> — "놓치기 쉬운 디테일을 돌본다". 나중에 손톱→큐티클→입술→발로 확장해도 다 맞는 세계관.<br><br>
+    <b>첫 제품·첫 콘텐츠(첫 상품)는 손톱 하나로</b> — 무명 계정이 넓게 흩뿌리면 아무도 기억 못 한다. "손톱 뜯는 습관"이라는 뾰족한 페인으로 먼저 꽂는다.</p>
+  </div>
+
+  <p class="lead"><b>비유:</b> 백화점 간판은 넓게 걸되, 첫 오픈은 "손톱 코너 하나"로. 간판은 넓게, 첫 상품은 좁게.</p>
+
+  <div class="warn"><b>"매거진부터 빌드업 → 나중에 손톱 릴스" 순서는 위험.</b> 무명 계정이 넓은 무드 콘텐츠부터 하면 도달이 안 나온다. 반대로 가야 한다 — <b>손톱이라는 훅으로 도달을 먼저 터뜨리고</b>, 모인 사람에게 브랜드 세계관(매거진)을 천천히 보여준다. 매거진은 빌드업 도구가 아니라 <b>들어온 사람을 머물게 하는</b> 도구.</div>
+
+  <h3 class="mini">브랜드 정체성 후보 (넓은 그릇)</h3>
+  <table class="ue">
+    <thead><tr><th>방향</th><th>느낌</th><th>확장성</th></tr></thead>
+    <tbody>
+      <tr><td>리버니 (디테일 케어)</td><td>살롱 origin 승계, 따뜻·신뢰</td><td>손→큐티클→손 전체→디테일</td></tr>
+      <tr><td>"놓치기 쉬운 1%" 컨셉</td><td>섬세함·자기관리</td><td>신체 디테일 전반</td></tr>
+      <tr><td>better human being류</td><td>넓고 자기계발적</td><td>매우 넓음(단 초기엔 모호 위험)</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>추천:</b> <b>리버니로 통일</b>하되 슬로건을 넓게(예: "손끝부터, 놓치기 쉬운 디테일을"). 살롱 origin 신뢰를 100% 승계하면서 확장 문도 열어둔다. 완전히 새 브랜드명(better human being)은 살롱 신뢰 자산을 버리는 셈이라 비추천. <b>브랜드는 리버니, 세계관은 넓게.</b></div>
+</section>
+
+<!-- 2 콘텐츠 로드맵 -->
+<section class="block" id="p2">
+  <div class="bh"><span class="hr">02</span><h2>페이즈별 콘텐츠 로드맵</h2></div>
+  <p class="goal">뾰족하게 시작해 점점 넓힌다. 각 페이즈의 목표가 다르다.</p>
+
+  <div class="phase"><div class="ph"><span class="p">P1</span><span class="w">1~2개월</span></div>
+    <div class="body"><span class="tag">PHASE 1 · 손톱 훅으로 도달 터뜨리기</span>
+    <h4>"손톱 하나로 꽂는다"</h4>
+    <p>물어뜯기·변형·셀프젤 손상이라는 뾰족한 페인으로 도달·저장을 노린다. 길거리 투표, 비포애프터, 창업자 고백.</p>
+    <p>KPI: 저장률 4%+, 팔로워 0→500, "저요" 댓글</p></div>
+  </div>
+
+  <div class="phase"><div class="ph"><span class="p">P2</span><span class="w">2~4개월</span></div>
+    <div class="body"><span class="tag">PHASE 2 · 세계관·신뢰 빌드업</span>
+    <h4>"머물게 한다"</h4>
+    <p>들어온 사람에게 브랜드 세계관을 매거진으로 보여준다. "우리는 손톱만이 아니라 놓치기 쉬운 디테일을 본다" — 단 콘텐츠 60%는 여전히 손톱.</p>
+    <p>KPI: 팔로워 500→1,500, 재방문·하이라이트 조회, 사전 대기자 폼 수집</p></div>
+  </div>
+
+  <div class="phase"><div class="ph"><span class="p">P3</span><span class="w">4~6개월</span></div>
+    <div class="body"><span class="tag">PHASE 3 · 수요 검증 & 출시 준비</span>
+    <h4>"수요를 수치화한다"</h4>
+    <p>스모크 테스트(대기자 폼)로 수요 증명. 샘플 후기·비포애프터 누적. 이 데이터가 예창패 발표 자료가 된다.</p>
+    <p>KPI: 대기자 수, 설문 응답, 샘플 후기 수</p></div>
+  </div>
+
+  <div class="phase"><div class="ph"><span class="p">P4</span><span class="w">출시 후</span></div>
+    <div class="body"><span class="tag">PHASE 4 · 확장</span>
+    <h4>"손톱에서 디테일로"</h4>
+    <p>손톱에서 신뢰가 쌓인 뒤 큐티클 오일·강화제 등 인접 제품. 그 다음 입술·발 등 디테일 확장. 넓은 그릇이 여기서 빛난다.</p>
+    <p>KPI: 재구매율, 교차구매, 라인 확장</p></div>
+  </div>
+
+  <div class="note"><b>핵심:</b> 페이즈마다 <b>"손톱 비중을 서서히 줄이고 디테일 비중을 늘린다."</b> P1은 손톱 90% → P4는 손톱 40% + 디테일 60%. 급하게 넓히지 말 것.</div>
+</section>
+
+<!-- 3 릴스 반응유도 -->
+<section class="block" id="p3">
+  <div class="bh"><span class="hr">03</span><h2>릴스 반응유도 설계</h2></div>
+  <p class="goal">"무슨 반응을 원하는가"를 먼저 정하고, 그걸 끌어내는 포맷을 고른다.</p>
+
+  <table class="ue">
+    <thead><tr><th>원하는 반응</th><th>왜 중요</th><th>릴스 소재(준영 아이디어 반영)</th></tr></thead>
+    <tbody>
+      <tr><td>저장·공유</td><td>도달 확산(알고리즘)</td><td>길거리 투표 "이성 볼 때 더 신경쓰이는 건? 손톱 vs 겨땀 vs 떡진머리" → 손톱 의외의 상위 증명</td></tr>
+      <tr><td>댓글·자기고백</td><td>참여→도달, 공감 형성</td><td>"손톱 뜯는 사람만 아는 것" / "나도 그랬다" 창업자 고백 → "저요" 유도</td></tr>
+      <tr><td>링크클릭·수요표출</td><td>전환 선행지표</td><td>"30일이면 습관이 바뀐다" + "다시 자신 있게" → 대기자 폼 연결</td></tr>
+      <tr><td>체류·완주</td><td>알고리즘 강력 신호</td><td>비포애프터 타임랩스(끝까지 봐야 결과 나옴)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="mini">길거리 투표 릴스 — 구체 설계</h3>
+  <div class="step">
+    <p><b>훅(0~3초):</b> "이성 볼 때 의외로 제일 신경 쓰이는 신체부위, 1위가 뭘까?"</p>
+    <p><b>전개:</b> 길거리에서 손톱 vs 겨땀자국 vs 떡진머리 투표 → 손톱이 상위인 반응 모음</p>
+    <p><b>반전:</b> "의외로 손톱을 많이 본다. 근데 가장 방치하는 부위이기도."</p>
+    <p><b>CTA:</b> "당신은 손톱 자신 있나요? 댓글로" + 프로필 링크</p>
+  </div>
+
+  <div class="warn"><b>카피 규제 주의:</b> "치료·완치·평생 고친다"는 화장품법 위반. → "습관을 바꾸는 90일", "다시 자신 있게", "관리"로 표현. 자극적이되 의학적 단정은 피한다. "질병의 영역"이라는 멘트도 의학적 주장이라 위험 — "오래된 습관"으로 순화.</div>
+
+  <div class="note"><b>온톨로지 연결:</b> 각 릴스를 hook(투표형·고백형·정보형) / format(길거리·타임랩스·토킹) / topic(물어뜯기·셀프젤·디테일)로 태깅해 발행 → 뭐가 터지는지 측정 → 성공 패턴 반복. (제공된 vault 그대로 사용)</div>
+</section>
+
+<!-- 4 수요검증 -->
+<section class="block" id="p4">
+  <div class="bh"><span class="hr">04</span><h2>수요 검증 — 스모크 테스트 (안전 버전)</h2></div>
+  <p class="goal">판매 전 수요를 수치화하는 검증법. 단 기만 없이 안전하게.</p>
+
+  <div class="warn"><b>하면 안 되는 것:</b> "실제 구매" 버튼처럼 보이게 결제 유도 후 "배송 지연" 둘러대기 → <b>기만·사기 소지.</b> 신뢰가 생명인 초기 브랜드엔 치명적. 준영 아이디어 중 이 부분은 뺀다.</div>
+
+  <div class="note"><b>해야 하는 것 (안전한 스모크 테스트):</b> "출시 예정! 알림 받기" 형태의 <b>사전 예약/대기자 명단</b>. 이메일·연락처 남기면 출시 시 알림 + 얼리버드 할인. 돈을 안 받으니 기만이 아니고, <b>대기자 수 = 수요</b>로 정확히 측정된다. 폼에 "현재 개발 중인 제품의 사전 관심 조사"라고 명시.</div>
+
+  <h3 class="mini">실행 방법</h3>
+  <div class="step">
+    <ol>
+      <li>구글폼 또는 간단 랜딩페이지 제작: 제품 소개 + "출시되면 알림 받기"</li>
+      <li>옵션 조사: "30일 1병 / 90일 3병 패키지 중 어떤 게 끌리나요?" (선호만 조사, 실제 결제 X)</li>
+      <li>가격 반응: "예상가 2.5만 원, 살 의향?" 5점 척도</li>
+      <li>릴스 CTA에서 이 폼으로 연결</li>
+      <li>대기자 수·응답을 <b>예창패 발표 자료로</b> 수치화</li>
+    </ol>
+  </div>
+
+  <h3 class="mini">번들 전략 (실제 출시 때)</h3>
+  <p class="lead">"습관 안녕 패키지" 3병 묶음(90일 분) 할인 + 1병 단품 병행. 단 사전 폼에선 <b>선호 조사만</b>, 실제 판매는 출시 후.</p>
+  <div class="note"><b>왜 강력한가:</b> 대기자 명단은 출시 즉시 첫 구매로 전환되는 <b>"준비된 수요"</b>다. 예창패 발표에서 "이미 N명의 대기 수요를 확보했다"는 가장 강력한 증거가 된다.</div>
+</section>
+
+<!-- 5 임상교육 -->
+<section class="block" id="p5">
+  <div class="bh"><span class="hr">05</span><h2>자체 임상 · 창업교육 타이밍</h2></div>
+
+  <h3 class="mini">자체 임상 — 지원 전엔 하지 마라</h3>
+  <p class="lead">인체적용시험은 수백만~수천만 원. 선정 전 자비 집행은 리스크 과대. 1년차 무기는 임상이 아니라 <b>창업자 서사·비포애프터·후기</b>. → <b>"선정되면 지원금으로 임상하겠다"</b>가 오히려 좋은 자금 계획. 지금은 본인·지인·살롱 고객 실사용 후기를 모은다.</p>
+
+  <h3 class="mini">창업교육 — 따라 하기</h3>
+  <table class="ue">
+    <thead><tr><th>단계</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>소요</td><td>과정당 2~4시간 ~ 며칠. 군 복무 중 온라인으로 가능</td></tr>
+      <tr><td>① 가입</td><td>k-startup.go.kr 가입·로그인</td></tr>
+      <tr><td>② 신청</td><td>"창업교육/온라인교육" 메뉴 → 무료 강좌 신청</td></tr>
+      <tr><td>③ 수강</td><td>영상 수강 완료</td></tr>
+      <tr><td>④ 이수증</td><td>마이페이지에서 수료증 PDF 다운로드 → 폴더 보관</td></tr>
+      <tr><td>추천 3곳</td><td>K-Startup / 소상공인 지식배움터(edu.sbiz.or.kr) / 중기부 온라인</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>여러 개 들을수록 가점에 유리.</b> 목표: 군 복무 중 3개 이수. 이수증은 예창패 가점 증빙.</div>
+</section>
+
+<!-- 6 타임라인 -->
+<section class="block" id="p6">
+  <div class="bh"><span class="hr">06</span><h2>통합 타임라인 (지원 전까지)</h2></div>
+  <table class="ue">
+    <thead><tr><th>시기</th><th>브랜드·콘텐츠</th><th>제품·행정</th></tr></thead>
+    <tbody>
+      <tr><td>지금(6월)</td><td>인스타 개설·세계관 정의 / 손톱 비포 기록 / Phase1 콘텐츠 시작</td><td>상표 출원 / 창업교육 신청 / K-Startup 가입</td></tr>
+      <tr><td>7~8월</td><td>Phase1~2 / 길거리 투표·비포애프터 / 25h 스프린트</td><td>창업교육 이수 / 책임판매관리자 자격 확인</td></tr>
+      <tr><td>9~10월(전역)</td><td>Phase2~3 / 대기자 폼 오픈 / 수요 수치화</td><td>공장 미팅→샘플→매장 테스트 / 디자인 완성</td></tr>
+      <tr><td>11~12월</td><td>Phase3 / 후기·대기자 누적</td><td>사업계획서 데이터 채우기 / 통합공고 확인</td></tr>
+      <tr><td>1~2월</td><td>콘텐츠 지속 / 데이터 정리</td><td>공식 양식 작성 / 발표 준비 / 증빙 정리</td></tr>
+      <tr><td>2~3월</td><td>—</td><td>접수 → 발표평가</td></tr>
+    </tbody>
+  </table>
+  <div class="bigidea">
+    <div class="t">막막할 때 이 한 줄만</div>
+    <p><b>이번 주:</b> 인스타 개설 + 브랜드 세계관 한 줄 정하기 + 손톱 비포 사진 찍기 + 상표 출원 + 창업교육 1개 신청. 나머지는 페이즈대로 따라온다. <b>완벽한 시작이 아니라, 시작 자체가 핵심이다.</b></p>
+  </div>
+</section>
+
+</div>
+<footer><div class="wrap">
+  <span>LIBUNNY · 브랜드 런칭 & 콘텐츠 플랜 · 2026</span>
+  <span>뾰족하게 들어가서, 넓게 키운다</span>
+</div></footer>
+</body>
+</html>

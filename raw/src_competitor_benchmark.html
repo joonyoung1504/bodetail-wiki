@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIBUNNY — 경쟁사 벤치마킹 리포트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1310;--ink-soft:#3A2E27;--porcelain:#F2ECE6;--porcelain-2:#EAE2DA;
+    --oxblood:#6B1620;--oxblood-deep:#46101A;--sheen:#B0844A;--sheen-soft:#C9A66B;
+    --blush:#E6D0C9;--mist:#8C7E76;--line:rgba(26,19,16,.14);--green:#2E5D4E;
+    --serif:'Cormorant Garamond',serif;--sans:'Pretendard',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--porcelain);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6}
+  ::selection{background:var(--oxblood);color:var(--porcelain)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  header.hero{background:linear-gradient(160deg,#241015,var(--oxblood-deep) 46%,#2A1117);color:var(--porcelain);padding:62px 0 54px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.07) 50%,transparent 62%)}
+  .hero .wrap{position:relative;z-index:2}
+  .kick{font-size:11px;letter-spacing:.32em;text-transform:uppercase;font-weight:600;color:var(--sheen-soft);display:inline-flex;align-items:center;gap:10px}
+  .kick::before{content:"";width:26px;height:1px;background:var(--sheen-soft)}
+  .mast{font-family:var(--serif);font-weight:500;font-size:clamp(36px,7vw,68px);line-height:1.02;margin:16px 0 8px}
+  .mast em{font-style:italic;color:var(--sheen-soft)}
+  .hsub{font-family:var(--serif);font-style:italic;font-size:clamp(17px,2.4vw,23px);color:var(--blush)}
+  .hnote{margin-top:18px;max-width:640px;font-size:14.5px;color:rgba(242,236,230,.86)}
+
+  section.blk{padding:54px 0 8px}
+  section.blk:nth-child(even){background:var(--porcelain-2)}
+  .sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:16px}
+  .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--oxblood)}
+  .sec-title{font-family:var(--serif);font-weight:600;font-size:clamp(26px,4vw,40px);line-height:1.05;margin-top:6px}
+  .sec-title .ko{display:block;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--mist);letter-spacing:0;margin-top:6px}
+  .chapno{font-family:var(--serif);font-style:italic;color:var(--sheen);font-size:17px;white-space:nowrap}
+  .lead{font-size:16px;color:var(--ink-soft);margin-bottom:18px;max-width:850px}
+  .lead b{color:var(--ink)}
+  h3.sub{font-family:var(--serif);font-size:23px;font-weight:600;margin:30px 0 6px}
+
+  table.ue{width:100%;border-collapse:collapse;margin:12px 0 8px;font-size:13.5px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  table.ue th{background:var(--oxblood);color:var(--porcelain);text-align:left;padding:11px 13px;font-weight:600;font-size:12.5px;letter-spacing:.02em}
+  table.ue td{padding:10px 13px;border-top:1px solid var(--line);vertical-align:top}
+  table.ue tr:nth-child(even) td{background:#faf6f1}
+  table.ue td:first-child{font-weight:600;color:var(--oxblood-deep)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .win{color:var(--green);font-weight:700}.lose{color:var(--oxblood);font-weight:700}
+
+  .caption{font-size:12.5px;color:var(--mist);font-style:italic;margin:4px 0 14px}
+  .callout{background:#fff;border-left:4px solid var(--sheen);border-radius:6px;padding:15px 18px;margin:16px 0;font-size:14px;color:var(--ink-soft)}
+  .callout b{color:var(--oxblood-deep)}
+  .callout.dark{background:var(--ink);color:var(--porcelain);border-left-color:var(--sheen-soft)}
+  .callout.dark b{color:var(--sheen-soft)}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:16px;margin:18px 0}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h4{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--oxblood-deep);margin-bottom:4px}
+  .card .tag{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--sheen);margin-bottom:8px}
+  .card p{font-size:13px;color:var(--ink-soft);margin-bottom:6px}
+  .card .stat{font-family:var(--serif);font-size:26px;color:var(--oxblood);font-weight:600}
+
+  .verdict{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
+  .verdict>div{border-radius:12px;padding:18px}
+  .verdict .good{background:#eef3f0;border:1px solid #cfe0d8}
+  .verdict .risk{background:#fbefe9;border:1px solid #f0d5cb}
+  .verdict h4{font-size:15px;margin-bottom:10px}
+  .verdict .good h4{color:var(--green)}.verdict .risk h4{color:var(--oxblood)}
+  .verdict ul{margin:0;padding-left:18px}.verdict li{font-size:13px;margin-bottom:6px;color:var(--ink-soft)}
+  @media(max-width:720px){.verdict{grid-template-columns:1fr}}
+
+  footer{background:var(--ink);color:var(--porcelain);padding:30px 0;margin-top:30px;font-size:12.5px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  footer span{color:var(--mist);font-style:italic}
+  .disc{font-size:11.5px;color:var(--mist);font-style:italic;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kick">Competitor Benchmarking Report</span>
+    <div class="mast">누가 어떻게 떴나<em>.</em></div>
+    <div class="hsub">토리든 · 셀리맥스 · 마미케어 · 코골이 테이프 — 그리고 우리</div>
+    <p class="hnote">바이럴로 성공한 뷰티·소비재 브랜드들을 분해해, 판매량·성장공식·ROAS·매각 멀티플을 비교하고, 우리 손톱 회복 세럼의 경쟁 위치를 냉정하게 진단한다.</p>
+  </div>
+</header>
+
+<!-- 1. 한눈에 비교 -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">01 — Overview</span><h2 class="sec-title">한눈에 비교<span class="ko">핵심 지표 요약</span></h2></div><span class="chapno">summary / 01</span></div>
+    <table class="ue">
+      <thead><tr><th>구분</th><th>토리든</th><th>셀리맥스</th><th>마미케어</th><th>코골이 테이프</th><th>우리(손톱)</th></tr></thead>
+      <tbody>
+        <tr><td>히어로</td><td>다이브인 세럼</td><td>레티날 세럼</td><td>바다포도 앰플</td><td>입막음 테이프</td><td>손톱 회복 세럼</td></tr>
+        <tr><td>누적/규모</td><td>1,361만 병</td><td>매출 1,700억</td><td>100만 병</td><td>수백만~천만 매</td><td>목표 13.5만 병</td></tr>
+        <tr><td>핵심 무기</td><td>저자극·후기</td><td>성분 1위·글로벌</td><td>성분 네이밍·광고</td><td>충격 비주얼</td><td>살롱·서사·블루오션</td></tr>
+        <tr><td>성장 동력</td><td>오가닉</td><td>플랫폼 1위</td><td>유료광고·번들</td><td>유료광고</td><td>오가닉 지향</td></tr>
+        <tr><td>경쟁 강도</td><td class="lose">극심</td><td class="lose">심함</td><td class="lose">심함</td><td class="lose">매우 심함</td><td class="win">낮음</td></tr>
+        <tr><td>해자</td><td>중</td><td>중상</td><td class="lose">약함</td><td class="lose">매우 약함</td><td class="win">중상(살롱)</td></tr>
+        <tr><td>효과 신뢰</td><td class="win">높음</td><td class="win">높음</td><td class="lose">논란</td><td class="lose">논란·경고</td><td>중(보습 확실)</td></tr>
+      </tbody>
+    </table>
+    <p class="caption">규모는 누적 판매량 또는 연매출 기준(공개 자료). 우리 목표는 5년 누적 추정치.</p>
+  </div>
+</section>
+
+<!-- 2. 토리든 -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">02 — Benchmark</span><h2 class="sec-title">토리든 (다이브인 세럼)<span class="ko">가장 닮아야 할 롤모델 ★★★</span></h2></div><span class="chapno">torriden / 02</span></div>
+    <div class="cards">
+      <div class="card"><div class="tag">매출</div><div class="stat">1,860억</div><p>2024년 (전년 673억 → +176%)</p></div>
+      <div class="card"><div class="tag">영업이익</div><div class="stat">520억</div><p>이익률 약 28% (업계 최상위)</p></div>
+      <div class="card"><div class="tag">누적 판매</div><div class="stat">1,361만<span style="font-size:14px">병</span></div><p>단일 제품이 브랜드를 메가화</p></div>
+    </div>
+    <h3 class="sub">성공 공식</h3>
+    <p class="lead">오랫동안 무명 → 2022년 클린뷰티 트렌드에 맞춰 용기·라벨을 투명하게 바꾸고 "세럼 맛집"으로 입소문. <b>화해(앱)에서 선판매로 후기를 먼저 쌓고</b>, "촉촉하고 순한 세럼"으로 출시 2년 만에 매출 2억→17억.</p>
+    <div class="callout"><b>우리 벤치마크:</b> ① 저자극·순함을 핵심 메시지로(=우리 원칙) ② 후기를 먼저 쌓고 시작(=B안 사전 콘텐츠) ③ 단일 제품 집중 ④ 2년의 빌드업 — 단기 대박 아닌 누적 성장.</div>
+  </div>
+</section>
+
+<!-- 3. 셀리맥스 -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">03 — Benchmark</span><h2 class="sec-title">셀리맥스 (레티날 세럼)<span class="ko">단일 성분 1위로 글로벌 ★★</span></h2></div><span class="chapno">selimax / 03</span></div>
+    <div class="cards">
+      <div class="card"><div class="tag">매출 성장</div><div class="stat">462→1,700억</div><p>1년 만에 약 3.7배 (70여 개국)</p></div>
+      <div class="card"><div class="tag">핵심</div><div class="stat">아마존 1위</div><p>레티날 키워드 → 세럼 카테고리 1위</p></div>
+      <div class="card"><div class="tag">유통</div><div class="stat">얼타 입점</div><p>미국 얼타 1,300개 전 매장</p></div>
+    </div>
+    <div class="callout"><b>우리 벤치마크:</b> 하나의 강력한 성분/제품으로 <b>한 카테고리를 장악</b> → 우리도 "손톱 회복" 카테고리 1등 전략. 해외 플랫폼(아마존)은 확장기 참고.</div>
+  </div>
+</section>
+
+<!-- 4. 마미케어 -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">04 — Benchmark</span><h2 class="sec-title">마미케어 (바다포도 앰플)<span class="ko">기법은 차용, 약점은 회피 ★</span></h2></div><span class="chapno">mommycare / 04</span></div>
+    <div class="cards">
+      <div class="card"><div class="tag">누적 판매</div><div class="stat">100만<span style="font-size:14px">병</span></div><p>SNS 대란 → 올리브영 품절템</p></div>
+      <div class="card"><div class="tag">가격</div><div class="stat">2.2만<span style="font-size:14px">원</span></div><p>정가 4.9만 / 1+1·사은품 프로모션</p></div>
+      <div class="card"><div class="tag">마케팅</div><div class="stat">성분 네이밍</div><p>'바다포도' + 임상 수치 소구</p></div>
+    </div>
+    <div class="verdict">
+      <div class="good"><h4>배울 점</h4><ul>
+        <li>기억에 남는 성분 네이밍(바다포도)으로 시선 집중</li>
+        <li>약국 입소문 → SNS 확산의 신뢰 빌드업</li>
+        <li>번들·사은품으로 객단가 상승(=우리 키트 업셀)</li>
+      </ul></div>
+      <div class="risk"><h4>피할 점</h4><ul>
+        <li>"모공 150% 개선" 임상 수치 — 우리는 자체 임상 없어 불가</li>
+        <li>효과 논란 후기 존재(마케팅 대비 실효과)</li>
+        <li>광고·프로모션 의존 = 해자 약함</li>
+      </ul></div>
+    </div>
+    <div class="callout"><b>결론:</b> 마케팅 기법(성분 후킹·번들)은 배우되, 과장 수치·효과 논란은 피한다. 우리 무기는 <b>진정성·살롱 origin·창업자 서사</b>.</div>
+  </div>
+</section>
+
+<!-- 5. 코골이 테이프 -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">05 — Benchmark</span><h2 class="sec-title">코골이/입막음 테이프<span class="ko">바이럴 최고, 해자 최악 — 반면교사</span></h2></div><span class="chapno">mouthtape / 05</span></div>
+    <p class="lead">입에 테이프 붙이고 자는 <b>충격 비주얼</b>로 틱톡 5,200만 조회 등 폭발적 바이럴. 다수 브랜드 난립(바른수면밴드 1,400만 매 등). 단 부직포라 <b>누구나 만들 수 있어 해자가 없고</b>, 의사들은 효과·안전(피부 자극·알레르기)을 경고.</p>
+    <div class="verdict">
+      <div class="good"><h4>배울 점</h4><ul>
+        <li>호기심 유발 비주얼이 바이럴의 핵심 (=우리 비포/애프터)</li>
+        <li>명확한 페인 + 간편한 해결</li>
+        <li>소모품이라 재구매 구조</li>
+      </ul></div>
+      <div class="risk"><h4>반면교사</h4><ul>
+        <li>진입장벽 0 → 가격·광고 싸움, 브랜드 안 남음</li>
+        <li>효과·건강 논란(=블랭크식 휘발 위험)</li>
+        <li>브랜드 충성도 낮음(제일 싼 거 삼)</li>
+      </ul></div>
+    </div>
+    <div class="callout dark"><b>핵심 교훈:</b> "코골이 테이프의 바이럴 + 토리든의 해자·신뢰"를 합쳐야 한다. 바이럴만 있고 해자 없으면 반짝 사라지고, 해자만 있고 바이럴 없으면 안 알려진다. <b>둘 다 필요.</b></div>
+  </div>
+</section>
+
+<!-- 6. ROAS -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">06 — ROAS</span><h2 class="sec-title">ROAS 분석<span class="ko">광고비 대비 매출 — 추정과 구조</span></h2></div><span class="chapno">roas / 06</span></div>
+    <p class="lead">정확한 ROAS는 <b>어느 회사도 공개하지 않는다</b>(제품별 광고비 비공개). 다만 비즈니스 구조로 추정 가능하다.</p>
+    <table class="ue">
+      <thead><tr><th>구분</th><th>추정 ROAS 성격</th><th>근거</th></tr></thead>
+      <tbody>
+        <tr><td>업계 평균(유료광고)</td><td>Meta ~1.5 / 틱톡 ~1.6</td><td>화장품 이커머스 벤치마크</td></tr>
+        <tr><td>토리든</td><td class="win">실질 高 (오가닉)</td><td>영업이익률 28% = 광고 안 사도 팔림. 후기·입소문 비중 큼</td></tr>
+        <tr><td>마미케어/코골이</td><td>中 (1.5~3, 유료의존)</td><td>광고·프로모션으로 미는 구조</td></tr>
+        <tr><td>우리 지향</td><td class="win">오가닉 高 목표</td><td>창업자 서사·비포애프터로 광고비 없이 도달</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>핵심 통찰:</b> 토리든의 진짜 무기는 "광고를 잘 산 것"이 아니라 <b>"후기로 광고비 없이 팔리는 구조"</b>다. 작은 브랜드는 광고 ROAS 1.5배 싸움으론 대기업을 못 이긴다. <b>오가닉 바이럴(서사·후기)</b>에 집중해야 하는 이유.</div>
+  </div>
+</section>
+
+<!-- 7. 매각 멀티플 -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">07 — Valuation</span><h2 class="sec-title">매각가 · 멀티플<span class="ko">K-뷰티 M&A는 EV/EBITDA 배수</span></h2></div><span class="chapno">exit / 07</span></div>
+    <table class="ue">
+      <thead><tr><th>딜 사례</th><th class="num">멀티플(EV/EBITDA)</th></tr></thead>
+      <tbody>
+        <tr><td>스킨푸드 (구다이글로벌)</td><td class="num">9배</td></tr>
+        <tr><td>서린컴퍼니</td><td class="num">약 7배</td></tr>
+        <tr><td>스킨이데아 (모건스탠리PE)</td><td class="num">약 6배</td></tr>
+      </tbody>
+    </table>
+    <p class="caption">K-뷰티 브랜드 매각 멀티플은 보통 6~9배. 성장성·독창성 강하면 9배, 올드하면 6배.</p>
+    <h3 class="sub">우리 시나리오 대입 (영업이익 10억)</h3>
+    <div class="cards">
+      <div class="card"><div class="tag">밸류 추정</div><div class="stat">60~90억</div><p>영업이익 10억 × 6~9배</p></div>
+      <div class="card"><div class="tag">100억 매각</div><div class="stat">멀티플 10배</div><p>화장품엔 약간 높음(낙관)</p></div>
+      <div class="card"><div class="tag">필요 조건</div><div class="stat">3~5년</div><p>꾸준한 우상향 실적 증명</p></div>
+    </div>
+    <div class="callout dark"><b>매각 핵심:</b> 매각가 = "지속가능한 이익 × 멀티플". 한 해 반짝 이익엔 멀티플을 안 쳐준다. <b>3~5년 우상향 + 재구매율(LTV)</b>이 멀티플을 결정한다. 또 매각은 <b>사줄 인수자</b>가 있어야 성립. ※ 매각가 100억 ≠ 본인 수령 100억(지분 희석·세금 고려).</div>
+  </div>
+</section>
+
+<!-- 8. 판매량 벤치마크 -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">08 — Position</span><h2 class="sec-title">우리 목표의 위치<span class="ko">13.5만 병이 어느 수준인가</span></h2></div><span class="chapno">position / 08</span></div>
+    <table class="ue">
+      <thead><tr><th>구간</th><th class="num">누적 판매</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td>메가 히트(토리든)</td><td class="num">1,361만 병</td><td>국민템·글로벌</td></tr>
+        <tr><td>바이럴 성공(마미케어)</td><td class="num">100만 병</td><td>대란템</td></tr>
+        <tr><td><b>우리 목표</b></td><td class="num"><b>13.5만 병</b></td><td class="win">성공적 안착 (메가의 1%)</td></tr>
+        <tr><td>초기 성장(토리든 2년차)</td><td class="num">8만~15만 병</td><td>"뜨기 시작한" 단계</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>해석:</b> 13.5만 병은 메가 히트의 <b>약 1%</b> = "성공적 안착" 수준이지 국민템급이 아니다. <b>도달 가능한 현실적 목표</b>지만, 2~3년 누적으로 봐야 하고 손톱 시장은 좁아 도달이 까다롭다. 침투율로는 타깃(700만~1,000만)의 1% 안팎.</div>
+  </div>
+</section>
+
+<!-- 9. 종합 진단 -->
+<section class="blk">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">09 — Diagnosis</span><h2 class="sec-title">우리의 경쟁 위치<span class="ko">상품 잠재력은 우위, 실행은 더 어렵다</span></h2></div><span class="chapno">verdict / 09</span></div>
+    <div class="verdict">
+      <div class="good"><h4>우리가 이기는 것</h4><ul>
+        <li>경쟁 없음(블루오션) — 손톱 회복 카테고리 비어있음</li>
+        <li>페인 절박도 높음(컴플렉스)</li>
+        <li>해자: 살롱 origin + 창업자 서사 + 비포애프터</li>
+        <li>재구매 잠재력(긴 회복기간)</li>
+        <li>남녀공용 시장</li>
+      </ul></div>
+      <div class="risk"><h4>우리가 불리한 것</h4><ul>
+        <li>효과의 객관적 입증(자체 임상 불가)</li>
+        <li>효과 체감 느림 → 초반 이탈 위험</li>
+        <li>초기 인지·노출(숨기는 페인)</li>
+        <li>시장 크기 자체는 작음(틈새)</li>
+      </ul></div>
+    </div>
+    <div class="callout dark"><b>최종 진단:</b> 상품 본질 경쟁력(페인·경쟁·해자)은 <b>토리든·바다포도보다 오히려 우위</b>, 단 마케팅 입증력(임상·노출)에서 불리. → 약점(효과 입증·노출)을 <b>창업자 서사 + 비포애프터 + 후기</b>로 메우면, 강점(블루오션·해자·재구매)이 살아나 <b>토리든 성공 공식을 더 적은 경쟁으로</b> 달성 가능. 점수로: 상품 잠재력 우리 &gt; 토리든 &gt; 바다포도 / 실행 난이도도 우리 &gt; 바다포도 &gt; 토리든 — <b>좋은 패를 들었지만 실행이 더 어렵다.</b></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>LIBUNNY · 경쟁사 벤치마킹 리포트 · 2026</span>
+    <span>토리든 · 셀리맥스 · 마미케어 · 코골이 테이프 분석 종합</span>
+  </div>
+  <div class="wrap"><p class="disc">※ 매출·판매량은 공개 보도 자료 기준이며 시점에 따라 변동. ROAS·멀티플·우리 목표 수치는 추정으로, 실제는 견적·시장 상황에 따라 달라짐.</p></div>
+</footer>
+
+</body>
+</html>
