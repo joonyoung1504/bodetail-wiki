@@ -131,3 +131,10 @@ updated: 2026-06-17
 - [[product/ODM-의뢰서]]
 - [[product/용기-스펙-초안]]
 - [[decisions/주요-의사결정]]
+
+---
+
+## Knowledge Connections
+- **Related Topics:** [[concepts/MOQ]], [[concepts/롤온]], [[concepts/독점처방]], [[concepts/무수오일]], [[concepts/단위경제]]
+- **Related Notes:** [[product/제품-개요]], [[product/ODM-의뢰서]], [[product/용기-스펙-초안]], [[decisions/주요-의사결정]]
+- **Open Questions:** 라온하제 샘플 일정·단가 확인 대기 (22만원 입금 후 회신 대기 중) / 에스코스랩 회신 대기 / 에이티바이오 롤온 공병 발송 미완료 / 10ml vs 20ml 단가 비교 미완료

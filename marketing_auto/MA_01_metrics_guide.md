@@ -150,3 +150,10 @@ updated: 2026-06-18
 - [[content/릴스-제작-프로세스]] — 제작 시 지표 설계 반영
 - [[marketing_auto/MA_02_viral_playbook]] — 훅·CTA가 어떤 지표에 영향하는지 연결
 - [[marketing_auto/MA_03_automation_structure]] — 지표 자동 수집·위키 업데이트 구조
+
+---
+
+## Knowledge Connections
+- **Related Topics:** [[concepts/저장률]], [[concepts/완주율]], [[concepts/메타API]], [[concepts/수요검증]], [[concepts/AB실험]], [[concepts/훅]]
+- **Related Notes:** [[content/콘텐츠-수요검증-마스터플랜]], [[content/릴스-제작-프로세스]], [[marketing_auto/MA_02_viral_playbook]], [[marketing_auto/MA_03_automation_structure]]
+- **Open Questions:** 메타 API 미연동 상태 (팔로워 1,000명+ 조건 미달성) / 3초 잔존율·구간 이탈은 앱 스크린샷 수동 입력으로 대체 중

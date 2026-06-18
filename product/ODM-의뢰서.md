@@ -87,3 +87,10 @@ updated: 2026-06-17
 - [[product/용기-스펙-초안]]
 - [[ops/OEM-업체-비교]]
 - [[decisions/주요-의사결정]]
+
+---
+
+## Knowledge Connections
+- **Related Topics:** [[concepts/무수오일]], [[concepts/롤온]], [[concepts/MOQ]], [[concepts/독점처방]], [[concepts/화장품법]]
+- **Related Notes:** [[product/제품-개요]], [[product/용기-스펙-초안]], [[ops/OEM-업체-비교]]
+- **Open Questions:** 샘플 롤온 형태 수령 가능 여부 확인 필요 / 양산 리드타임 미확인 / 10ml vs 20ml 단가·효율 비교 미완료

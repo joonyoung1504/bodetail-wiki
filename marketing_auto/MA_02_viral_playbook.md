@@ -178,3 +178,10 @@ updated: 2026-06-18
 - [[content/릴스-제작-프로세스]] — 실제 제작 시 이 공략집 적용
 - [[content/콘텐츠-수요검증-마스터플랜]] — 전체 콘텐츠 전략과 연결
 - [[marketing_auto/MA_03_automation_structure]] — 바이럴 패턴 자동화에 적용
+
+---
+
+## Knowledge Connections
+- **Related Topics:** [[concepts/훅]], [[concepts/릴스]], [[concepts/Adam-TTS]], [[concepts/저장률]], [[concepts/오가닉마케팅]], [[concepts/옥스블러드]], [[concepts/AB실험]]
+- **Related Notes:** [[marketing_auto/MA_01_metrics_guide]], [[content/릴스-제작-프로세스]], [[content/콘텐츠-수요검증-마스터플랜]], [[marketing_auto/MA_03_automation_structure]]
+- **Open Questions:** 최적 발행 시간대 A/B 테스트 미실행 / 해시태그 세트 A/B 번갈아 사용 효과 미검증 / 계정 시각 일관성(커버·자막 스타일) 적용 첫 영상 미발행

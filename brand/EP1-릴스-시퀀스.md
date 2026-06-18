@@ -109,3 +109,10 @@ EP1 손톱 🔓 지금  →  EP2 큐티클·손 🔒  →  EP3 입술 🔒  → 
 - [[decisions/주요-의사결정]]
 - [[decisions/콘텐츠-볼트-운영]]
 - [[content/콘텐츠-수요검증-마스터플랜]]
+
+---
+
+## Knowledge Connections
+- **Related Topics:** [[concepts/EP시리즈]], [[concepts/비포애프터]], [[concepts/훅]], [[concepts/AB실험]], [[concepts/저장률]], [[concepts/완주율]], [[concepts/화장품법]]
+- **Related Notes:** [[brand/콘텐츠-인플루언서]], [[brand/브랜드-정체성]], [[content/콘텐츠-수요검증-마스터플랜]], [[content/릴스-제작-프로세스]]
+- **Open Questions:** T1 주제 5종 중 첫 발행 순서 미확정 / 첫 릴스 발행 날짜 미확정 / 비포애프터용 손톱 실사 촬영 완료 여부 미확인
