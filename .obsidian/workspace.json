@@ -13,28 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "환영합니다!.md",
+                "file": "market/경쟁사-분석.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "환영합니다!"
-            }
-          }
-        ]
-      },
-      {
-        "id": "4794b580e6f1f928",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "bc184a3ed0831353",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "그래프 뷰"
+              "title": "경쟁사-분석"
             }
           }
         ]
@@ -110,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "raw/06_latest_update_20260617.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -119,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "백링크"
+              "title": "06_latest_update_20260617 의 백링크"
             }
           },
           {
@@ -128,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "raw/06_latest_update_20260617.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "나가는 링크"
+              "title": "06_latest_update_20260617 의 나가는 링크"
             }
           },
           {
@@ -170,12 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "raw/06_latest_update_20260617.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "개요"
+              "title": "06_latest_update_20260617 의 개요"
             }
           }
         ]
@@ -196,43 +183,43 @@
       "bases:새 베이스 생성하기": false
     }
   },
-  "active": "bc184a3ed0831353",
+  "active": "5721416716945093",
   "lastOpenFiles": [
-    "decisions/콘텐츠-볼트-운영.md.tmp.11644.4539fd84cc65",
-    "decisions/주요-의사결정.md.tmp.11644.2083b62e5214",
-    "decisions/주요-의사결정.md.tmp.11644.8433caeaf2c4",
-    "decisions/콘텐츠-볼트-운영.md.tmp.11644.02523619c4d9",
-    "ops/OEM-업체-비교.md.tmp.11644.78181b0a003e",
-    "ops/OEM-업체-비교.md.tmp.11644.3d3c7c0a03ce",
-    "ops/OEM-업체-비교.md.tmp.11644.945b6469d86b",
+    "content/콘텐츠-수요검증-마스터플랜.md.tmp.19356.62c99604b4d2",
+    "content/콘텐츠-수요검증-마스터플랜.md.tmp.19356.e4ad380746b8",
+    "marketing_auto/MA_03_automation_structure.md.tmp.19356.9a2f8f07eafe",
+    "marketing_auto/MA_02_viral_playbook.md.tmp.19356.ccbc5343ad3d",
+    "marketing_auto/MA_01_metrics_guide.md.tmp.19356.7acdefef9381",
+    "marketing_auto/MA_03_automation_structure.md.tmp.19356.fef842b8b675",
+    "marketing_auto/MA_02_viral_playbook.md.tmp.19356.f7d3d425f833",
+    "marketing_auto/MA_01_metrics_guide.md.tmp.19356.3a1f2ace5187",
+    "content/릴스-제작-프로세스.md",
+    "content/릴스-제작-프로세스.md.tmp.19356.90ea2c87f921",
+    "marketing_auto/MA_03_automation_structure.md",
+    "marketing_auto/MA_01_metrics_guide.md",
+    "marketing_auto/MA_02_viral_playbook.md",
+    "marketing_auto",
+    "새 폴더",
+    "raw/09_reels_process_raw.md",
+    "market/수출전략.md",
+    "content/콘텐츠-수요검증-마스터플랜.md",
+    "raw/07_export_strategy.md",
+    "raw/08_content_masterplan.md",
     "raw/06_latest_update_20260617.md",
+    "ops/OEM-업체-비교.md",
+    "환영합니다!.md",
+    "brand/타깃-페르소나.md",
+    "brand/브랜드-정체성.md",
     "brand/콘텐츠-인플루언서.md",
-    "decisions/주요-의사결정.md.tmp.7660.7d2547769051",
-    "brand/EP1-릴스-시퀀스.md.tmp.7660.053efb1f614d",
-    "brand/콘텐츠-인플루언서.md.tmp.7660.6a3e3bed03fc",
-    "ops/OEM-업체-비교.md.tmp.7660.3498e239dc37",
     "product/ODM-의뢰서.md",
     "decisions/콘텐츠-볼트-운영.md",
     "brand/EP1-릴스-시퀀스.md",
     "decisions/상표-임상-예창패.md",
     "decisions/주요-의사결정.md",
-    "ops/OEM-업체-비교.md",
     "market/경쟁사-벤치마킹.md",
-    "brand/브랜드-정체성.md",
     "product/제품-개요.md",
     "raw/src_business_plan.md",
     "raw/05_decisions.md",
-    "raw/04_oem.md",
-    "raw/03_market.md",
-    "raw/02_brand.md",
-    "raw/00_README.md",
-    "raw/01_product.md",
-    "raw/원본-수집-예시.md",
-    "decisions/브랜드-포지셔닝-결정.md",
-    "ops/OEM-협의-현황.md",
-    "market/경쟁사-분석.md",
-    "brand/타깃-페르소나.md",
-    "product/용기-스펙-초안.md",
-    "README.md"
+    "raw/04_oem.md"
   ]
 }
