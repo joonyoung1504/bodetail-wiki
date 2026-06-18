@@ -190,5 +190,5 @@ bodetail-vault/
 
 ## Knowledge Connections
 - **Related Topics:** [[concepts/메타API]], [[concepts/AB실험]], [[concepts/오가닉마케팅]], [[concepts/수요검증]], [[concepts/저장률]]
-- **Related Notes:** [[marketing_auto/MA_01_metrics_guide]], [[marketing_auto/MA_02_viral_playbook]], [[content/릴스-제작-프로세스]], [[decisions/콘텐츠-볼트-운영]]
+- **Related Notes:** [[marketing_auto/MA_01_metrics_guide]], [[marketing_auto/MA_02_viral_playbook]], [[marketing_auto/MA_04_when_data_comes]], [[content/릴스-제작-프로세스]], [[decisions/콘텐츠-볼트-운영]]
 - **Open Questions:** ffmpeg 자동화 스크립트 미작성 / 메타 API 연동 미완료 / 캡컷 웹 자동화(Playwright) 안정성·실현 가능성 미검증
