@@ -16,3 +16,5 @@ updated: 2026-06-18
 *→ 상세: [[brand/타깃-페르소나]] / [[product/제품-개요]]*
 
 → 오프라인 접점 전략: [[market/네일샵-제휴-전략]] / [[concepts/네일샵제휴]]
+→ EP 시리즈 전체 BFRB 연결 구조: [[brand/EP시리즈-확장-로드맵]]
+→ 잔털 뽑기(Trichotillomania) BFRB 연결: [[concepts/잔털제거]]
