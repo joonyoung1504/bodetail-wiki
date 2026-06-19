@@ -92,3 +92,30 @@ updated: 2026-06-17
 ## 핵심 한 줄
 준영의 강점은 "만들기"(위키·의뢰서·시스템 다 훌륭). 근데 "올리기"를 아직 한 번도 안 했다.
 그게 진짜 시험. 오늘 계정 만들고 손톱 한 장 찍는 것 = 지금까지 만든 모든 것보다 중요.
+
+---
+
+## 관련 노트 (MOC)
+
+### 콘텐츠 실행 문서
+- [[content/콘텐츠-수요검증-마스터플랜]]
+- [[content/릴스-제작-프로세스]]
+- [[content/릴스-마스터-콘티집]]
+- [[brand/EP1-릴스-시퀀스]]
+
+### 마케팅 자동화·지표
+- [[marketing_auto/MA_01_metrics_guide]]
+- [[marketing_auto/MA_02_viral_playbook]]
+- [[marketing_auto/MA_04_when_data_comes]]
+
+### 수요검증 개념
+- [[concepts/수요검증]]
+- [[concepts/스모크테스트]]
+- [[concepts/대기자명단]]
+
+### 콘텐츠 지표 개념
+- [[concepts/저장률]]
+- [[concepts/완주율]]
+- [[concepts/훅]]
+- [[concepts/비포애프터]]
+- [[concepts/릴스]]

@@ -43,3 +43,24 @@ updated: 2026-06-17
 
 ## 연락처 (이준영)
 - 이준영 / 010-3034-9878 / richard200475@gmail.com
+
+---
+
+## 관련 노트 (MOC)
+
+### OEM·제조 문서
+- [[ops/OEM-업체-비교]]
+- [[ops/OEM-협의-현황]]
+- [[product/ODM-의뢰서]]
+- [[product/용기-스펙-초안]]
+- [[product/제품-개요]]
+
+### 제조 핵심 개념
+- [[concepts/MOQ]]
+- [[concepts/무수오일]]
+- [[concepts/롤온]]
+- [[concepts/독점처방]]
+- [[concepts/단위경제]]
+
+### 의사결정
+- [[decisions/주요-의사결정]]

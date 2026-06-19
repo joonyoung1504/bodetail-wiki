@@ -97,3 +97,29 @@ updated: 2026-06-17
 - 메타 API 연동 ❌ (팔로워 1,000명+ 후)
 - 통계 신뢰 장치 ❌ (콘텐츠 쌓인 후)
 - 현재 완성도: 약 60%
+
+---
+
+## 관련 노트 (MOC)
+
+### OEM·제조 업데이트
+- [[ops/OEM-업체-비교]]
+- [[ops/OEM-협의-현황]]
+- [[product/ODM-의뢰서]]
+- [[concepts/MOQ]]
+- [[concepts/무수오일]]
+- [[concepts/롤온]]
+
+### 세컨드브레인·인프라
+- [[decisions/콘텐츠-볼트-운영]]
+- [[marketing_auto/MA_03_automation_structure]]
+- [[marketing_auto/MA_01_metrics_guide]]
+- [[concepts/메타API]]
+- [[concepts/AB실험]]
+- [[concepts/수요검증]]
+- [[concepts/Adam-TTS]]
+
+### 도구·자동화 개념
+- [[concepts/저장률]]
+- [[concepts/완주율]]
+- [[concepts/스모크테스트]]

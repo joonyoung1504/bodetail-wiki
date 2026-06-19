@@ -95,3 +95,31 @@ updated: 2026-06-17
 - 위 7단계 흐름 + 캡컷 Adam 적용법은 모든 릴스 동일
 - 대본만 콘티별로 갈아끼우면 됨 (창업자 고백/비포애프터/정보형/티저)
 - 각 영상 발행 후 3일째 지표(저장·공유·완주·댓글) 기록 → 어떤 콘티가 먹히는지 비교
+
+---
+
+## 관련 노트 (MOC)
+
+### 릴스 제작 문서
+- [[content/릴스-제작-프로세스]]
+- [[content/릴스-마스터-콘티집]]
+- [[brand/EP1-릴스-시퀀스]]
+
+### 제작 도구·기법 개념
+- [[concepts/Adam-TTS]]
+- [[concepts/훅]]
+- [[concepts/비포애프터]]
+- [[concepts/번따선물]]
+- [[concepts/사용순간전략]]
+- [[concepts/블라인드테스트]]
+- [[concepts/소거법]]
+
+### 성과 측정 개념
+- [[concepts/저장률]]
+- [[concepts/완주율]]
+- [[concepts/릴스]]
+- [[concepts/규제체크리스트]]
+
+### 마케팅 자동화·지표
+- [[marketing_auto/MA_01_metrics_guide]]
+- [[marketing_auto/MA_02_viral_playbook]]

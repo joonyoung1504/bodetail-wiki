@@ -39,3 +39,28 @@ updated: 2026-06-17
 ## 5년 재무 목표
 - 5년 2억 저축 = 직장인 상위 5~10% 저축속도, 매우 보수적
 - 전제: 1년차 재구매 증명 → 2년차 점프 → 5년 생존
+
+---
+
+## 관련 노트 (MOC)
+
+### 의사결정 문서
+- [[decisions/주요-의사결정]]
+- [[decisions/브랜드-포지셔닝-결정]]
+- [[decisions/상표-임상-예창패]]
+- [[decisions/콘텐츠-볼트-운영]]
+- [[decisions/브랜드-비전-북극성]]
+
+### 전략 개념
+- [[concepts/오가닉마케팅]]
+- [[concepts/재구매구조]]
+- [[concepts/화장품법]]
+- [[concepts/예창패]]
+- [[concepts/의사결정필터]]
+- [[concepts/북극성]]
+
+### 인프라·도구 개념
+- [[concepts/메타API]]
+- [[concepts/AB실험]]
+- [[concepts/Adam-TTS]]
+- [[concepts/수요검증]]
