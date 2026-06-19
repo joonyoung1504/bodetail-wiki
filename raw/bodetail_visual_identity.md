@@ -1,7 +1,7 @@
 ---
 title: 바디테일 비주얼 아이덴티티 — 인스타 첫 게시물 세트
 aliases: [bodetail visual identity, 첫 게시물 디자인]
-tags: [brand, visual-identity, logo, color, instagram]
+tags: [brand, visual-identity, logo, color, instagram, layer/raw]
 created: 2026-06-19
 status: 검토중
 folder: brand

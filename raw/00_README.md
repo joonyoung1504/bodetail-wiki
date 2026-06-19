@@ -1,6 +1,6 @@
 ---
 summary: "raw 폴더 안내 — 이 자료들을 위키로 분류·정리하는 방법"
-tags: [raw, 안내]
+tags: [raw, 안내, layer/raw]
 created: 2026-06-17
 updated: 2026-06-17
 ---

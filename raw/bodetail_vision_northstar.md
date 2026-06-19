@@ -1,7 +1,7 @@
 ---
 title: 바디테일 브랜드 비전 — 북극성 (North Star)
 aliases: [브랜드 비전, 신념, 북극성, north star, 바디테일 헌법]
-tags: [brand, vision, decisions, 신념, 전략베이스]
+tags: [brand, vision, decisions, 신념, 전략베이스, layer/raw]
 created: 2026-06-19
 folder: decisions
 status: 최상위원칙

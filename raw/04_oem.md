@@ -1,6 +1,6 @@
 ---
 summary: "OEM 업체 회신 현황 — 라온하제·에이티바이오·유스팩토리·에스코스랩 비교"
-tags: [OEM, 제조, 견적, 미정리]
+tags: [OEM, 제조, 견적, 미정리, layer/raw]
 created: 2026-06-17
 updated: 2026-06-17
 ---

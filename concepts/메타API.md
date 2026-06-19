@@ -1,6 +1,6 @@
 ---
 summary: "메타 API — 인스타그램 비즈니스 계정 성과 지표 자동 수집 API. 팔로워 1,000명+ 후 활성화 예정."
-tags: [concepts, 자동화, 메타API, 인스타]
+tags: [concepts, 자동화, 메타API, 인스타, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

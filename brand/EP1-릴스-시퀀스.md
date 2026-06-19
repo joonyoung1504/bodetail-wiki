@@ -1,6 +1,6 @@
 ---
 summary: "EP1 릴스 서사 8단계·변수 실험 매트릭스·비포애프터 아이디어·핵심 카피 모음"
-tags: [brand, 콘텐츠, EP1, 릴스, 변수실험, 카피]
+tags: [brand, 콘텐츠, EP1, 릴스, 변수실험, 카피, layer/exec]
 created: 2026-06-17
 updated: 2026-06-17
 ---

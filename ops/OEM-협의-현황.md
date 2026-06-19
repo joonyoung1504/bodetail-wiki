@@ -1,6 +1,6 @@
 ---
 summary: "→ OEM-업체-비교로 이동됨. 이 노트는 구 템플릿 (화성/인천 A·B사) 잔재"
-tags: [ops, deprecated]
+tags: [ops, deprecated, layer/exec]
 created: 2026-06-17
 updated: 2026-06-17
 ---

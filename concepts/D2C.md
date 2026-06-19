@@ -1,6 +1,6 @@
 ---
 summary: "D2C(Direct-to-Consumer) — 유통 없이 자사몰·스마트스토어로 직접 판매. 고마진·재구매 데이터 확보."
-tags: [concepts, D2C, 유통, 전략]
+tags: [concepts, D2C, 유통, 전략, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

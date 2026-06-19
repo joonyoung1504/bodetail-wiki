@@ -1,6 +1,6 @@
 ---
 summary: "A/B 실험 — 한 번에 변수 하나만 바꾸어 성과 비교. 콘텐츠 학습 엔진. T1(주제·훅)부터 시작."
-tags: [concepts, AB실험, 콘텐츠, 데이터]
+tags: [concepts, AB실험, 콘텐츠, 데이터, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

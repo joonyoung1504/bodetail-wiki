@@ -1,7 +1,7 @@
 ---
 title: 바디테일 릴스 마스터 콘티집
 aliases: [릴스 콘티, reels master, 릴스 대본집]
-tags: [content, reels, 콘티, 대본, instagram]
+tags: [content, reels, 콘티, 대본, instagram, layer/raw]
 created: 2026-06-19
 folder: content
 status: 제작가이드

@@ -1,6 +1,6 @@
 ---
 summary: "BFRB(Body-focused Repetitive Behavior) — 손톱 물어뜯기 등 반복 신체 행동. 바디테일 EP1 핵심 타깃 페인."
-tags: [concepts, BFRB, 손톱, 타깃]
+tags: [concepts, BFRB, 손톱, 타깃, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

@@ -1,6 +1,6 @@
 ---
 summary: "K-뷰티 — 한국 화장품·뷰티 브랜드 총칭. 글로벌 인지도 높음. 아마존·틱톡·벤더 유통 채널."
-tags: [concepts, K뷰티, 시장, 수출]
+tags: [concepts, K뷰티, 시장, 수출, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

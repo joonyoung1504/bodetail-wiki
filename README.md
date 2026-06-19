@@ -1,3 +1,7 @@
+---
+tags: [layer/meta]
+---
+
 # bodetail-vault — LLM 위키
 
 보디테일 브랜드 런칭을 위한 지식 베이스. LLM과 협업해 제품·브랜드·시장·운영 정보를 관리한다.

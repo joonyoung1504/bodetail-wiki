@@ -1,6 +1,6 @@
 ---
 summary: "Adam TTS — CapCut의 남성 TTS 목소리. 속도 1.2배로 '샤갈 톤' 구현. 바디테일 계정 시그니처."
-tags: [concepts, 캡컷, TTS, 콘텐츠]
+tags: [concepts, 캡컷, TTS, 콘텐츠, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

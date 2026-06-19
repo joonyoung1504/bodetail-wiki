@@ -1,3 +1,7 @@
+---
+tags: [layer/meta]
+---
+
 # WIKI-RULES.md — LLM 위키 운영 규칙
 
 ## 1. Frontmatter 필수 필드

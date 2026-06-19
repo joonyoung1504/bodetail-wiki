@@ -1,6 +1,6 @@
 ---
 summary: "EP 시리즈 — 넷플릭스식 잠금·리빌 구조. EP1 손톱→EP2 큐티클→EP3 입술→EP4 발."
-tags: [concepts, EP시리즈, 브랜드, 제품라인]
+tags: [concepts, EP시리즈, 브랜드, 제품라인, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

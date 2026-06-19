@@ -1,6 +1,6 @@
 ---
 summary: "MOQ(Minimum Order Quantity) — 최소 발주 수량. OEM 업체 선정 핵심 기준. 라온하제 20ml 기준 1,500개."
-tags: [concepts, MOQ, OEM, ops]
+tags: [concepts, MOQ, OEM, ops, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

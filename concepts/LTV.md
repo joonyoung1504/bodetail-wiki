@@ -1,6 +1,6 @@
 ---
 summary: "LTV(Lifetime Value) — 고객 1인의 생애 구매 총액. 재구매 4회 기준 ₩64,000+."
-tags: [concepts, 단위경제, 재무, 재구매]
+tags: [concepts, 단위경제, 재무, 재구매, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

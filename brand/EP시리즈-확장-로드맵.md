@@ -1,6 +1,6 @@
 ---
 summary: "바디테일 EP 시리즈 전체 확장 로드맵 — EP1~EP4 제품 아이디어·성분·용기·BFRB 연결·타임라인"
-tags: [brand, EP시리즈, 제품확장, 세계관, 타임라인]
+tags: [brand, EP시리즈, 제품확장, 세계관, 타임라인, layer/exec]
 created: 2026-06-19
 updated: 2026-06-19
 source: raw/14_EP_series_expansion.md

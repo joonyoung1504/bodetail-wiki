@@ -1,6 +1,6 @@
 ---
 summary: "CAC(Customer Acquisition Cost) — 고객 1명 획득 비용. 오가닉 기준 ≈₩5,500. 재구매 시 ≈0."
-tags: [concepts, 단위경제, 마케팅, 재무]
+tags: [concepts, 단위경제, 마케팅, 재무, layer/concept]
 created: 2026-06-18
 updated: 2026-06-18
 ---

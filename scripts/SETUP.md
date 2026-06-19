@@ -1,3 +1,7 @@
+---
+tags: [layer/meta]
+---
+
 # watchdog 설정 가이드
 
 ## 1. Python 패키지 설치
