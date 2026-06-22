@@ -1,0 +1,39 @@
+name: bodetail Daily Post Generator
+
+on:
+  schedule:
+    - cron: '30 20 * * *'
+  workflow_dispatch:
+    inputs:
+      day_override:
+        description: 'DAY 번호 직접 지정 (비워두면 자동)'
+        required: false
+        default: ''
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: 폰트 설치
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-noto-cjk fonts-noto-cjk-extra
+      - name: 패키지 설치
+        run: pip install anthropic requests Pillow numpy
+      - name: 게시물 생성
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          DAY_OVERRIDE: ${{ github.event.inputs.day_override }}
+        run: python generate_daily_post.py
+      - name: 결과물 커밋
+        run: |
+          git config --local user.email "bot@bodetail.com"
+          git config --local user.name "bodetail-bot"
+          git add posts/
+          git diff --staged --quiet || git commit -m "📸 $(date +'%Y-%m-%d') 게시물 자동생성"
+          git push
