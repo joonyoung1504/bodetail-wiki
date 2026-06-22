@@ -9,9 +9,9 @@ on:
         description: 'DAY 번호 직접 지정 (비워두면 자동)'
         required: false
         default: ''
-        permissions:
-  contents: write
 
+permissions:
+  contents: write
 
 jobs:
   generate:
