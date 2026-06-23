@@ -3,28 +3,39 @@
   "period": "30일 시드 스케줄 v2",
   "note": "8개 섹션 순환. 손 관련 1/30 (Day 7 DETAIL). 세르칸 바이럴 패턴 반영.",
   "sections": {
-    "WHY":    "철학·마인드셋 — 왜 관리해야 하는가",
+    "WHY": "철학·마인드셋 — 왜 관리해야 하는가",
     "DETAIL": "즉효 한 끗 — 오늘 당장 쓸 수 있는 디테일",
-    "ROUTINE":"루틴 인덱스 — 순서와 방법",
-    "PICK":   "제품 큐레이션 — 안목 있는 선택",
-    "KNOW":   "지식·성분·용어 — 알아야 보인다",
-    "STYLE":  "스타일·무드 — 감도 있는 선택",
-    "BODY":   "바디·자세·컨디션 — 외모를 만드는 몸",
-    "SCENE":  "상황별 디테일 — 그 순간을 위한 준비"
+    "ROUTINE": "루틴 인덱스 — 순서와 방법",
+    "PICK": "제품 큐레이션 — 안목 있는 선택",
+    "KNOW": "지식·성분·용어 — 알아야 보인다",
+    "STYLE": "스타일·무드 — 감도 있는 선택",
+    "BODY": "바디·자세·컨디션 — 외모를 만드는 몸",
+    "SCENE": "상황별 디테일 — 그 순간을 위한 준비"
   },
-  "rotation": ["WHY","DETAIL","ROUTINE","PICK","KNOW","STYLE","BODY","SCENE"],
+  "rotation": [
+    "WHY",
+    "DETAIL",
+    "ROUTINE",
+    "PICK",
+    "KNOW",
+    "STYLE",
+    "BODY",
+    "SCENE"
+  ],
   "topics": [
     {
-      "day": 1, "section": "WHY",
-      "title_main": "외모 관리가 자존감이다",
-      "title_sub": "관리하는 남자가 보내는 신호",
-      "hook_type": "자기효능 자극형",
-      "why_viral": "세르칸 '외모 또한 경쟁력' 패턴. 자기계발 공감대",
+      "day": 1,
+      "section": "WHY",
+      "title_main": "거울 볼 때, 이 5곳을 본다",
+      "title_sub": "매일 30초 자가 점검 포인트",
+      "hook_type": "즉시실행형",
+      "why_viral": "추상적 자기관리론이 아니라 당장 따라할 체크포인트. 저장 욕구",
       "num_slides": 5,
-      "image_search": "confident men dark moody cinematic portrait"
+      "image_search": "man mirror reflection dark moody grooming"
     },
     {
-      "day": 2, "section": "DETAIL",
+      "day": 2,
+      "section": "DETAIL",
       "title_main": "면접 직전, 손이 다 말해버린다",
       "title_sub": "놓치기 쉬운 디테일 5",
       "hook_type": "상황특정+즉효형",
@@ -33,7 +44,8 @@
       "image_search": "men hands suit dark editorial close up"
     },
     {
-      "day": 3, "section": "ROUTINE",
+      "day": 3,
+      "section": "ROUTINE",
       "title_main": "취침 전 7분이 다음날 얼굴을 결정한다",
       "title_sub": "자기 전 루틴 7",
       "hook_type": "즉효·디테일형",
@@ -42,7 +54,8 @@
       "image_search": "men night skincare routine dark minimal"
     },
     {
-      "day": 4, "section": "PICK",
+      "day": 4,
+      "section": "PICK",
       "title_main": "첫 향수, 이 5개 중 고르면 된다",
       "title_sub": "추구미별 입문 향수",
       "hook_type": "큐레이션형",
@@ -51,7 +64,8 @@
       "image_search": "men perfume bottle dark luxury editorial"
     },
     {
-      "day": 5, "section": "KNOW",
+      "day": 5,
+      "section": "KNOW",
       "title_main": "레티놀, 아무거나 바르면 안 된다",
       "title_sub": "레티놀 입문 가이드",
       "hook_type": "반전·경고형",
@@ -60,7 +74,8 @@
       "image_search": "skincare serum dark minimal aesthetic"
     },
     {
-      "day": 6, "section": "STYLE",
+      "day": 6,
+      "section": "STYLE",
       "title_main": "옷보다 먼저 완성되어야 할 것",
       "title_sub": "착장 전 그루밍 체크 6",
       "hook_type": "정체성 호명형",
@@ -69,7 +84,8 @@
       "image_search": "men fashion dark editorial style minimal"
     },
     {
-      "day": 7, "section": "BODY",
+      "day": 7,
+      "section": "BODY",
       "title_main": "자세 하나로 키가 3cm 달라 보인다",
       "title_sub": "자세교정 시작 4단계",
       "hook_type": "즉효·디테일형",
@@ -78,7 +94,8 @@
       "image_search": "men posture body dark cinematic silhouette"
     },
     {
-      "day": 8, "section": "SCENE",
+      "day": 8,
+      "section": "SCENE",
       "title_main": "데이트 직전 30분, 이 순서대로",
       "title_sub": "외모개선 루틴 5",
       "hook_type": "상황특정형",
@@ -87,16 +104,18 @@
       "image_search": "men getting ready dark mirror aesthetic"
     },
     {
-      "day": 9, "section": "WHY",
-      "title_main": "관리하는 남자들의 공통점",
-      "title_sub": "알아채기 어려운 디테일 8",
+      "day": 9,
+      "section": "WHY",
+      "title_main": "잘 관리하는 사람들의 공통 습관 8",
+      "title_sub": "티 안 나게 챙기는 디테일",
       "hook_type": "정체성 호명형",
-      "why_viral": "세르칸 '귀티나는 디테일' 공유 강함",
+      "why_viral": "구체적 습관 리스트. 세르칸 '귀티나는 디테일' 패턴",
       "num_slides": 7,
-      "image_search": "elegant men dark refined details portrait"
+      "image_search": "refined man dark editorial details portrait"
     },
     {
-      "day": 10, "section": "DETAIL",
+      "day": 10,
+      "section": "DETAIL",
       "title_main": "구취, 칫솔질만으론 부족하다",
       "title_sub": "완벽한 구취 제거 루틴 5",
       "hook_type": "반전·경고형",
@@ -105,7 +124,8 @@
       "image_search": "men grooming dark bathroom minimal"
     },
     {
-      "day": 11, "section": "ROUTINE",
+      "day": 11,
+      "section": "ROUTINE",
       "title_main": "기초 화장품, 바르는 순서가 전부다",
       "title_sub": "스킨케어 레이어링 순서",
       "hook_type": "즉시실행형",
@@ -114,7 +134,8 @@
       "image_search": "skincare products dark flat lay minimal men"
     },
     {
-      "day": 12, "section": "PICK",
+      "day": 12,
+      "section": "PICK",
       "title_main": "마음 먹고 투자할 자기관리템 7",
       "title_sub": "비용 대비 효과 TOP 7",
       "hook_type": "큐레이션형",
@@ -123,7 +144,8 @@
       "image_search": "men grooming products flat lay dark aesthetic"
     },
     {
-      "day": 13, "section": "KNOW",
+      "day": 13,
+      "section": "KNOW",
       "title_main": "피부타입, 잘못 알고 있었다",
       "title_sub": "피부타입 셀프 진단법",
       "hook_type": "반전형",
@@ -132,7 +154,8 @@
       "image_search": "men skincare face dark portrait editorial"
     },
     {
-      "day": 14, "section": "STYLE",
+      "day": 14,
+      "section": "STYLE",
       "title_main": "첫 수트, 컬러 선택 가이드",
       "title_sub": "피부톤별 어울리는 수트 색상",
       "hook_type": "큐레이션형",
@@ -141,7 +164,8 @@
       "image_search": "men suit dark editorial fashion cinematic"
     },
     {
-      "day": 15, "section": "BODY",
+      "day": 15,
+      "section": "BODY",
       "title_main": "필수 영양제, 언제 먹는지가 전부다",
       "title_sub": "시간대별 영양제 총정리",
       "hook_type": "즉시실행형",
@@ -150,7 +174,8 @@
       "image_search": "supplements vitamins dark flat lay minimal"
     },
     {
-      "day": 16, "section": "SCENE",
+      "day": 16,
+      "section": "SCENE",
       "title_main": "출근 전 10분, 이것만 해도 다르다",
       "title_sub": "모닝 그루밍 루틴 6",
       "hook_type": "상황특정+즉효형",
@@ -159,16 +184,18 @@
       "image_search": "men morning routine dark minimal mirror"
     },
     {
-      "day": 17, "section": "WHY",
-      "title_main": "지쳤다는 신호 10가지",
-      "title_sub": "몸이 보내는 경고를 무시하지 마라",
-      "hook_type": "자기효능 자극형",
-      "why_viral": "세르칸 동명 게시물 고인기. 공감대 폭넓음",
+      "day": 17,
+      "section": "WHY",
+      "title_main": "몸이 보내는 피로 신호 7가지",
+      "title_sub": "방치하면 얼굴부터 망가진다",
+      "hook_type": "반전·경고형",
+      "why_viral": "자가진단 체크리스트 + 해결법. 공감대 폭넓음",
       "num_slides": 5,
-      "image_search": "men tired exhausted dark moody portrait"
+      "image_search": "tired man dark moody portrait low key"
     },
     {
-      "day": 18, "section": "DETAIL",
+      "day": 18,
+      "section": "DETAIL",
       "title_main": "향수, 이렇게 뿌리면 3배 오래 간다",
       "title_sub": "향수 레이어링 기술",
       "hook_type": "즉효·디테일형",
@@ -177,7 +204,8 @@
       "image_search": "perfume spray wrist dark luxury moody"
     },
     {
-      "day": 19, "section": "ROUTINE",
+      "day": 19,
+      "section": "ROUTINE",
       "title_main": "탈모, 시작 전에 막는 게 맞다",
       "title_sub": "두피 관리 루틴 TOP 8",
       "hook_type": "즉시실행형",
@@ -186,7 +214,8 @@
       "image_search": "men hair scalp dark minimal care aesthetic"
     },
     {
-      "day": 20, "section": "PICK",
+      "day": 20,
+      "section": "PICK",
       "title_main": "주머니 속 남자의 디테일",
       "title_sub": "늘 가지고 다녀야 할 것 6",
       "hook_type": "큐레이션형",
@@ -195,7 +224,8 @@
       "image_search": "men edc essentials dark flat lay aesthetic"
     },
     {
-      "day": 21, "section": "KNOW",
+      "day": 21,
+      "section": "KNOW",
       "title_main": "스킨케어 성분, 이것만 알면 된다",
       "title_sub": "남자 입문 성분 용어집",
       "hook_type": "즉시실행형",
@@ -204,7 +234,8 @@
       "image_search": "skincare ingredients dark label minimal"
     },
     {
-      "day": 22, "section": "STYLE",
+      "day": 22,
+      "section": "STYLE",
       "title_main": "계절이 바뀌면 향수도 바뀌어야 한다",
       "title_sub": "계절별 향수 추천",
       "hook_type": "시의성형",
@@ -213,7 +244,8 @@
       "image_search": "cologne perfume seasonal dark editorial"
     },
     {
-      "day": 23, "section": "BODY",
+      "day": 23,
+      "section": "BODY",
       "title_main": "잘 자는 것도 자기관리다",
       "title_sub": "수면과 외모의 관계",
       "hook_type": "즉효·디테일형",
@@ -222,7 +254,8 @@
       "image_search": "men sleeping bedroom dark minimal aesthetic"
     },
     {
-      "day": 24, "section": "SCENE",
+      "day": 24,
+      "section": "SCENE",
       "title_main": "소개팅 전날 밤, 이것만 해라",
       "title_sub": "D-1 준비 루틴",
       "hook_type": "상황특정형",
@@ -231,16 +264,18 @@
       "image_search": "men grooming night routine dark mirror"
     },
     {
-      "day": 25, "section": "WHY",
-      "title_main": "남자는 남자만의 관리가 있다",
-      "title_sub": "여자 뷰티와 다른 점",
-      "hook_type": "정체성 호명형",
-      "why_viral": "세르칸 '남자는 남자만의 관리' 게시물",
+      "day": 25,
+      "section": "WHY",
+      "title_main": "남자 피부가 여자와 다른 3가지",
+      "title_sub": "그래서 관리법도 달라야 한다",
+      "hook_type": "정보·반전형",
+      "why_viral": "의외의 사실 + 그래서 어떻게. 정보 가치 높음",
       "num_slides": 5,
-      "image_search": "men grooming products dark masculine editorial"
+      "image_search": "men skincare dark masculine editorial closeup"
     },
     {
-      "day": 26, "section": "DETAIL",
+      "day": 26,
+      "section": "DETAIL",
       "title_main": "면도 후 이 한 단계가 다르다",
       "title_sub": "면도 후 케어 루틴",
       "hook_type": "즉효·디테일형",
@@ -249,7 +284,8 @@
       "image_search": "men after shave care dark minimal"
     },
     {
-      "day": 27, "section": "ROUTINE",
+      "day": 27,
+      "section": "ROUTINE",
       "title_main": "운동 후 피부, 이렇게 하면 망한다",
       "title_sub": "운동 후 스킨케어 순서",
       "hook_type": "반전·경고형",
@@ -258,7 +294,8 @@
       "image_search": "men gym workout dark portrait athletic"
     },
     {
-      "day": 28, "section": "PICK",
+      "day": 28,
+      "section": "PICK",
       "title_main": "선크림 하나로 여름 버티는 법",
       "title_sub": "남자 선크림 추천 TOP 5",
       "hook_type": "시의성+큐레이션형",
@@ -267,7 +304,8 @@
       "image_search": "sunscreen skincare men dark summer minimal"
     },
     {
-      "day": 29, "section": "KNOW",
+      "day": 29,
+      "section": "KNOW",
       "title_main": "눈썹 하나가 인상을 바꾼다",
       "title_sub": "남자 눈썹 정리 기초",
       "hook_type": "즉효·디테일형",
@@ -276,7 +314,8 @@
       "image_search": "men eyebrow grooming close up dark"
     },
     {
-      "day": 30, "section": "SCENE",
+      "day": 30,
+      "section": "SCENE",
       "title_main": "30일 전과 지금, 달라진 것들",
       "title_sub": "자기관리 습관 체크리스트",
       "hook_type": "시의성·회고형",
