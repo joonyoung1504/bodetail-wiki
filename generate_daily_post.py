@@ -70,9 +70,15 @@ topic = next((t for t in schedule["topics"] if t["day"] == day_num),
 
 # 섹션 라벨 한글 매핑 (커버 좌상단 + VOL 표기에 사용)
 SECTION_KO = {
-    "WHY":"오늘의 생각", "DETAIL":"오늘의 디테일", "ROUTINE":"루틴 인덱스",
-    "PICK":"오늘의 PICK", "KNOW":"알아두면", "STYLE":"스타일 노트",
-    "BODY":"바디 & 컨디션", "SCENE":"그 순간을 위해"
+    "WHY":"오늘의 디테일", "DETAIL":"오늘의 디테일", "ROUTINE":"오늘의 루틴",
+    "PICK":"오늘의 PICK", "KNOW":"오늘의 지식", "STYLE":"오늘의 스타일",
+    "BODY":"오늘의 컨디션", "SCENE":"오늘의 준비"
+}
+# 커버 배지 영문 라벨 (섹션별)
+SECTION_BADGE = {
+    "WHY":"DETAIL INDEX", "DETAIL":"DETAIL INDEX", "ROUTINE":"ROUTINE INDEX",
+    "PICK":"CURATION", "KNOW":"KNOWLEDGE", "STYLE":"STYLE NOTE",
+    "BODY":"CONDITION", "SCENE":"FOR THE MOMENT"
 }
 sec_code = topic.get("section","DETAIL")
 topic["section_label_ko"] = SECTION_KO.get(sec_code, "오늘의 디테일")
@@ -117,29 +123,35 @@ USER = f"""오늘 게시물을 JSON으로 만들어줘.
 후킹타입: {topic['hook_type']}
 슬라이드수: {topic['num_slides']}
 
-아래 JSON 구조로 출력:
+★★ 절대 원칙 — 독자가 반드시 '얻어가는 것'이 있어야 한다 ★★
+- 이건 무드 매거진이다. 추상적 동기부여("관리하면 자존감이 올라간다")만 있으면 실패다.
+- 각 슬라이드(number 슬라이드)는 다음 중 최소 하나를 담아라:
+  (a) 구체적 실행 팁 — 당장 따라할 수 있는 행동/순서/수치
+  (b) 의외의 정보·사실 — "몰랐던" 디테일, 흔한 오해 교정
+  (c) 제품·도구 추천 또는 선택 기준 — 무엇을, 왜, 어떻게 고르는지
+  (d) 기준·체크리스트 — 판단할 수 있는 명확한 잣대
+- "왜 중요한가"는 1슬라이드면 충분. 나머지는 전부 "그래서 뭘 어떻게"로 채워라.
+- 제목이 뻔하면(예: 외모관리가 자존감이다) 각도를 비틀어 구체적 정보로 만들어라.
+  예: "거울 보는 습관"이 아니라 "거울 볼 때 체크하는 5포인트".
+- 본문은 한 슬라이드당 2~3줄. 한 줄은 30자 이내 권장(자동 줄바꿈되지만 짧을수록 좋다).
+- caption(슬라이드 하단 박스)은 그 슬라이드의 핵심을 한 문장으로 요약.
+
+JSON 구조 (순수 JSON만, 코드블록 금지):
 {{
   "section_label": "섹션 라벨",
   "vol": "VOL.01",
   "slides": [
-    {{
-      "slide_num": 1,
-      "type": "cover",
-      "headline_sub": "보조줄",
-      "headline_main": ["메인", "헤드라인", "줄바꿈"],
-      "headline_serif": "— 서브 한 줄"
-    }},
-    {{
-      "slide_num": 2,
-      "type": "content",
-      "number": "01",
-      "subhead": "소제목",
-      "body": ["본문줄1", "본문줄2", ""],
-      "caption": "캡션 한 줄"
-    }}
+    {{"slide_num": 1, "type": "cover",
+      "headline_sub": "맥락 한 줄 (예: 면접 시즌 / 환절기)",
+      "headline_main": ["메인", "헤드라인", "2~3줄"],
+      "headline_serif": "구체적 약속 (예: 놓치기 쉬운 디테일 5)"}},
+    {{"slide_num": 2, "type": "content", "number": "01",
+      "subhead": "핵심 팁 제목 (정보가 담긴)",
+      "body": ["구체적 내용 1", "구체적 내용 2"],
+      "caption": "이 슬라이드 핵심 한 문장"}}
   ],
-  "caption_full": "전체 인스타 캡션 (세르칸 6단 구조)",
-  "hashtags": "#bodetail #태그1 #태그2"
+  "caption_full": "인스타 캡션. (광고X)로 시작, 공감 도입 2줄, 관점 전환 1줄, 01~N 넘버링 요약, 마무리 슬로건, @bodetail_official 팔로우 유도",
+  "hashtags": "#bodetail #남자그루밍 #관련태그 (총 8~10개)"
 }}
 """
 
@@ -244,71 +256,60 @@ for q in photo_queries:
 # ══════════════════════════════════════════════════════════════
 def apply_shadow_stack(photo=None):
     """
-    7단 그림자 레이어:
-    1. 원본 사진 (or 잉크블랙 캔버스)
-    2. 저채도·톤커브
-    3. 잉크블랙 멀티플라이 오버레이
-    4. 하단 롱 그라데이션 (35~55% 커버)
-    5. 비네팅
-    6. 필름 그레인
-    → PIL RGB 1080×1440
+    잉크블랙 그림자 레이어 (numpy 기반, 칼선 없는 부드러운 페이드):
+    1. 사진을 1080x1440 전체에 깔기 (cover) + 저채도
+    2. 전체 높이 수직 그라데이션 (위는 살짝, 아래로 갈수록 짙게) — 칼선 제거
+    3. 균일 잉크 틴트 (톤 통일)
+    4. 부드러운 비네팅
+    5. 필름 그레인
+    → PIL RGB 1080x1440
     """
-    if photo:
-        # ① 저채도 처리
-        arr = np.array(photo, dtype=np.float32)
-        gray = 0.299*arr[:,:,0] + 0.587*arr[:,:,1] + 0.114*arr[:,:,2]
-        # saturate ~20%
-        sat = 0.22
-        arr = gray[:,:,np.newaxis] * (1-sat) + arr * sat
-        # 약간 어둡게
-        arr *= 0.80
-        arr = np.clip(arr, 0, 255).astype(np.uint8)
-        img = Image.fromarray(arr)
+    if photo is not None:
+        base = np.array(photo, dtype=np.float32)
+        if base.shape[0] != H or base.shape[1] != W:
+            photo = photo.resize((W, H), Image.LANCZOS)
+            base = np.array(photo, dtype=np.float32)
+        # 저채도 (흑백 22% 블렌드) + 살짝 어둡게
+        gray = 0.299*base[:,:,0] + 0.587*base[:,:,1] + 0.114*base[:,:,2]
+        sat = 0.30
+        base = gray[:,:,None]*(1-sat) + base*sat
+        base *= 0.92
     else:
-        # 사진 없으면 잉크블랙 그라데이션 캔버스
-        arr = np.zeros((H, W, 3), dtype=np.float32)
-        arr[:] = list(DARK)
+        # 사진 없을 때: 잉크블랙 + 따뜻한 방사 글로우
+        base = np.zeros((H, W, 3), dtype=np.float32)
+        base[:] = list(DARK)
         Xg, Yg = np.meshgrid(np.arange(W), np.arange(H))
         d = np.sqrt((Xg - W*0.6)**2 + (Yg - H*0.4)**2)
-        g = np.clip(1 - d / (np.sqrt(W**2+H**2)*0.55), 0, 1) * 0.25
-        arr[:,:,0] += g*55; arr[:,:,1] += g*35; arr[:,:,2] += g*12
-        img = Image.fromarray(np.clip(arr,0,255).astype(np.uint8))
+        g = np.clip(1 - d/(np.sqrt(W**2+H**2)*0.55), 0, 1) * 0.22
+        base[:,:,0] += g*55; base[:,:,1] += g*35; base[:,:,2] += g*12
 
-    # ③ 잉크블랙 멀티플라이 오버레이 (rgba alpha_composite)
-    ov = Image.new("RGBA", (W, H), (*DARK, 0))
-    od = ImageDraw.Draw(ov)
-    od.rectangle([(0,0),(W,H)], fill=(*DARK, 120))  # ~47% 오버레이
-    img = Image.alpha_composite(img.convert("RGBA"), ov).convert("RGB")
+    # ── 수직 페이드 마스크 (0=원본 유지, 1=완전 잉크) ──
+    # 위 0%에서 시작해 아래로 갈수록 짙어짐. 부드러운 곡선이라 칼선 없음.
+    yv = np.linspace(0, 1, H)[:, None]          # 0(위) → 1(아래)
+    # 상단 28%까지는 거의 투명, 그 아래로 완만하게 상승, 하단은 강하게
+    fade = np.clip((yv - 0.18) / 0.82, 0, 1) ** 1.45
+    fade = fade * 0.82                            # 하단 최대 82% 잉크
+    # 전체 균일 틴트도 살짝 (톤 통일)
+    tint = 0.30
+    total = np.clip(fade + tint, 0, 0.96)[:, :, None]  # (H,1,1) 브로드캐스트용
+    total = np.repeat(total, W, axis=1)           # (H,W,1)
 
-    # ④ 하단 롱 그라데이션 (57%)
-    scrim = Image.new("RGBA", (W, H), (0,0,0,0))
-    sd = ImageDraw.Draw(scrim)
-    sh = int(H * 0.57)
-    for i in range(sh):
-        t = i / sh
-        a = int(250 * (1 - t**1.65))
-        sd.line([(0, H-sh+i),(W, H-sh+i)], fill=(*DARK, a))
-    img = Image.alpha_composite(img.convert("RGBA"), scrim).convert("RGB")
+    ink = np.array(DARK, dtype=np.float32)[None, None, :]
+    out = base*(1-total) + ink*total
 
-    # ⑤ 비네팅 (사각형 기반)
-    vig = Image.new("RGBA", (W, H), (0,0,0,0))
-    vd = ImageDraw.Draw(vig)
-    steps = 55
-    for k in range(steps, 0, -1):
-        frac = k / steps
-        a = int(195 * (1 - frac)**1.7)
-        if a <= 0: continue
-        mx = int(W * (1-frac) / 2)
-        my = int(H * (1-frac) / 2)
-        x0, y0, x1, y1 = mx, my, W-mx, H-my
-        if x1 > x0 and y1 > y0:
-            vd.rectangle([(x0,y0),(x1,y1)],
-                          outline=(0,0,0,a), width=max(1, W//55))
-    img = Image.alpha_composite(img.convert("RGBA"), vig).convert("RGB")
+    # ── 비네팅 (부드러운 방사) ──
+    Xg, Yg = np.meshgrid(np.arange(W), np.arange(H))
+    cx, cy = W/2, H/2
+    dist = np.sqrt(((Xg-cx)/cx)**2 + ((Yg-cy)/cy)**2)   # 0(중앙)~~1.4(모서리)
+    vig = np.clip((dist-0.65)/0.75, 0, 1) ** 1.6 * 0.55
+    out = out * (1 - vig[:,:,None])
 
-    # ⑥ 필름 그레인
+    out = np.clip(out, 0, 255).astype(np.uint8)
+    img = Image.fromarray(out)
+
+    # ── 필름 그레인 ──
     arr2 = np.array(img, dtype=np.int16)
-    noise = np.random.randint(-15, 15, arr2.shape, dtype=np.int16)
+    noise = np.random.randint(-12, 12, arr2.shape, dtype=np.int16)
     arr2 = np.clip(arr2 + noise, 0, 255).astype(np.uint8)
     return Image.fromarray(arr2)
 
@@ -405,13 +406,20 @@ def render_cover(slide_data, photo):
     vol = content.get("vol", "VOL.01")
     draw_header(draw, sec, vol)
 
-    # 배지
-    bf = fnt(SANS_MED, 26)
-    bt = "DETAIL INDEX"
-    bw = tw(draw, bt, bf)
+    # 배지 (bbox 기반 상하좌우 균등 패딩)
+    bf = fnt(SANS_MED, 24)
+    bt = SECTION_BADGE.get(topic.get("section","DETAIL"), "DETAIL INDEX")
+    bb = draw.textbbox((0, 0), bt, font=bf)
+    gw = bb[2] - bb[0]
+    gh = bb[3] - bb[1]
+    pad_x, pad_y = 18, 12          # 좌우 18, 상하 12 균등
     bx, by = MAR_X, MAR_Y + 66
-    draw.rectangle([(bx,by),(bx+bw+28, by+40)], outline=(*CREAM, 70), width=1)
-    draw.text((bx+14, by+7), bt, font=bf, fill=(*CREAM, 100))
+    box_w = gw + pad_x * 2
+    box_h = gh + pad_y * 2
+    draw.rectangle([(bx, by), (bx + box_w, by + box_h)],
+                   outline=(*CREAM, 90), width=1)
+    # 글리프 offset 보정해 박스 정중앙에
+    draw.text((bx + pad_x - bb[0], by + pad_y - bb[1]), bt, font=bf, fill=(*CREAM, 120))
 
     # 보조줄
     sf2 = fnt(SANS_LT, 36)
