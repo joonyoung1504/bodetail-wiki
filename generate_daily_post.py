@@ -30,7 +30,7 @@ DATE  = TODAY.strftime("%Y-%m-%d")
 W, H = 1080, 1440   # 3:4 인스타 그리드 네이티브
 
 # 컬러 토큰
-DARK=(8,6,4); INK=(12,12,12); GOLD=(176,132,74); GOLD_D=(100,72,35)
+DARK=(8,6,4); INK=(12,12,12); GOLD=(176,132,74); GOLD_D=(100,72,35); GOLD_BRIGHT=(200,154,92)
 CREAM=(237,230,216); WHITE=(245,244,240); MUTED=(118,110,102)
 
 # 폰트 경로 (GitHub Actions ubuntu-latest 기준)
@@ -39,8 +39,8 @@ SANS_BOLD = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
 SANS_MED  = "/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc"
 SANS_REG  = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
 SANS_LT   = "/usr/share/fonts/opentype/noto/NotoSansCJK-Light.ttc"
-SERIF     = "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf"
-SERIF_B   = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
+SERIF     = "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc"
+SERIF_B   = "/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"
 
 def fnt(p, s):
     return ImageFont.truetype(p, s)
@@ -68,7 +68,19 @@ else:
 topic = next((t for t in schedule["topics"] if t["day"] == day_num),
              schedule["topics"][0])
 
-print(f"📅 {DATE} | DAY {day_num} | {topic['title_main']}")
+# 섹션 라벨 한글 매핑 (커버 좌상단 + VOL 표기에 사용)
+SECTION_KO = {
+    "WHY":"오늘의 생각", "DETAIL":"오늘의 디테일", "ROUTINE":"루틴 인덱스",
+    "PICK":"오늘의 PICK", "KNOW":"알아두면", "STYLE":"스타일 노트",
+    "BODY":"바디 & 컨디션", "SCENE":"그 순간을 위해"
+}
+sec_code = topic.get("section","DETAIL")
+topic["section_label_ko"] = SECTION_KO.get(sec_code, "오늘의 디테일")
+# 같은 섹션이 몇 번째로 등장하는지 = VOL 번호
+same_sec = [t for t in schedule["topics"] if t.get("section")==sec_code and t["day"]<=day_num]
+topic["vol_no"] = f"VOL.{len(same_sec):02d}"
+
+print(f"📅 {DATE} | DAY {day_num} | [{sec_code}] {topic['title_main']}")
 
 OUT = Path(f"posts/{DATE}_day{day_num:02d}")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -101,8 +113,7 @@ SYSTEM = f"""너는 bodetail 인스타그램 콘텐츠 매니저야.
 USER = f"""오늘 게시물을 JSON으로 만들어줘.
 
 주제: {topic['title_main']}
-카테고리: {topic['category']}
-섹션라벨: {topic['section_label']}
+섹션: {topic['section']}
 후킹타입: {topic['hook_type']}
 슬라이드수: {topic['num_slides']}
 
@@ -143,6 +154,9 @@ raw = msg.content[0].text.strip()
 raw = re.sub(r'^```json\s*', '', raw)
 raw = re.sub(r'\s*```$', '', raw)
 content = json.loads(raw)
+# 섹션 라벨/VOL은 우리가 계산한 값으로 강제 (Claude 출력 무시)
+content["section_label"] = topic["section_label_ko"]
+content["vol"] = topic["vol_no"]
 print("✅ 콘텐츠 생성 완료")
 
 # 캡션 저장
@@ -184,21 +198,21 @@ def download_image(url):
         return None
 
 def smart_crop(img, target_w=W, target_h=H):
-    """중앙 기준 스마트 크롭 → 1080×1440"""
+    """CSS object-fit:cover 방식 — 빈 공간 없이 1080x1440 완전히 채움"""
     ow, oh = img.size
     target_ratio = target_w / target_h
     source_ratio = ow / oh
-    if source_ratio > target_ratio:
-        # 너무 넓음 → 좌우 잘라냄
-        new_w = int(oh * target_ratio)
-        left = (ow - new_w) // 2
-        img = img.crop((left, 0, left + new_w, oh))
-    else:
-        # 너무 높음 → 위아래 잘라냄 (상단 30% 기준으로 약간 위쪽)
-        new_h = int(ow / target_ratio)
-        top = int((oh - new_h) * 0.3)
-        img = img.crop((0, top, ow, top + new_h))
-    return img.resize((target_w, target_h), Image.LANCZOS)
+    # 1) 짧은 쪽을 타겟에 맞춰 업스케일 (항상 타겟보다 크거나 같게)
+    scale = max(target_w / ow, target_h / oh)
+    nw, nh = int(ow * scale + 1), int(oh * scale + 1)
+    img = img.resize((nw, nh), Image.LANCZOS)
+    # 2) 중앙(세로는 상단 35%) 기준 크롭
+    left = (nw - target_w) // 2
+    top  = int((nh - target_h) * 0.35)
+    left = max(0, min(left, nw - target_w))
+    top  = max(0, min(top,  nh - target_h))
+    img = img.crop((left, top, left + target_w, top + target_h))
+    return img
 
 # 슬라이드용 이미지 검색어 목록 (슬라이드마다 다른 사진)
 photo_queries = [
@@ -317,12 +331,20 @@ def draw_sig(draw):
     draw.text((x, H-58), t, font=sf, fill=(*CREAM, 72))
 
 def numbox(img, draw, n, x, y):
-    nf = fnt(SANS_BLK, 58)
-    nw = tw(draw, n, nf); nh = th(draw, n, nf)
-    px, py = 24, 12
-    draw.rectangle([(x,y),(x+nw+px*2, y+nh+py*2)], fill=GOLD)
-    draw.text((x+px, y+py), n, font=nf, fill=INK)
-    return y + nh + py*2 + 24
+    nf = fnt(SANS_BLK, 52)
+    # 실제 글리프 bbox (offset 포함) 계산
+    bb = draw.textbbox((0, 0), n, font=nf)
+    gw = bb[2] - bb[0]
+    gh = bb[3] - bb[1]
+    px, py = 26, 16
+    box_w = gw + px * 2
+    box_h = gh + py * 2
+    draw.rectangle([(x, y), (x + box_w, y + box_h)], fill=GOLD)
+    # 글리프 offset(bb[0], bb[1])을 보정해 박스 정중앙에 배치
+    tx = x + px - bb[0]
+    ty = y + py - bb[1]
+    draw.text((tx, ty), n, font=nf, fill=INK)
+    return y + box_h + 24
 
 def capbox(img, x, y, lines):
     cf = fnt(SANS_REG, 34)
@@ -340,6 +362,36 @@ def capbox(img, x, y, lines):
         ty += lh
     return img2, d2, y + bh
 
+def wrap_text(draw, text, font, max_width):
+    """max_width(px)를 넘지 않게 자동 줄바꿈. 공백 단위 우선, 길면 글자 단위."""
+    if text == "":
+        return [""]
+    words = text.split(" ")
+    lines = []
+    cur = ""
+    for w in words:
+        trial = w if cur == "" else cur + " " + w
+        if draw.textlength(trial, font=font) <= max_width:
+            cur = trial
+        else:
+            if cur:
+                lines.append(cur)
+            # 단어 하나가 폭을 넘으면 글자 단위로 쪼갬
+            if draw.textlength(w, font=font) > max_width:
+                piece = ""
+                for ch in w:
+                    if draw.textlength(piece + ch, font=font) <= max_width:
+                        piece += ch
+                    else:
+                        lines.append(piece)
+                        piece = ch
+                cur = piece
+            else:
+                cur = w
+    if cur:
+        lines.append(cur)
+    return lines
+
 def divline(draw, y):
     draw.line([(MAR_X,y),(W-MAR_X,y)], fill=(*GOLD_D,55), width=1)
 
@@ -354,30 +406,46 @@ def render_cover(slide_data, photo):
     draw_header(draw, sec, vol)
 
     # 배지
-    bf = fnt(SANS_MED, 28)
+    bf = fnt(SANS_MED, 26)
     bt = "DETAIL INDEX"
     bw = tw(draw, bt, bf)
-    bx, by = MAR_X, MAR_Y + 68
-    draw.rectangle([(bx,by),(bx+bw+28, by+42)], outline=(*CREAM, 70), width=1)
-    draw.text((bx+14, by+6), bt, font=bf, fill=(*CREAM, 100))
+    bx, by = MAR_X, MAR_Y + 66
+    draw.rectangle([(bx,by),(bx+bw+28, by+40)], outline=(*CREAM, 70), width=1)
+    draw.text((bx+14, by+7), bt, font=bf, fill=(*CREAM, 100))
 
     # 보조줄
-    sf2 = fnt(SANS_LT, 38)
+    sf2 = fnt(SANS_LT, 36)
     sub = slide_data.get("headline_sub", "")
-    draw.text((MAR_X, MAR_Y+140), sub, font=sf2, fill=MUTED)
+    draw.text((MAR_X, MAR_Y+132), sub, font=sf2, fill=MUTED)
 
-    # 메인 헤드라인
-    mf = fnt(SANS_BLK, 112)
-    lh = th(draw, "가", mf) + 10
-    by2 = MAR_Y + 195
-    for l in slide_data.get("headline_main", []):
+    # 메인 헤드라인 (자동 줄바꿈 + 폭 넘으면 폰트 축소)
+    main_lines = slide_data.get("headline_main", [])
+    if isinstance(main_lines, str):
+        main_lines = [main_lines]
+    max_w = W - MAR_X*2
+    fsize = 104
+    while fsize > 64:
+        mf = fnt(SANS_BLK, fsize)
+        wrapped = []
+        for ln in main_lines:
+            wrapped += wrap_text(draw, ln, mf, max_w)
+        lh = int(fsize * 1.18)
+        total_h = len(wrapped) * lh
+        if total_h <= 560:
+            break
+        fsize -= 6
+    by2 = MAR_Y + 188
+    for l in wrapped:
         draw.text((MAR_X, by2), l, font=mf, fill=WHITE)
         by2 += lh
 
-    # 서브 서리프
-    srf = fnt(SERIF, 44)
+    # 서브 서리프 (한글 가능 Noto Serif, 골드)
+    srf = fnt(SERIF, 40)
     serif_txt = slide_data.get("headline_serif", "")
-    draw.text((MAR_X, by2 + 10), serif_txt, font=srf, fill=(*CREAM, 175))
+    if serif_txt:
+        for sl in wrap_text(draw, serif_txt, srf, max_w):
+            draw.text((MAR_X, by2 + 14), sl, font=srf, fill=(*GOLD_BRIGHT, 220) if 'GOLD_BRIGHT' in globals() else (*CREAM,185))
+            by2 += int(40*1.3)
 
     draw_sig(draw)
     return img
@@ -389,48 +457,65 @@ def render_content(slide_data, photo):
     vol = content.get("vol", "VOL.01")
     draw_header(draw, sec, vol)
 
-    y = MAR_Y + 72
+    y = MAR_Y + 80
     n = slide_data.get("number", "")
     if n:
         y = numbox(img, draw, n, MAR_X, y)
 
-    sbf = fnt(SANS_BOLD, 52)
-    draw.text((MAR_X, y), slide_data.get("subhead",""), font=sbf, fill=CREAM)
-    y += th(draw, "가", sbf) + 24
+    sbf = fnt(SANS_BOLD, 50)
+    max_w = W - MAR_X*2
+    for sline in wrap_text(draw, slide_data.get("subhead",""), sbf, max_w):
+        draw.text((MAR_X, y), sline, font=sbf, fill=CREAM)
+        y += int(50*1.3)
+    y += 12
 
-    bf = fnt(SANS_LT, 38)
-    lh = th(draw, "가", bf) + 12
-    for l in slide_data.get("body", []):
-        if l: draw.text((MAR_X, y), l, font=bf, fill=MUTED)
-        y += lh
+    bf = fnt(SANS_LT, 36)
+    lh = int(36 * 1.5)
+    for raw in slide_data.get("body", []):
+        if raw == "":
+            y += int(lh*0.5)
+            continue
+        for bl in wrap_text(draw, raw, bf, max_w):
+            draw.text((MAR_X, y), bl, font=bf, fill=MUTED)
+            y += lh
 
     cap_txt = slide_data.get("caption", "")
     if cap_txt:
-        cap_y = H - MAR_Y - 155
-        img, draw, _ = capbox(img, MAR_X, cap_y, [cap_txt])
+        cf = fnt(SANS_REG, 32)
+        cap_lines = wrap_text(draw, cap_txt, cf, W - MAR_X*2 - 40)
+        cap_h = len(cap_lines) * int(32*1.4) + 28
+        cap_y = H - MAR_Y - cap_h - 20
+        img, draw, _ = capbox(img, MAR_X, cap_y, cap_lines)
 
     draw_sig(draw)
     return img
 
 def render_content_double(sd1, sd2, photo):
-    """두 섹션을 한 슬라이드에 (03, 04형)"""
+    """두 섹션을 한 슬라이드에"""
     img = apply_shadow_stack(photo)
     draw = ImageDraw.Draw(img)
     draw_header(draw, content["section_label"], content.get("vol","VOL.01"))
 
-    sbf = fnt(SANS_BOLD, 48); bf = fnt(SANS_LT, 36); lh = th(draw,"가",bf)+12
-    y = MAR_Y + 72
-
-    for sd in [sd1, sd2]:
+    sbf = fnt(SANS_BOLD, 44); bf = fnt(SANS_LT, 33)
+    lh = int(33 * 1.45)
+    max_w = W - MAR_X*2
+    y = MAR_Y + 80
+    items = [sd1, sd2]
+    for idx, sd in enumerate(items):
         if sd.get("number"):
             y = numbox(img, draw, sd["number"], MAR_X, y)
-        draw.text((MAR_X, y), sd.get("subhead",""), font=sbf, fill=CREAM)
-        y += th(draw, "가", sbf) + 20
-        for l in sd.get("body", []):
-            if l: draw.text((MAR_X, y), l, font=bf, fill=MUTED)
-            y += lh
-        if sd != [sd1, sd2][-1]:
-            y += 16; divline(draw, y); y += 26
+        for sline in wrap_text(draw, sd.get("subhead",""), sbf, max_w):
+            draw.text((MAR_X, y), sline, font=sbf, fill=CREAM)
+            y += int(44*1.3)
+        y += 8
+        for raw in sd.get("body", []):
+            if raw == "":
+                y += int(lh*0.5); continue
+            for bl in wrap_text(draw, raw, bf, max_w):
+                draw.text((MAR_X, y), bl, font=bf, fill=MUTED)
+                y += lh
+        if idx == 0:
+            y += 22; divline(draw, y); y += 32
 
     draw_sig(draw)
     return img
@@ -444,20 +529,35 @@ def render_closing():
     draw = ImageDraw.Draw(img)
     draw_header(draw, content["section_label"], "")
 
-    wf = fnt(SERIF_B, 92); cf = fnt(SANS_LT, 32)
+    wf = fnt(SERIF_B, 88); cf = fnt(SANS_LT, 30)
     wt = "bodetail"; ct = "Detail changes everything"
-    ww = tw(draw, wt, wf); cw = tw(draw, ct, cf)
     cx = W // 2
 
-    bw = 80
-    by1 = H//2 - 100
-    draw.rectangle([(cx-bw//2, by1),(cx+bw//2, by1+3)], fill=GOLD)
-    wmy = H//2 - 78
-    draw.text((cx - ww//2, wmy), wt, font=wf, fill=CREAM)
-    wh = th(draw, wt, wf)
-    by2 = wmy + wh + 16
-    draw.rectangle([(cx-bw//2, by2),(cx+bw//2, by2+3)], fill=GOLD)
-    draw.text((cx - cw//2, by2+22), ct, font=cf, fill=(72,66,60))
+    # 워드마크 실제 글리프 bbox로 정확한 높이/중앙 계산
+    wbb = draw.textbbox((0,0), wt, font=wf)
+    wgw = wbb[2]-wbb[0]; wgh = wbb[3]-wbb[1]
+    cbb = draw.textbbox((0,0), ct, font=cf)
+    cgw = cbb[2]-cbb[0]
+
+    bar_w = 64
+    gap = 40            # 바와 글자 사이 위/아래 동일 간격
+    # 워드마크를 화면 정중앙에 배치
+    wm_x = cx - wgw//2 - wbb[0]
+    wm_y = H//2 - wgh//2 - wbb[1]
+    # 워드마크의 화면상 실제 top/bottom
+    wm_top = H//2 - wgh//2
+    wm_bot = H//2 + wgh//2
+
+    # 위 골드 바: 워드마크 top에서 gap 위
+    top_bar_y = wm_top - gap
+    draw.rectangle([(cx-bar_w//2, top_bar_y-2),(cx+bar_w//2, top_bar_y+1)], fill=GOLD)
+    # 워드마크
+    draw.text((wm_x, wm_y), wt, font=wf, fill=CREAM)
+    # 아래 골드 바: 워드마크 bottom에서 gap 아래 (위와 동일 간격)
+    bot_bar_y = wm_bot + gap
+    draw.rectangle([(cx-bar_w//2, bot_bar_y-2),(cx+bar_w//2, bot_bar_y+1)], fill=GOLD)
+    # 태그라인
+    draw.text((cx - cgw//2 - cbb[0], bot_bar_y + 22), ct, font=cf, fill=(95,88,78))
     return img
 
 # ══════════════════════════════════════════════════════════════
