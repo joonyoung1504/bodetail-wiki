@@ -25,11 +25,13 @@ colors:
   cream: "#EDE6D8"        # 워드마크·세리프 헤드라인
   white: "#F5F4F0"        # 오프화이트 — 메인 임팩트 헤드라인
   body-muted: "#A9A39A"   # 서브카피·캡션 그레이
+  body-light: "#D4CEC2"   # ★본문 텍스트(실사 위) — 회색은 묻히므로 밝은 크림으로
   hairline: "#B0844A"     # 골드 헤어라인(저알파로 사용)
   caption-veil: "rgba(12,12,12,0.55)"   # 캡션 박스 반투명 배경(오늘의집/liadio식)
   depth-veil: "rgba(255,255,255,0.045)" # 은은한 도형(공간감)용 라이트 베일
   depth-gold: "rgba(176,132,74,0.10)"   # 골드 도형 베일
   scrim-bottom: "rgba(12,12,12,0.65)"   # 하단 헤드라인 가독용 그라데이션(아래→위 롱 페이드)
+  text-safezone: "rgba(8,6,4,0.78)"     # ★본문 슬라이드 텍스트 안전지대(상단~중단 잉크 오버레이)
 
 typography:
   wordmark:
@@ -97,7 +99,10 @@ typography:
     fontSize: 34px
     lineHeight: 1.5
     letterSpacing: -0.3px
-    note: "슬라이드 본문."
+    note: >
+      슬라이드 본문. ★실사 사진 위에 올 때 글자색은 회색(body-muted)이 아니라
+      body-light(#D4CEC2 이상)로. 회색은 사진의 밝은 부분에 반드시 묻힌다.
+      본문 영역에는 text-safezone 오버레이를 먼저 깐다(아래 그림자 레이어 시스템 참조).
   body-en-fine:
     fontFamily: "Fraunces, serif"
     fontWeight: 300
@@ -160,6 +165,13 @@ components:
     textColor: "{colors.cream}"
     typography: "{typography.wordmark}"
     rounded: "{rounded.none}"
+  safezone-overlay:
+    backgroundColor: "{colors.text-safezone}"
+    note: >
+      ★본문 슬라이드 전용. 본문 텍스트가 놓이는 상단~중단(0~58%)에 잉크블랙을
+      한 겹 더 덮어 가독을 확보한다. 커버는 하단 scrim-bottom으로 충분하지만,
+      본문은 텍스트가 상단부터 깔리므로 상단 안전지대가 없으면 사진 밝은 부분에
+      글자가 묻힌다. 코드의 apply_text_safezone() 이 이 컴포넌트를 구현한다.
   label-section:
     backgroundColor: transparent
     textColor: "{colors.gold}"
@@ -237,6 +249,14 @@ components:
       모든 슬라이드 하단 중앙의 작은 'bodetail' 서명(세르칸의 SERKAN 워드마크 위치).
       자간 넓게, 저채도. 그리드 전체에 동일 위치 → 강력한 시리즈 통일감. 마무리 슬라이드의
       큰 워드마크와는 별개(이건 매 장 구석의 작은 도장).
+  cta-block:
+    backgroundColor: transparent
+    textColor: "{colors.gold-bright}"
+    typography: "{typography.caption-strong}"
+    note: >
+      ★마무리 슬라이드 필수. 워드마크·태그라인 아래에 팔로우 유도 한 줄
+      ("@bodetail_official 팔로우" 또는 "남자의 디테일을 읽는 곳 → @bodetail_official").
+      로고만 두면 팔로우 전환이 새어나간다. 세르칸은 마지막 장에 커뮤니티 정체성을 박는다.
   source-note:
     backgroundColor: transparent
     textColor: "{colors.body-muted}"
@@ -274,9 +294,10 @@ bodetail의 인스타그램은 **제품 카탈로그가 아니라 매일 한 장
 ## 컬러 시스템
 
 - 기본 캔버스는 `{colors.ink}`(#0C0C0C). 면을 나눠야 하면 `{colors.ink-2}`/`{colors.ink-3}`로 미세 단차만.
-- 헤드라인은 `{colors.white}`(임팩트) 또는 `{colors.cream}`(세리프·우아). 본문/캡션은 `{colors.body-muted}`.
+- 헤드라인은 `{colors.white}`(임팩트) 또는 `{colors.cream}`(세리프·우아). **본문은 실사 위에서 `{colors.body-light}`** — 캡션·보조카피만 `{colors.body-muted}`.
 - **골드(`{colors.gold}`)는 라벨·헤어라인·별점·작은 강조에만.** 헤드라인 전체를 골드로 칠하지 않는다(거친 텍스처 위 예외적 타이틀 한 장 정도만 허용).
 - 하단 헤드라인 가독은 색을 더하지 말고 `{colors.scrim-bottom}` 그라데이션으로 해결.
+- **본문 슬라이드 가독은 `{colors.text-safezone}` 안전지대로 해결**(그림자 레이어 시스템 참조).
 - 캡션 박스는 `{colors.caption-veil}` 반투명 — 사진을 가리지 않으면서 글자를 띄운다.
 
 ## 타이포그래피
@@ -304,12 +325,12 @@ bodetail의 인스타그램은 **제품 카탈로그가 아니라 매일 한 장
 
 - **A. 커버(에디토리얼)** — 풀블리드 사진 + 좌상단 `{component.label-section}`(+옵션 `{component.series-badge}`) + 하단 `{component.headline-block-tiered}`(메인 헤드라인 + 보조줄). 텍스트 최소, 여백 충분(FRKT 고감도형).
 - **B. 커버(매거진 포스터)** — liadio식: 상단 Fraunces 타이틀 + 좌측 작은 영문 단락(`{typography.body-en-fine}`) + 중앙 클로즈업 피사체 위 `{component.depth-shape}` + 하단 임팩트 한 단어 + 중앙 `{component.caption-box}` 콜아웃.
-- **C. 넘버링 콘텐츠** — 좌상단 가로 헤더(`{component.label-section}` + 헤어라인 + `{component.number-box}`를 한 선상에) + 소제목(`{typography.subhead-kr}`) + 본문 2–3줄(`{typography.body-kr}`) + 하단 사진 + 우하단 `{component.caption-box}`(핵심 한 줄). 세르칸 Routine Index형.
+- **C. 넘버링 콘텐츠** — 좌상단 가로 헤더(`{component.label-section}` + 헤어라인 + `{component.number-box}`를 한 선상에) + 소제목(`{typography.subhead-kr}`) + 본문 2–3줄(`{typography.body-kr}`) + 하단 사진 + 우하단 `{component.caption-box}`(핵심 한 줄). 세르칸 Routine Index형. **★ 본문이 사진 위에 오므로 `{component.safezone-overlay}` 필수, 1슬라이드 1포인트.**
 - **D. PICK/큐레이션** — 핀터레스트 카드식: 제품 클로즈업 + `{component.rating-stars}` + 작은 라벨(브랜드/가격) + `{component.comment-block}`(COMMENT). *P1에선 타브랜드만.*
-- **E. 마무리** — `{component.slide-closing}`: 검은 화면 중앙에 bodetail 워드마크 + 그 아래 한 줄 태그라인("Detail changes everything" / "남들이 놓치는 한 끗").
+- **E. 마무리** — `{component.slide-closing}`: 검은 화면 중앙에 bodetail 워드마크 + 그 아래 한 줄 태그라인 + **`{component.cta-block}`(팔로우 유도 필수)**.
 - **F. 오브제 플랫레이**(세르칸 큐레이션형) — 어두운 바닥에 제품·도구 여러 개를 위에서 내려다보며 정렬(넘버 라벨 01~07 부착). PICK·자기관리템 큐레이션에. 골드 라벨 한 끗 + 저채도.
 
-> **2단 헤드라인 + 시리즈 넘버링은 부산 무드매거진 레퍼런스에서 확인한 패턴.** 사진 소재가 매일 달라도 텍스트 자리·그라데이션 처리를 예외 없이 동일하게 강제해 그리드 전체가 통일감 있게 읽히는 게 핵심 — `scrim-bottom`을 모든 슬라이드에 빠짐없이 적용할 것.
+> **2단 헤드라인 + 시리즈 넘버링은 부산 무드매거진 레퍼런스에서 확인한 패턴.** 사진 소재가 매일 달라도 텍스트 자리·그라데이션 처리를 예외 없이 동일하게 강제해 그리드 전체가 통일감 있게 읽히는 게 핵심 — `scrim-bottom`(커버)·`text-safezone`(본문)을 모든 슬라이드에 빠짐없이 적용할 것.
 
 ### 세르칸 전수 분석에서 확정한 레이아웃 규칙 (약 100개 게시물·릴스 관찰)
 
@@ -329,6 +350,8 @@ bodetail의 인스타그램은 **제품 카탈로그가 아니라 매일 한 장
 
 > **그라데이션은 짧은 띠가 아니라 사진 하단 35~50%를 덮는 긴 페이드**(세르칸 방식). 아래는 거의 불투명, 위로 갈수록 투명. 어떤 사진이 와도 헤드라인 자리가 항상 어둡게 확보돼 그리드 통일감이 유지된다.
 
+**`safezone-overlay`** — ★본문 슬라이드 전용 텍스트 안전지대. 본문 텍스트가 놓이는 상단~중단(0~58%)에 `{colors.text-safezone}` 잉크블랙을 한 겹 더 덮는다. `headline-block`의 하단 그라데이션이 "하단"만 어둡게 하는 것과 달리, 본문 슬라이드는 텍스트가 "상단"부터 깔리므로 상단 안전지대가 반드시 필요하다. 없으면 사진 밝은 부분(피부·셔츠·제품 라벨)에 글자가 묻힌다 — EP01에서 실제 발생한 문제. 코드의 `apply_text_safezone()` 이 구현.
+
 **`caption-box`** — 핵심 한 줄/콜아웃. `{colors.caption-veil}` 배경 + `{colors.white}` 텍스트, `{typography.caption}`, `{rounded.sm}`(10px), 패딩 20×28. 오늘의집의 우하단 설명박스, liadio의 중앙 콜아웃 둘 다 이 컴포넌트.
 
 **`badge-oval`** — "New" / "저장 필수" 등. 배경 투명 + `{colors.cream}` 1.5px 아웃라인 타원, `{rounded.pill}`, `{typography.caption-strong}`. 커버 우상단 또는 피사체 옆.
@@ -341,7 +364,9 @@ bodetail의 인스타그램은 **제품 카탈로그가 아니라 매일 한 장
 
 **`divider-hairline`** — 골드 헤어라인. `{colors.gold}` 2px. 라벨/워드마크 아래 짧게. 우리 프로필 워드마크의 골드 언더라인과 동일 문법.
 
-**`slide-closing`** — 마무리 슬라이드. `{colors.ink}` 풀블랙 중앙에 `{typography.wordmark}` bodetail(크림) + 아래 태그라인 `{typography.caption}`(`{colors.body-muted}`). 오늘의집이 마지막에 로고로 닫는 것과 동일.
+**`slide-closing`** — 마무리 슬라이드. `{colors.ink}` 풀블랙 중앙에 `{typography.wordmark}` bodetail(크림) + 아래 태그라인 `{typography.caption}`(`{colors.body-muted}`) + **`{component.cta-block}`(팔로우 유도)**. 오늘의집이 마지막에 로고로 닫는 것과 동일하되, 우리는 CTA를 한 줄 더 박아 팔로우 전환을 잡는다.
+
+**`cta-block`** — ★마무리 슬라이드 팔로우 유도. 워드마크·태그라인 아래에 `{colors.gold-bright}`로 "@bodetail_official 팔로우"(또는 "남자의 디테일을 읽는 곳 → @bodetail_official"). 로고만 두면 전환이 샌다. 세르칸이 마지막 장마다 커뮤니티 정체성을 박는 것과 동일 문법.
 
 **`number-box`** — 넘버링 콘텐츠(아키타입 C)의 좌상단 큰 숫자 박스("+ 02"). 세르칸 벤치마킹. `{colors.gold}` 또는 `{colors.ink-3}` 배경에 굵은 숫자. **모든 슬라이드에서 같은 위치 고정**이 핵심(반복=리듬).
 
@@ -385,6 +410,18 @@ bodetail의 인스타그램은 **제품 카탈로그가 아니라 매일 한 장
 
 > **이 7단 스택을 코드 상수로 박아 모든 이미지에 동일 적용.** 파라미터(멀티플라이 알파·채도·그레인 강도)는 골든셋으로 캘리브레이션 후 고정. 출처가 달라도 결과 톤이 같아지는 게 핵심 — "한 사람이 찍은 매거진" 통일감의 8할.
 
+### ★ 본문 텍스트 안전지대 (8번째 레이어 — 본문 슬라이드 전용, 확정 규격)
+
+7단 스택의 하단 그라데이션(4번)은 **헤드라인이 하단에 오는 커버**를 위한 것이다. 그런데 **넘버링 본문 슬라이드(아키타입 C)는 텍스트가 화면 상단부터 깔린다.** 어두운 영역(하단)과 글자 위치(상단)가 엇갈려, 상단의 밝은 사진 부분에 글자가 묻힌다. EP01에서 실제로 02·03·05 본문이 향수병·셔츠 위에서 판독 불가였던 원인이 정확히 이것이다.
+
+→ 해결: **본문 슬라이드에 한해 7단 스택 위에 안전지대 레이어를 한 겹 더 깐다.**
+
+- **위치/형태**: 상단부터 세로 58%까지 `{colors.text-safezone}`(rgba(8,6,4,0.78))를 균일하게 덮고, 58~72% 구간에서 부드럽게 0으로 페이드(칼선 방지).
+- **글자색**: 본문은 회색(`{colors.body-muted}`) 금지 → `{colors.body-light}`(#D4CEC2) 이상. 소제목은 `{colors.cream}`, 캡션 박스는 그대로 흰색.
+- **정보량**: **1 슬라이드 = 1 포인트.** 한 장에 2개 항목을 넣지 않는다(체류시간↑ + 가독성↑).
+- **코드**: `apply_text_safezone(cover_to=0.58, strength=0.78)` 가 구현. `render_content()`에서 `apply_shadow_stack` 직후 호출.
+- **수치 확정**: cover_to=0.58 / strength=0.78 / feather=0.14 를 코드 상수로 고정(골든셋 누적 시 미세 조정).
+
 **그림자 레이어 톤 가드:**
 - 너무 어둡게 덮어 사진이 안 보이면 실패. 피사체는 식별되되 "우리 잉크블랙 세계에 들어온" 느낌이 정답.
 - 한 캐러셀 안에서는 멀티플라이 알파를 동일하게(슬라이드마다 밝기 들쑥날쑥 금지).
@@ -395,11 +432,14 @@ bodetail의 인스타그램은 **제품 카탈로그가 아니라 매일 한 장
 ### Do
 - 색의 순간은 **골드 한 끗 + 사진**에만. 나머지는 블랙·크림·화이트·그레이.
 - 헤드라인은 하단 정렬, 본문은 최소. 여백을 디자인 요소로 쓴다.
+- **본문 슬라이드는 `{component.safezone-overlay}`를 깔고, 본문 글자를 `{colors.body-light}` 이상 밝기로.** 회색 본문 금지.
+- **1 슬라이드 = 1 포인트.** 한 장에 두 항목을 욱여넣지 않는다.
 - 감도 3원칙 중 최소 2개를 매 게시물에 적용(클로즈업/도형/반복).
 - 라벨·로고·헤어라인 위치를 **모든 슬라이드에서 픽셀 고정**(반복=리듬=감도).
 - `{component.headline-block-tiered}`로 메인+보조줄을 함께 써서 정보량을 늘리되, 보조줄 폰트는 항상 메인보다 확연히 얇게(체급 차이가 위계를 만든다).
 - 시리즈성 섹션(WHY/PICK 등)엔 `{component.series-badge}`로 회차를 표기해 연재 기대감을 쌓는다.
-- 사진 소재가 무엇이든 `{colors.scrim-bottom}` 하단 그라데이션은 예외 없이 적용 — 이게 그리드 전체의 통일감을 만든다.
+- 사진 소재가 무엇이든 `{colors.scrim-bottom}`(커버)·`{colors.text-safezone}`(본문) 처리는 예외 없이 적용 — 이게 그리드 전체의 통일감을 만든다.
+- **마무리 슬라이드엔 `{component.cta-block}`(팔로우 유도)을 반드시 넣는다.** 로고만 두지 않는다.
 - 매 슬라이드 하단 중앙에 `{component.signature-wordmark}`(작은 bodetail 도장)를 같은 위치에 박는다 — 세르칸의 SERKAN 서명처럼 시리즈 통일감의 핵심.
 - 데이터·주장형 콘텐츠엔 `{component.source-note}`로 출처를 밝혀 권위를 더한다.
 - 1080×1440(3:4)로만 내보낸다. 텍스트는 코드로 오버레이.
@@ -408,26 +448,34 @@ bodetail의 인스타그램은 **제품 카탈로그가 아니라 매일 한 장
 ### Don't
 - 두 번째 액센트 컬러 추가 금지. 골드 외 채도 있는 색은 사진 안에서만.
 - 골드로 헤드라인 전체를 칠하지 말 것(거친 텍스처 타이틀 한 장 예외).
+- **본문 슬라이드에서 회색(body-muted) 글자를 사진 위에 바로 얹지 말 것 — 묻힌다. 안전지대 + body-light 필수.**
+- **한 슬라이드에 두 항목 욱여넣지 말 것**(가독성·체류시간 모두 손해).
 - 그라데이션·드롭섀도우·테두리 같은 장식 크롬 금지. 깊이는 사진과 `{component.depth-shape}`로.
 - 운영자(준영) 본인 얼굴·신원을 노출하지 말 것 — 사람이 필요하면 라이선스 클리어된 스톡 실사로(그림자 레이어 처리 필수).
 - 그림자 레이어를 건너뛴 원본 실사를 그대로 올리지 말 것 — 톤이 깨진다. 모든 사진은 7단 스택을 거친다.
 - 저작권 불명 이미지(영화 스틸·유명인 사진 무단)를 쓰지 말 것 — 세르칸이 한다고 우리도 안전한 게 아니다.
 - 텍스트를 AI 이미지에 굽지 말 것(한글 깨짐 + 감도 흔들림).
+- **마무리 슬라이드를 로고만으로 닫지 말 것 — CTA가 비면 팔로우 전환이 샌다.**
 - 1:1/4:5로 업로드 금지. 슬라이드마다 폰트 크기·위치를 즉흥적으로 바꾸지 말 것.
 
 ## 카드뉴스 제작 순서 (Claude Code 위임용)
 
 1. `content_calendar.json`에서 당일 항목 로드(섹션 라벨 / 헤드라인 / 슬라이드 본문 / image_prompt / seed 여부).
-2. 섹션 타입 → 슬라이드 아키타입(A–E) 매칭, 레이아웃 변형 선택.
+2. 섹션 타입 → 슬라이드 아키타입(A–E) 매칭, 레이아웃 변형 선택. **본문(C)은 1슬라이드 1포인트로 분배.**
 3. AI로 **배경 사진만** 생성(카메라 언어 고정) → 후처리 필터 적용.
-4. Pillow로 고정 좌표에 `{component.label-section}` → `{component.headline-block}` → 필요 시 `{component.caption-box}`/`{component.depth-shape}` 오버레이.
-5. 마지막 슬라이드 `{component.slide-closing}` 자동 부착.
+4. Pillow로 고정 좌표에 오버레이:
+   - 커버: `{component.label-section}` → `{component.headline-block}` (하단 `scrim-bottom` 먼저).
+   - **본문: `{component.safezone-overlay}`를 먼저 깐 뒤** `{component.number-box}` → 소제목 → 본문(`{colors.body-light}`) → 필요 시 `{component.caption-box}`. 회색 본문 금지.
+5. 마지막 슬라이드 `{component.slide-closing}` 자동 부착 — **`{component.cta-block}`(@bodetail_official 팔로우) 필수 포함**, 워드마크 동반.
 6. 1080×1440 PNG로 내보내기 → 공개 URL 업로드 → 게시.
 7. **초반 몇 주는 "초안 → 1초 컨펌 → 게시"**, 이후 완전 자동. 주간 단위로 최근 7일 톤 점검.
 
 ## Known Gaps / 미정
 
-- **그림자 레이어 파라미터 미확정** — 멀티플라이 알파(30~45%)·채도 감소율·그레인 강도의 정확한 수치는 골든셋 5~10장으로 캘리브레이션 후 코드 상수로 고정.
+- **텍스트 안전지대: 확정.** 본문 슬라이드 상단~중단 58%에 `text-safezone`(rgba(8,6,4,0.78)) 오버레이 + 본문 `body-light`. 코드 상수 cover_to=0.58 / strength=0.78 / feather=0.14 고정. (EP01 vs 세르칸 비교분석 결과 편입, 2026-06-24)
+- **마무리 CTA: 확정.** `cta-block`("@bodetail_official 팔로우") 마무리 슬라이드 필수.
+- **1슬라이드 1포인트: 확정.** `render_content_double` 자동 호출 비활성화.
+- **무드용 그림자 레이어 파라미터 미확정** — 멀티플라이 알파(30~45%)·채도 감소율·그레인 강도의 정확한 수치는 골든셋 5~10장으로 캘리브레이션 후 코드 상수로 고정. (※ 텍스트 안전지대와는 별개 항목)
 - **스톡 소스 키워드 세트 미정** — "moody/cinematic/noir/editorial men" 계열 검색어 풀을 실제 검색하며 정리.
 - **보이스 가이드**(금칙어["화장" 등]·호기심갭 제목 공식·캡션 어투·해시태그)는 본 문서 범위 밖 → `voice_guide.md`로 별도.
 - Fraunces 이탤릭 혼용 규칙(어떤 단어를 이탤릭으로)은 커버 단위로 케이스화 필요 — 골든셋 누적 후 패턴화.
