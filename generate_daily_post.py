@@ -12,6 +12,12 @@ generate_daily_post.py  — bodetail 일일 게시물 완전 자동화
   NOTIFY_EMAIL        — 받을 이메일
 
 의존성: pip install anthropic requests Pillow numpy
+
+★ 2026-06-24 업데이트 (텍스트 가독성 패치):
+  1. apply_text_safezone() 신규 — 본문 슬라이드 상단~중단에 잉크블랙 안전지대
+  2. 본문 글자색 MUTED(회색) → BODY_LIGHT(밝은 크림)
+  3. 1슬라이드 1포인트 — render_content_double 자동 호출 비활성화
+  4. render_closing() 에 CTA(@bodetail_official 팔로우) 추가
 """
 
 import os, json, re, requests, io, textwrap
@@ -32,6 +38,7 @@ W, H = 1080, 1440   # 3:4 인스타 그리드 네이티브
 # 컬러 토큰
 DARK=(8,6,4); INK=(12,12,12); GOLD=(176,132,74); GOLD_D=(100,72,35); GOLD_BRIGHT=(200,154,92)
 CREAM=(237,230,216); WHITE=(245,244,240); MUTED=(118,110,102)
+BODY_LIGHT=(212,206,194)   # ★추가: 본문용 밝은 크림 (실사 위에서 회색은 묻히므로 밝게)
 
 # 폰트 경로 (GitHub Actions ubuntu-latest 기준)
 SANS_BLK  = "/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc"
@@ -134,6 +141,7 @@ USER = f"""오늘 게시물을 JSON으로 만들어줘.
 - 제목이 뻔하면(예: 외모관리가 자존감이다) 각도를 비틀어 구체적 정보로 만들어라.
   예: "거울 보는 습관"이 아니라 "거울 볼 때 체크하는 5포인트".
 - 본문은 한 슬라이드당 2~3줄. 한 줄은 30자 이내 권장(자동 줄바꿈되지만 짧을수록 좋다).
+- ★ 줄바꿈은 의미 단위로 끊어라. 한 단어만 다음 줄로 떨어지지 않게, body 배열의 각 원소가 자연스러운 한 호흡이 되게 하라.
 - caption(슬라이드 하단 박스)은 그 슬라이드의 핵심을 한 문장으로 요약.
 
 JSON 구조 (순수 JSON만, 코드블록 금지):
@@ -150,7 +158,7 @@ JSON 구조 (순수 JSON만, 코드블록 금지):
       "body": ["구체적 내용 1", "구체적 내용 2"],
       "caption": "이 슬라이드 핵심 한 문장"}}
   ],
-  "caption_full": "인스타 캡션. (광고X)로 시작, 공감 도입 2줄, 관점 전환 1줄, 01~N 넘버링 요약, 마무리 슬로건, @bodetail_official 팔로우 유도",
+  "caption_full": "인스타 캡션. 첫 줄은 강한 후킹 한 문장(광고고지로 시작하지 말 것). 둘째 줄에 (광고 아님 · 저장 유도). 공감 도입 2줄, 관점 전환 1줄, 01~N 넘버링 요약, 마무리 슬로건, 댓글 유도 질문, @bodetail_official 팔로우 유도",
   "hashtags": "#bodetail #남자그루밍 #관련태그 (총 8~10개)"
 }}
 """
@@ -314,6 +322,32 @@ def apply_shadow_stack(photo=None):
     return Image.fromarray(arr2)
 
 # ══════════════════════════════════════════════════════════════
+# 5-B. ★추가: 본문 텍스트 안전지대 (Text Safe Zone)
+# ══════════════════════════════════════════════════════════════
+def apply_text_safezone(img, cover_to=0.58, strength=0.78):
+    """
+    ★ 본문 슬라이드 전용 텍스트 안전지대.
+    apply_shadow_stack 의 그라데이션은 '하단'만 어둡게 하지만, 본문 텍스트는
+    화면 '상단'부터 깔린다. 그 엇갈림 때문에 글자가 사진의 밝은 부분에 묻힌다.
+    → 본문 텍스트가 놓이는 상단~중단을 잉크블랙으로 한 겹 더 덮어 가독을 확보한다.
+
+    cover_to : 상단부터 이 비율까지는 균일하게 덮고, 그 아래로는 부드럽게 0으로 페이드.
+    strength : 최대 불투명도(0~1). 높을수록 사진이 덜 비치고 글자가 또렷.
+    """
+    arr = np.array(img, dtype=np.float32)
+    yv = np.linspace(0, 1, H)[:, None]                 # 0(위) → 1(아래)
+    feather = 0.14                                     # 경계 부드럽게 (칼선 방지)
+    m = np.where(
+        yv < cover_to, 1.0,
+        np.clip((cover_to + feather - yv) / feather, 0, 1)
+    ).astype(np.float32)
+    m = m * strength
+    mask = np.repeat(m, W, axis=1)[:, :, None]          # (H,W,1)
+    ink = np.array(DARK, dtype=np.float32)[None, None, :]
+    out = arr * (1 - mask) + ink * mask
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8))
+
+# ══════════════════════════════════════════════════════════════
 # 6. 공통 UI 드로잉 함수
 # ══════════════════════════════════════════════════════════════
 def draw_header(draw, sec, vol):
@@ -460,6 +494,7 @@ def render_cover(slide_data, photo):
 
 def render_content(slide_data, photo):
     img = apply_shadow_stack(photo)
+    img = apply_text_safezone(img)          # ★추가: 본문 안전지대 (가독성 핵심)
     draw = ImageDraw.Draw(img)
     sec = content["section_label"]
     vol = content.get("vol", "VOL.01")
@@ -484,7 +519,7 @@ def render_content(slide_data, photo):
             y += int(lh*0.5)
             continue
         for bl in wrap_text(draw, raw, bf, max_w):
-            draw.text((MAR_X, y), bl, font=bf, fill=MUTED)
+            draw.text((MAR_X, y), bl, font=bf, fill=BODY_LIGHT)   # ★변경: MUTED→BODY_LIGHT
             y += lh
 
     cap_txt = slide_data.get("caption", "")
@@ -499,8 +534,10 @@ def render_content(slide_data, photo):
     return img
 
 def render_content_double(sd1, sd2, photo):
-    """두 섹션을 한 슬라이드에"""
+    """두 섹션을 한 슬라이드에 (★기본 비활성화 — 1슬라이드 1포인트 원칙).
+       남겨두되 조합부에서 호출하지 않는다. 수동으로 쓸 때를 위해 안전지대는 적용."""
     img = apply_shadow_stack(photo)
+    img = apply_text_safezone(img, cover_to=0.74, strength=0.78)   # ★추가
     draw = ImageDraw.Draw(img)
     draw_header(draw, content["section_label"], content.get("vol","VOL.01"))
 
@@ -520,7 +557,7 @@ def render_content_double(sd1, sd2, photo):
             if raw == "":
                 y += int(lh*0.5); continue
             for bl in wrap_text(draw, raw, bf, max_w):
-                draw.text((MAR_X, y), bl, font=bf, fill=MUTED)
+                draw.text((MAR_X, y), bl, font=bf, fill=BODY_LIGHT)   # ★변경: MUTED→BODY_LIGHT
                 y += lh
         if idx == 0:
             y += 22; divline(draw, y); y += 32
@@ -538,7 +575,9 @@ def render_closing():
     draw_header(draw, content["section_label"], "")
 
     wf = fnt(SERIF_B, 88); cf = fnt(SANS_LT, 30)
-    wt = "bodetail"; ct = "Detail changes everything"
+    wt = "bodetail"
+    ct  = "남들이 놓치는 한 끗"                 # ★변경: 태그라인(한글 슬로건)
+    cta = "@bodetail_official 팔로우"          # ★추가: CTA (팔로우 유도)
     cx = W // 2
 
     # 워드마크 실제 글리프 bbox로 정확한 높이/중앙 계산
@@ -565,7 +604,12 @@ def render_closing():
     bot_bar_y = wm_bot + gap
     draw.rectangle([(cx-bar_w//2, bot_bar_y-2),(cx+bar_w//2, bot_bar_y+1)], fill=GOLD)
     # 태그라인
-    draw.text((cx - cgw//2 - cbb[0], bot_bar_y + 22), ct, font=cf, fill=(95,88,78))
+    draw.text((cx - cgw//2 - cbb[0], bot_bar_y + 22), ct, font=cf, fill=(150,140,124))
+    # ★추가: CTA (골드, 태그라인 아래)
+    ctaf = fnt(SANS_MED, 30)
+    ctab = draw.textbbox((0,0), cta, font=ctaf)
+    ctaw = ctab[2]-ctab[0]
+    draw.text((cx - ctaw//2 - ctab[0], bot_bar_y + 22 + 46), cta, font=ctaf, fill=GOLD_BRIGHT)
     return img
 
 # ══════════════════════════════════════════════════════════════
@@ -581,7 +625,7 @@ cover_data = next((s for s in slides_data if s["type"] == "cover"), {})
 rendered.append(("01_커버", render_cover(cover_data, photos[0] if photos else None)))
 
 # 콘텐츠 슬라이드 분배 (01~N번)
-# 1개씩 또는 2개씩 묶어서 (총 슬라이드 수에 맞게)
+# ★변경: 1슬라이드 1포인트 — 항상 single 렌더 (render_content_double 자동 호출 비활성화)
 i = 0
 slide_idx = 2
 while i < len(content_slides):
@@ -589,18 +633,10 @@ while i < len(content_slides):
     photo_idx = min(slide_idx - 1, len(photos) - 2)
     photo = photos[photo_idx] if photo_idx < len(photos) else None
 
-    # 다음 슬라이드도 content이면 2개 묶기 (공간 여유 판단)
-    if (i + 1 < len(content_slides) and
-        len(content_slides) > topic['num_slides'] - 2):
-        img = render_content_double(content_slides[i], content_slides[i+1], photo)
-        lbl = f"{slide_idx:02d}_{s.get('number','')}-{content_slides[i+1].get('number','')}"
-        rendered.append((lbl, img))
-        i += 2
-    else:
-        img = render_content(s, photo)
-        lbl = f"{slide_idx:02d}_{s.get('number',str(slide_idx))}"
-        rendered.append((lbl, img))
-        i += 1
+    img = render_content(s, photo)
+    lbl = f"{slide_idx:02d}_{s.get('number',str(slide_idx))}"
+    rendered.append((lbl, img))
+    i += 1
     slide_idx += 1
 
 # 마무리
