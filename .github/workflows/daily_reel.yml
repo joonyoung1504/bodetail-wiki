@@ -1,0 +1,96 @@
+name: 🎬 Daily Reel Generator
+
+on:
+  schedule:
+    # KST 오전 8시 = UTC 전날 23:00
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+    inputs:
+      day_override:
+        description: '주제 번호 (1-30), 비워두면 오늘 날짜 기준'
+        required: false
+        default: ''
+      mode_force:
+        description: '모드 강제 지정 (A=스톡/B=inbox), 비워두면 자동'
+        required: false
+        default: ''
+
+jobs:
+  generate-reel:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write    # 파일 커밋
+      id-token: write    # GitHub Token
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 시스템 패키지 설치
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            ffmpeg \
+            fonts-noto-cjk \
+            fonts-noto-cjk-extra \
+            --no-install-recommends
+          echo "✅ FFmpeg: $(ffmpeg -version | head -1)"
+          echo "✅ 폰트: $(fc-list | grep -i 'noto.*cjk' | wc -l)개"
+
+      - name: Python 패키지 설치
+        run: |
+          pip install --quiet \
+            anthropic \
+            requests \
+            Pillow \
+            numpy
+
+      - name: videos/inbox 폴더 준비
+        run: |
+          mkdir -p videos/inbox/done
+          mkdir -p reels/latest
+          mkdir -p content
+          echo "📂 inbox 영상 수: $(ls videos/inbox/*.mp4 2>/dev/null | wc -l)"
+
+      - name: 릴스 생성
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PEXELS_API_KEY:    ${{ secrets.PEXELS_API_KEY }}
+          IG_USER_ID:        ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN:   ${{ secrets.IG_ACCESS_TOKEN }}
+          GITHUB_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
+          REPO:              ${{ github.repository }}
+          DAY_OVERRIDE:      ${{ inputs.day_override }}
+        run: python generate_daily_reel.py
+
+      - name: 결과물 커밋
+        run: |
+          git config user.name  "bodetail-bot"
+          git config user.email "bot@bodetail.com"
+          git add reels/ videos/ content/
+          git diff --staged --quiet && echo "변경 없음" || \
+            git commit -m "🎬 $(date +%Y-%m-%d -d '+9 hours') 릴스 자동생성"
+          git push
+
+      - name: 결과 요약
+        if: always()
+        run: |
+          echo "## 🎬 릴스 생성 결과" >> $GITHUB_STEP_SUMMARY
+          if [ -f reels/latest/reel_final.mp4 ]; then
+            SIZE=$(du -sh reels/latest/reel_final.mp4 | cut -f1)
+            echo "- ✅ reel_final.mp4 ($SIZE)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ 영상 생성 실패" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f reels/latest/thumbnail_1080x1440.png ]; then
+            echo "- ✅ thumbnail_1080x1440.png" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f reels/latest/caption.txt ]; then
+            echo "- ✅ caption.txt" >> $GITHUB_STEP_SUMMARY
+            echo "### 캡션 미리보기" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            head -5 reels/latest/caption.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
