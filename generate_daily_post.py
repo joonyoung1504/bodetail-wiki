@@ -336,7 +336,7 @@ def search_pexels(query, orientation="portrait"):
         r = requests.get(
             "https://api.pexels.com/v1/search",
             headers={"Authorization": PEXELS_KEY},
-            params={"query":q,"orientation":orientation,"size":"large","per_page":15},
+            params={"query":q,"orientation":orientation,"size":"large","per_page":20},
             timeout=10
         )
         return [(p["id"], p["src"]["large2x"]) for p in r.json().get("photos",[])]
