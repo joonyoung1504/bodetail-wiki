@@ -56,7 +56,7 @@ SERIF_B   = "/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"
 def fnt(p, s): return ImageFont.truetype(p, s)
 
 # API 키
-ANTHROPIC_KEY  = os.environ["ANTHROPIC_API_KEY"]
+ANTHROPIC_KEY  = os.environ["ANTROPIC_API_KEY"]
 PEXELS_KEY     = os.environ.get("PEXELS_API_KEY", "")
 IG_USER_ID     = os.environ.get("IG_USER_ID", "")
 IG_TOKEN       = os.environ.get("IG_ACCESS_TOKEN", "")
