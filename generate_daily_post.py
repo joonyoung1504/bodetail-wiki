@@ -58,6 +58,14 @@ MAR_X, MAR_Y = 84, 92
 # Claude가 image_query를 잘못 만들어도 이 테이블이 최종 보정한다
 SUBJECT_RULES = [
     # (감지 키워드들,  강제 image_queries 3개)
+    # ★ 규칙: 더 구체적인 것이 앞에 — 겹치는 키워드("건조" 등)가 있을 때 올바른 룰이 먼저 매칭
+
+    # 입술·립밤 (건조/갈라진 포함 — 핸드크림보다 앞에 있어야 우선 매칭됨)
+    ({"립밤","lip balm","입술","립","립케어","balm","건조","갈라진","입꼬리"},
+     ["man face closeup dark moody",
+      "male jawline portrait dark editorial",
+      "men face skin dark cinematic"]),
+
     ({"손톱","nail","nails","손끝","길이","3mm","2mm","파일"},
      ["man clean trimmed nails closeup dark",
       "male hand nails grooming moody",
@@ -68,7 +76,7 @@ SUBJECT_RULES = [
       "male hands grooming detail moody",
       "men hands care closeup dark"]),
 
-    ({"핸드크림","hand cream","핸드 크림","moisturizer","보습","건조","갈라진"},
+    ({"핸드크림","hand cream","핸드 크림","moisturizer","보습","핸드 로션"},
      ["man applying hand cream dark moody",
       "male hands moisturizer luxury dark",
       "men hand lotion applying closeup"]),
@@ -112,6 +120,41 @@ SUBJECT_RULES = [
      ["man leather shoes dark cinematic",
       "male dress shoes dark moody",
       "men footwear editorial dark"]),
+
+    ({"치아","양치","구강","치실","whitening","치약"},
+     ["man portrait dark moody closeup",
+      "male face editorial dark",
+      "men grooming bathroom dark"]),
+
+    ({"눈썹","눈매","브로우","brow","eyebrow"},
+     ["man eyes closeup dark moody",
+      "male face portrait dark editorial",
+      "men eyebrow grooming closeup"]),
+
+    ({"귀","목","neck","ear","턱"},
+     ["man neck jawline dark cinematic",
+      "male portrait side dark moody",
+      "men profile face dark editorial"]),
+
+    ({"코","콧볼","T존","모공","pore","블랙헤드"},
+     ["man face skin pores closeup dark",
+      "male nose skin closeup moody",
+      "men face editorial dark cinematic"]),
+
+    ({"수면","피로","잠","sleep"},
+     ["man tired face dark moody",
+      "male face closeup dark editorial",
+      "men morning routine dark cinematic"]),
+
+    ({"운동","gym","헬스","근육","workout","body","몸"},
+     ["man gym workout dark moody",
+      "male fitness body dark cinematic",
+      "men training dark editorial"]),
+
+    ({"식단","단백질","음식","food","meal","diet"},
+     ["man meal prep dark moody",
+      "male healthy food dark cinematic",
+      "men nutrition dark editorial"]),
 ]
 
 def subject_override(slide: dict) -> list | None:
@@ -303,7 +346,11 @@ USED_FILE  = Path("content/used_photos.json")
 FEMALE_WORDS = {
     "woman","women","female","girl","girls","ladies","lady",
     "nail","nails","ring","rings","flower","flowers","floral",
-    "feminine","pink","makeup","cosmetic","cosmetics","beauty"
+    "feminine","pink","makeup","cosmetic","cosmetics","beauty",
+    # ★ 추가: 입술 관련 — Pexels에서 lip 검색 = 여성 사진 압도적
+    "lip","lips","lipstick","lipgloss","lipbalm",
+    # ★ 추가: 기타 여성성 키워드
+    "skincare routine girl","blush","mascara","eyeliner","foundation"
 }
 
 def sanitize_query(q: str) -> str:
@@ -336,7 +383,7 @@ def search_pexels(query, orientation="portrait"):
         r = requests.get(
             "https://api.pexels.com/v1/search",
             headers={"Authorization": PEXELS_KEY},
-            params={"query":q,"orientation":orientation,"size":"large","per_page":20},
+            params={"query":q,"orientation":orientation,"size":"large","per_page":15},
             timeout=10
         )
         return [(p["id"], p["src"]["large2x"]) for p in r.json().get("photos",[])]
