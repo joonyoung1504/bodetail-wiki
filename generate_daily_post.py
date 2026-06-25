@@ -10,14 +10,13 @@ generate_daily_post.py  — bodetail 일일 게시물 완전 자동화
 
 의존성: pip install anthropic requests Pillow numpy
 
-★ 2026-06-24 v4:
-  1. 제목 톤 강화 — "말해버린다" 류 구어체 금지.
-     선언적·묵직한 문장 강제 ("손이 모든 걸 결정한다" 형식)
-  2. 사진-내용 매칭 정밀화:
-     - Claude가 슬라이드 주제에 맞는 image_query 3개를 우선순위 순으로 생성
-     - 첫번째 쿼리 실패 시 두번째→세번째 자동 폴백
-     - 주제별 오브제 사전(TOPIC_PHOTO_MAP) 추가 — 추상 주제도 적절한 오브제로 변환
-     - 남성 이미지 필터(sanitize_query) 그대로 유지
+★ 2026-06-25 v5:
+  1. SUBJECT_RULES — 슬라이드 본문 키워드로 필수 피사체 강제
+     (손톱→hands/nails, 핸드크림→hand cream applying, 큐티클→hands closeup 등)
+     Claude image_query만으로 해결 안 되는 부분을 코드 레벨에서 재작성
+  2. 동작 키워드 포함 — "applying" / "moisturizer" 등 제품+손 동시 등장 유도
+  3. PICK 섹션 전용 render_pick() 추가 — 제품 추천 게시물 템플릿
+     rating stars, 제품명, 가격대, 한줄평, 구매포인트 레이아웃
 """
 
 import os, json, re, requests, io
@@ -32,11 +31,11 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 KST   = timezone(timedelta(hours=9))
 TODAY = datetime.now(KST)
 DATE  = TODAY.strftime("%Y-%m-%d")
-
-W, H = 1080, 1440
+W, H  = 1080, 1440
 
 DARK=(8,6,4); INK=(12,12,12); GOLD=(176,132,74); GOLD_BRIGHT=(200,154,92)
 CREAM=(237,230,216); WHITE=(245,244,240); BODY_LIGHT=(226,221,210)
+GOLD_D=(100,72,35)
 
 SANS_BLK  = "/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc"
 SANS_BOLD = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
@@ -51,6 +50,81 @@ def tw(d, t, f): b=d.textbbox((0,0),t,font=f); return b[2]-b[0]
 def th(d, t, f): b=d.textbbox((0,0),t,font=f); return b[3]-b[1]
 
 MAR_X, MAR_Y = 84, 92
+
+# ══════════════════════════════════════════════════════════════
+# 1-B. ★ 주제별 필수 피사체 규칙 (코드 레벨 강제)
+# ══════════════════════════════════════════════════════════════
+# subhead / body 텍스트에서 키워드가 감지되면 해당 image_queries를 덮어씀
+# Claude가 image_query를 잘못 만들어도 이 테이블이 최종 보정한다
+SUBJECT_RULES = [
+    # (감지 키워드들,  강제 image_queries 3개)
+    ({"손톱","nail","nails","손끝","길이","3mm","2mm","파일"},
+     ["man clean trimmed nails closeup dark",
+      "male hand nails grooming moody",
+      "men hands fingers closeup dark"]),
+
+    ({"큐티클","cuticle","큐티클 정리","밀기"},
+     ["man cuticle care hands closeup dark",
+      "male hands grooming detail moody",
+      "men hands care closeup dark"]),
+
+    ({"핸드크림","hand cream","핸드 크림","moisturizer","보습","건조","갈라진"},
+     ["man applying hand cream dark moody",
+      "male hands moisturizer luxury dark",
+      "men hand lotion applying closeup"]),
+
+    ({"향수","cologne","perfume","fragrance","냄새","향"},
+     ["men cologne bottle dark cinematic",
+      "man perfume luxury dark moody",
+      "male fragrance bottle editorial dark"]),
+
+    ({"면도","shaving","髭","수염","shave"},
+     ["man shaving dark editorial",
+      "male razor shaving moody",
+      "men grooming shave dark cinematic"]),
+
+    ({"피부","스킨케어","세럼","에센스","토너","로션","skin","toner"},
+     ["man skincare serum dark moody",
+      "male face skin closeup editorial",
+      "men skincare routine dark cinematic"]),
+
+    ({"시계","watch","wristwatch"},
+     ["man wristwatch dark cinematic",
+      "male luxury watch moody",
+      "men watch leather dark editorial"]),
+
+    ({"슈트","suit","재킷","jacket","넥타이","tie"},
+     ["man suit dark editorial",
+      "male formal suit moody cinematic",
+      "men jacket dark professional"]),
+
+    ({"헤어","머리","hair","두피","샴푸"},
+     ["man hair dark editorial moody",
+      "male hairstyle dark cinematic",
+      "men hair grooming dark"]),
+
+    ({"눈","다크서클","부기","아이크림","eye"},
+     ["man face closeup eyes dark moody",
+      "male dark circles eye care",
+      "men face skin closeup editorial"]),
+
+    ({"신발","shoes","구두","leather"},
+     ["man leather shoes dark cinematic",
+      "male dress shoes dark moody",
+      "men footwear editorial dark"]),
+]
+
+def subject_override(slide: dict) -> list | None:
+    """슬라이드 텍스트에서 주제 키워드 감지 → 강제 image_queries 반환. 없으면 None."""
+    text = " ".join([
+        slide.get("subhead",""),
+        " ".join(slide.get("body",[])),
+        slide.get("caption",""),
+    ]).lower()
+    for keywords, queries in SUBJECT_RULES:
+        if any(k.lower() in text for k in keywords):
+            return queries
+    return None
 
 # ══════════════════════════════════════════════════════════════
 # 2. 주제 로드
@@ -83,8 +157,9 @@ sec_code = topic.get("section","DETAIL")
 topic["section_label_ko"] = SECTION_KO.get(sec_code, "오늘의 디테일")
 same_sec = [t for t in schedule["topics"] if t.get("section")==sec_code and t["day"]<=day_num]
 topic["vol_no"] = f"VOL.{len(same_sec):02d}"
+is_pick = (sec_code == "PICK")
 
-print(f"📅 {DATE} | DAY {day_num} | [{sec_code}] {topic['title_main']}")
+print(f"📅 {DATE} | DAY {day_num} | [{sec_code}{'·PICK' if is_pick else ''}] {topic['title_main']}")
 OUT = Path(f"posts/{DATE}_day{day_num:02d}")
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -111,7 +186,45 @@ SYSTEM = f"""너는 bodetail 인스타그램 콘텐츠 매니저야.
 {voice_md[:2000]}
 """
 
-USER = f"""오늘 게시물을 JSON으로 만들어줘.
+# PICK 섹션 전용 프롬프트
+PICK_USER = f"""오늘은 제품 추천(PICK) 게시물이야. JSON으로 만들어줘.
+
+주제: {topic['title_main']}
+섹션: PICK
+
+★★ PICK 게시물 원칙 ★★
+- 우리는 제품을 파는 게 아니라 '안목 있는 에디터'가 큐레이션하는 거다.
+- 광고처럼 보이면 실패. "이게 왜 좋은지"를 명확히, 짧게.
+- 추천 제품은 실제 존재하는 남성 그루밍 제품으로 (핸드크림, 향수, 면도, 스킨케어 등).
+- 가격대는 현실적으로 (2만원~15만원 선).
+- 각 제품 슬라이드는 1개 제품만. 별점은 5점 만점 기준.
+
+JSON 구조 (순수 JSON만):
+{{
+  "section_label": "오늘의 PICK",
+  "vol": "VOL.01",
+  "slides": [
+    {{"slide_num": 1, "type": "cover",
+      "headline_sub": "에디터의 한 줄 이유",
+      "headline_main": ["제품 카테고리", "큐레이션 제목"],
+      "headline_serif": "이달의 추천 N선",
+      "image_queries": ["men grooming product dark moody", "male skincare luxury dark", "men cologne bottle cinematic"]}},
+    {{"slide_num": 2, "type": "pick",
+      "number": "01",
+      "product_name": "제품명 (브랜드 포함)",
+      "price": "가격대 (예: 3만원대)",
+      "stars": 4,
+      "one_line": "한 줄 픽 이유 (15자 이내)",
+      "body": ["구매 포인트 1", "구매 포인트 2"],
+      "caption": "이 제품 핵심 선언.",
+      "image_queries": ["men face cream luxury dark", "male skincare product moody", "men grooming cream dark"]}}
+  ],
+  "caption_full": "캡션. 첫 줄 강한 후킹. (광고 아님·저장 유도). 큐레이션 이유, 제품 요약, @bodetail_official 팔로우",
+  "hashtags": "#bodetail #남자그루밍 #관련태그 (8~10개)"
+}}
+"""
+
+CONTENT_USER = f"""오늘 게시물을 JSON으로 만들어줘.
 
 주제: {topic['title_main']}
 섹션: {topic['section']}
@@ -119,13 +232,11 @@ USER = f"""오늘 게시물을 JSON으로 만들어줘.
 슬라이드수: {topic['num_slides']}
 
 ★★ 제목·헤드라인 원칙 ★★
-bodetail은 감도 있는 남성 무드 매거진이다. 제목은 다음을 반드시 지켜라:
 - 선언적이고 묵직하게. 읽는 순간 '맞다'고 느끼게.
   좋은 예: "손이 모든 걸 결정한다" / "디테일이 인상을 만든다" / "손끝이 첫인상이다"
-  나쁜 예: "손이 다 말해버린다"(구어체 과잉) / "손이 중요해요"(약함) / "손 관리 팁"(밋밋)
+  나쁜 예: "손이 다 말해버린다"(구어체 과잉) / "손이 중요해요"(약함)
 - 숫자가 들어가면 강해진다: "아무도 안 알려준 손 디테일 5"
-- 역설·반전이 있으면 더 강하다: "관리를 티 내지 않는 게 진짜 관리다"
-- 커버 headline_main은 2~3줄, 한 줄 8자 이내가 임팩트 있다.
+- 커버 headline_main은 2~3줄, 한 줄 8자 이내.
 
 ★★ 콘텐츠 원칙 ★★
 - 독자가 반드시 '얻어가는 것'이 있어야 한다. 추상적 동기부여 금지.
@@ -133,26 +244,18 @@ bodetail은 감도 있는 남성 무드 매거진이다. 제목은 다음을 반
 - 본문 2~3줄. 한 줄 25자 이내. 줄바꿈은 의미 단위로.
 - caption: 그 슬라이드 핵심을 한 문장으로, 선언형으로.
 
-★★ image_queries — 사진-내용 일치가 가장 중요 ★★
-각 슬라이드마다 그 슬라이드 '내용'에 정확히 맞는 사진을 부를 영어 검색어 3개를
-우선순위 순으로 만들어라. 첫번째가 가장 정확한 피사체, 세번째는 넓은 폴백.
-
+★★ image_queries — 피사체 일치가 핵심 ★★
+각 슬라이드 내용에 정확히 맞는 검색어 3개를 우선순위 순으로.
 규칙:
-1. 검색어에 반드시 "man" 또는 "male" 또는 "men" 중 하나 포함.
-2. 여성·네일아트·반지·꽃 등 여성성 키워드 절대 금지.
-3. 피사체 = '사진으로 존재할 법한 구체적 오브제나 장면'으로 번역.
-   냄새(추상) → "men cologne bottle dark" / "man hands soap dark" (구체 오브제)
-   타이밍(추상) → "man wristwatch closeup dark" / "men luxury watch moody"
-4. 항상 톤 키워드: dark / moody / cinematic / editorial 중 하나 포함.
-5. 슬라이드마다 다른 피사체 (중복 방지).
-
-image_queries 예시:
-  손톱 길이 → ["man clean nails closeup dark", "male hand grooming moody", "men hands dark editorial"]
-  큐티클 → ["male hand care closeup moody", "man cuticle grooming dark", "men hands dark cinematic"]
-  핸드크림 → ["men hand cream luxury dark", "male hands moisturizer moody", "man hands care dark"]
-  냄새 → ["men cologne bottle dark", "man soap hands dark moody", "male grooming products cinematic"]
-  면접 → ["man suit dark editorial", "male professional dark moody", "men formal attire cinematic"]
-  커버(전체) → ["man portrait dark studio", "male dark editorial cinematic", "men moody portrait dark"]
+1. "man"/"male"/"men" 반드시 포함.
+2. 여성·네일아트·반지·꽃 키워드 금지.
+3. 피사체를 구체 오브제나 동작으로 번역:
+   핸드크림 → "man applying hand cream dark"  (동작 포함)
+   손톱 → "man clean nails hands closeup dark"  (신체부위 포함)
+   냄새 → "men cologne bottle dark"  (오브제 포함)
+   면접 → "man suit dark editorial"
+4. 톤 키워드(dark/moody/cinematic/editorial) 반드시 포함.
+5. 슬라이드마다 다른 피사체.
 
 JSON 구조 (순수 JSON만, 코드블록 금지):
 {{
@@ -160,17 +263,17 @@ JSON 구조 (순수 JSON만, 코드블록 금지):
   "vol": "VOL.01",
   "slides": [
     {{"slide_num": 1, "type": "cover",
-      "headline_sub": "맥락 한 줄 (짧고 선명하게)",
+      "headline_sub": "맥락 한 줄",
       "headline_main": ["묵직한", "선언형", "제목"],
-      "headline_serif": "구체적 약속 (예: 아무도 안 알려준 손 디테일 5)",
-      "image_queries": ["man dark studio portrait", "male editorial dark cinematic", "men moody dark portrait"]}},
+      "headline_serif": "구체적 약속",
+      "image_queries": ["man dark studio portrait", "male editorial dark", "men moody portrait"]}},
     {{"slide_num": 2, "type": "content", "number": "01",
       "subhead": "선언형 핵심 팁 제목",
       "body": ["구체 내용 1", "구체 내용 2"],
       "caption": "핵심 선언 한 문장.",
-      "image_queries": ["man clean nails closeup dark", "male hand grooming moody", "men hands dark editorial"]}}
+      "image_queries": ["man clean nails hands closeup dark", "male hand grooming moody", "men hands dark editorial"]}}
   ],
-  "caption_full": "인스타 캡션. 첫 줄 강한 후킹(광고고지 금지). 둘째 줄 (광고 아님·저장 유도). 공감 2줄, 관점 전환 1줄, 01~N 요약, 슬로건, 댓글 유도, @bodetail_official 팔로우",
+  "caption_full": "캡션. 첫 줄 강한 후킹(광고고지 금지). (광고 아님·저장 유도). 공감 2줄, 관점 전환 1줄, 01~N 요약, 슬로건, 댓글 유도, @bodetail_official 팔로우",
   "hashtags": "#bodetail #남자그루밍 #관련태그 (8~10개)"
 }}
 """
@@ -178,7 +281,8 @@ JSON 구조 (순수 JSON만, 코드블록 금지):
 print("🤖 Claude 콘텐츠 생성 중...")
 msg = client.messages.create(
     model="claude-sonnet-4-6", max_tokens=4096,
-    system=SYSTEM, messages=[{"role":"user","content":USER}]
+    system=SYSTEM,
+    messages=[{"role":"user","content": PICK_USER if is_pick else CONTENT_USER}]
 )
 raw = msg.content[0].text.strip()
 raw = re.sub(r'^```json\s*','',raw); raw = re.sub(r'\s*```$','',raw)
@@ -191,12 +295,11 @@ print("✅ 콘텐츠 생성 완료")
     f"{content['caption_full']}\n\n{content['hashtags']}", encoding="utf-8")
 
 # ══════════════════════════════════════════════════════════════
-# 4. Pexels — 3단 폴백 + 남성 이미지 필터 + 중복 회피
+# 4. Pexels — 주제 보정 + 3단 폴백 + 남성 필터 + 중복 회피
 # ══════════════════════════════════════════════════════════════
 PEXELS_KEY = os.environ.get("PEXELS_API_KEY","")
 USED_FILE  = Path("content/used_photos.json")
 
-# ★ 남성 이미지 보장 필터
 FEMALE_WORDS = {
     "woman","women","female","girl","girls","ladies","lady",
     "nail","nails","ring","rings","flower","flowers","floral",
@@ -204,7 +307,6 @@ FEMALE_WORDS = {
 }
 
 def sanitize_query(q: str) -> str:
-    """여성 키워드 제거 + 남성 키워드 보장 + 톤 키워드 보장"""
     words = q.lower().split()
     words = [w for w in words if w not in FEMALE_WORDS]
     if not any(w in {"man","male","men"} for w in words):
@@ -242,17 +344,11 @@ def search_pexels(query, orientation="portrait"):
         print(f"⚠️ Pexels({q[:24]}): {e}"); return []
 
 def pick_photo(queries: list) -> tuple:
-    """
-    3단 폴백: 쿼리를 순서대로 시도하며 과거·세션 미사용 사진을 찾는다.
-    모두 중복이면 첫 쿼리 첫 결과로 폴백.
-    """
     fallback = None
     for q in queries:
         for pid, url in search_pexels(q):
-            if fallback is None:
-                fallback = (pid, url)
-            if pid in recent_used or pid in session_used:
-                continue
+            if fallback is None: fallback = (pid, url)
+            if pid in recent_used or pid in session_used: continue
             return pid, url
     return fallback if fallback else (None, None)
 
@@ -268,33 +364,37 @@ def smart_crop(img):
     scale = max(W/ow, H/oh)
     nw, nh = int(ow*scale+1), int(oh*scale+1)
     img = img.resize((nw,nh), Image.LANCZOS)
-    left = (nw-W)//2
-    top  = int((nh-H)*0.35)
+    left = (nw-W)//2; top = int((nh-H)*0.35)
     return img.crop((max(0,min(left,nw-W)), max(0,min(top,nh-H)),
                      max(0,min(left,nw-W))+W, max(0,min(top,nh-H))+H))
 
 def fetch_for(slide, hardcoded_fallback):
     """
-    슬라이드의 image_queries(3개) 순서대로 시도.
-    Claude가 image_query(단수)만 줬을 경우에도 호환.
+    ★ 핵심: subject_override 먼저 적용 → 있으면 Claude 쿼리를 덮어씀
+    없으면 Claude가 만든 image_queries 사용
     """
-    qs = slide.get("image_queries") or []
-    if not qs:
-        single = (slide.get("image_query") or "").strip()
-        qs = [single] if single else []
-    qs += [hardcoded_fallback, "man dark moody cinematic editorial"]
+    # 1순위: 주제 키워드 감지로 강제 덮어쓰기
+    forced = subject_override(slide)
+    if forced:
+        qs = forced
+        print(f"    → 주제 보정 적용: {qs[0][:30]}")
+    else:
+        qs = slide.get("image_queries") or []
+        if not qs:
+            single = (slide.get("image_query") or "").strip()
+            qs = [single] if single else []
 
+    qs += [hardcoded_fallback, "man dark moody cinematic editorial"]
     pid, url = pick_photo(qs)
-    if pid is None:
-        return None
+    if pid is None: return None
     session_used.append(pid)
     img = download_image(url)
     return smart_crop(img) if img else None
 
-print("📸 슬라이드별 남성 이미지 검색 중...")
+print("📸 슬라이드별 이미지 검색 중...")
 slides_data    = content.get("slides",[])
 cover_data     = next((s for s in slides_data if s["type"]=="cover"), {})
-content_slides = [s for s in slides_data if s["type"]=="content"]
+content_slides = [s for s in slides_data if s["type"] in ("content","pick")]
 
 topic_fb = f"{topic.get('image_search','editorial men')} dark"
 cover_data["_photo"] = fetch_for(cover_data, topic_fb)
@@ -306,7 +406,7 @@ for s in content_slides:
 save_used(used_history + session_used)
 
 # ══════════════════════════════════════════════════════════════
-# 5. 이미지 처리 — 이미지2 수준 침잠된 무드
+# 5. 이미지 처리
 # ══════════════════════════════════════════════════════════════
 def apply_dark_mood(photo=None):
     if photo is not None:
@@ -318,7 +418,7 @@ def apply_dark_mood(photo=None):
         base = gray[:,:,None]*0.62 + base*0.38
         base *= 0.88
     else:
-        base = np.zeros((H,W,3),dtype=np.float32); base[:] = list(DARK)
+        base = np.zeros((H,W,3),dtype=np.float32); base[:]=list(DARK)
         Xg,Yg = np.meshgrid(np.arange(W),np.arange(H))
         d = np.sqrt(((Xg-W*0.52)/320.)**2+((Yg-H*0.56)/360.)**2)
         g = np.clip(1-d,0,1)*0.28
@@ -326,17 +426,14 @@ def apply_dark_mood(photo=None):
 
     ink = np.array(DARK,dtype=np.float32)[None,None,:]
     base = base*0.58 + ink*0.42
-
     yv = np.linspace(0,1,H)[:,None]
     fade = np.clip((yv-0.48)/0.52,0,1)**1.5*0.65
     mask = np.repeat(fade[:,:,None],W,axis=1)
     base = base*(1-mask)+ink*mask
-
     Xg,Yg = np.meshgrid(np.arange(W),np.arange(H)); cx,cy=W/2,H/2
     dist = np.sqrt(((Xg-cx)/cx)**2+((Yg-cy)/cy)**2)
     vig = np.clip((dist-0.55)/0.75,0,1)**1.5*0.60
     base = base*(1-vig[:,:,None])
-
     out = np.clip(base,0,255).astype(np.uint8)
     arr2 = np.array(Image.fromarray(out),dtype=np.int16)
     noise = np.random.randint(-8,8,arr2.shape,dtype=np.int16)
@@ -363,7 +460,7 @@ def bottom_scrim(img, ratio=0.48, strength=0.70):
     return Image.fromarray(np.clip(arr*(1-mask)+ink*mask,0,255).astype(np.uint8))
 
 # ══════════════════════════════════════════════════════════════
-# 6. 드로잉 헬퍼 (외곽선 ZERO)
+# 6. 드로잉 헬퍼
 # ══════════════════════════════════════════════════════════════
 def ptext(draw, xy, text, font, fill):
     draw.text(xy, text, font=font, fill=fill)
@@ -498,6 +595,68 @@ def render_content(slide_data):
     draw_sig(draw)
     return img
 
+def render_pick(slide_data):
+    """
+    ★ PICK 전용 템플릿 — 제품 추천 슬라이드
+    레이아웃: 넘버박스 / 제품명(크게) / 별점 / 가격 / 한줄픽이유 / 본문 / 캡션박스
+    사진은 하단 50% — 제품 오브제가 은은하게 보이도록
+    """
+    img=apply_dark_mood(slide_data.get("_photo"))
+    # PICK은 상단 60%를 더 어둡게 — 텍스트 공간 확보
+    img=text_scrim(img, MAR_Y-30, int(H*0.60), strength=0.65)
+    max_w=W-MAR_X*2
+    draw=ImageDraw.Draw(img)
+    draw_header(draw,content["section_label"],content.get("vol","VOL.01"))
+
+    y=MAR_Y+70
+    n=slide_data.get("number","")
+    if n: y=numbox(draw,n,MAR_X,y)
+
+    # 제품명
+    pf=fnt(SANS_BOLD,54)
+    product=slide_data.get("product_name","")
+    for pl in wrap_text(draw,product,pf,max_w):
+        ptext(draw,(MAR_X,y),pl,pf,WHITE); y+=int(54*1.22)
+    y+=16
+
+    # 별점 ★★★★☆
+    stars=int(slide_data.get("stars",4))
+    star_str = "★"*stars + "☆"*(5-stars)
+    sf2=fnt(SANS_MED,38)
+    ptext(draw,(MAR_X,y),star_str,sf2,GOLD); y+=int(38*1.3)
+
+    # 가격 + 한줄 픽 이유
+    price=slide_data.get("price","")
+    one_line=slide_data.get("one_line","")
+    mf2=fnt(SANS_LT,34)
+    if price:
+        ptext(draw,(MAR_X,y),f"{price}  ·  {one_line}",mf2,(*CREAM,210)); y+=int(34*1.5)
+    y+=20
+
+    # 구매 포인트
+    bf=fnt(SANS_REG,37)
+    for raw in slide_data.get("body",[]):
+        for bl in wrap_text(draw,raw,bf,max_w):
+            ptext(draw,(MAR_X,y),f"— {bl}",bf,BODY_LIGHT); y+=int(37*1.62)
+
+    # 캡션 박스
+    cap_txt=slide_data.get("caption","")
+    if cap_txt:
+        cf=fnt(SANS_MED,33)
+        cap_lines=wrap_text(draw,cap_txt,cf,max_w-44)
+        lh=int(33*1.4); ch=len(cap_lines)*lh+30; cy=H-MAR_Y-ch-8
+        ov=Image.new("RGBA",(W,H),(0,0,0,0)); od=ImageDraw.Draw(ov)
+        od.rectangle([(MAR_X,cy),(W-MAR_X,cy+ch)],fill=(*DARK,185))
+        od.rectangle([(MAR_X,cy),(MAR_X+6,cy+ch)],fill=(*GOLD,255))
+        img=Image.alpha_composite(img.convert("RGBA"),ov).convert("RGB")
+        draw=ImageDraw.Draw(img)
+        ty=cy+16
+        for cl in cap_lines:
+            ptext(draw,(MAR_X+22,ty),cl,cf,WHITE); ty+=lh
+
+    draw_sig(draw)
+    return img
+
 def render_closing():
     arr=np.zeros((H,W,3),dtype=np.uint8); arr[:]=list(DARK)
     noise=np.random.randint(-8,8,arr.shape,dtype=np.int16)
@@ -509,10 +668,10 @@ def render_closing():
     wt="bodetail"; ct="남들이 놓치는 한 끗"; cta="@bodetail_official 팔로우"
     cx=W//2
     wbb=draw.textbbox((0,0),wt,font=wf); wgw=wbb[2]-wbb[0]; wgh=wbb[3]-wbb[1]
-    cbb=draw.textbbox((0,0),ct,font=cf);  cgw=cbb[2]-cbb[0]
+    cbb=draw.textbbox((0,0),ct,font=cf); cgw=cbb[2]-cbb[0]
     bar_w=64; gap=40
     wm_x=cx-wgw//2-wbb[0]; wm_y=H//2-wgh//2-wbb[1]
-    wm_top=H//2-wgh//2;     wm_bot=H//2+wgh//2
+    wm_top=H//2-wgh//2; wm_bot=H//2+wgh//2
     draw.rectangle([(cx-bar_w//2,wm_top-gap-2),(cx+bar_w//2,wm_top-gap+1)],fill=GOLD)
     draw.text((wm_x,wm_y),wt,font=wf,fill=CREAM)
     bot_bar_y=wm_bot+gap
@@ -530,7 +689,12 @@ rendered.append(("01_커버", render_cover(cover_data)))
 
 slide_idx=2
 for s in content_slides:
-    rendered.append((f"{slide_idx:02d}_{s.get('number',str(slide_idx))}", render_content(s)))
+    stype = s.get("type","content")
+    if stype == "pick":
+        img = render_pick(s)
+    else:
+        img = render_content(s)
+    rendered.append((f"{slide_idx:02d}_{s.get('number',str(slide_idx))}", img))
     slide_idx+=1
 
 rendered.append((f"{slide_idx:02d}_마무리", render_closing()))
