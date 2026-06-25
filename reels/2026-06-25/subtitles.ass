@@ -1,0 +1,20 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Main,Noto Sans CJK KR,68,&H00FFFFFF,&H000000FF,&H00000000,&HC0000000,1,0,0,0,100,100,0,0,3,3,0,2,40,40,80,1
+Style: Small,Noto Sans CJK KR,48,&H00EDE6D8,&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,3,2,0,2,40,40,60,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.00,0:00:04.00,Main,,0,0,0,,거울 보는데 왜 허점이 생길까
+Dialogue: 0,0:00:04.00,0:00:08.00,Main,,0,0,0,,남자가 놓치는 5곳 있다
+Dialogue: 0,0:00:08.00,0:00:11.00,Main,,0,0,0,,① 귀 뒤 · 목선 라인
+Dialogue: 0,0:00:11.00,0:00:14.00,Main,,0,0,0,,② 눈썹 꼬리 · 미간
+Dialogue: 0,0:00:14.00,0:00:17.00,Main,,0,0,0,,③ 코털 · 콧볼 피지
+Dialogue: 0,0:00:17.00,0:00:20.00,Main,,0,0,0,,④ 입꼬리 · 인중 털
+Dialogue: 0,0:00:20.00,0:00:24.00,Main,,0,0,0,,이 5곳이 인상 전체를 바꾼다
