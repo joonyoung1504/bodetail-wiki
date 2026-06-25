@@ -42,7 +42,7 @@ jobs:
       - name: Python 패키지 설치
         run: |
           pip install --quiet \
-            antropic \
+            anthropic \
             requests \
             Pillow \
             numpy
