@@ -56,7 +56,7 @@ jobs:
 
       - name: 릴스 생성
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTROPIC_API_KEY: ${{ secrets.ANTROPIC_API_KEY }}
           PEXELS_API_KEY:    ${{ secrets.PEXELS_API_KEY }}
           IG_USER_ID:        ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN:   ${{ secrets.IG_ACCESS_TOKEN }}
