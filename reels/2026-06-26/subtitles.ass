@@ -1,0 +1,20 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Main,Noto Sans CJK KR,68,&H00FFFFFF,&H000000FF,&H00000000,&HC0000000,1,0,0,0,100,100,0,0,3,3,0,2,40,40,80,1
+Style: Small,Noto Sans CJK KR,48,&H00EDE6D8,&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,3,2,0,2,40,40,60,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:00.00,0:00:04.00,Main,,0,0,0,,거울 보는데 왜 못 보냐
+Dialogue: 0,0:00:04.00,0:00:07.00,Main,,0,0,0,,진짜 봐야 할 5곳 있음
+Dialogue: 0,0:00:07.00,0:00:11.00,Main,,0,0,0,,① 눈 밑 · 다크서클 상태
+Dialogue: 0,0:00:11.00,0:00:15.00,Main,,0,0,0,,② 코 옆 · 피지 & 모공
+Dialogue: 0,0:00:15.00,0:00:19.00,Main,,0,0,0,,③ 입 주변 · 수분 & 각질
+Dialogue: 0,0:00:19.00,0:00:23.00,Main,,0,0,0,,④ 턱선 · 잔털 & 라인
+Dialogue: 0,0:00:23.00,0:00:28.00,Main,,0,0,0,,5곳 다 보는 남자가 다름
