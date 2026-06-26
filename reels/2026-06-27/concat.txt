@@ -1,0 +1,2 @@
+file '/home/runner/work/bodetail-wiki/bodetail-wiki/reels/2026-06-27/processed.mp4'
+file '/home/runner/work/bodetail-wiki/bodetail-wiki/reels/2026-06-27/outro.mp4'
