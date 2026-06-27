@@ -6,14 +6,20 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
-Style: Main,Noto Sans CJK KR,60,&H00000000,&H000000FF,&H00FFFFFF,&HFFFFFFFF,1,0,0,0,100,100,0,0,4,0,0,8,30,30,160,1
+Style: Main,Noto Sans CJK KR,60,&H00000000,&H000000FF,&H00FFFFFF,&HFFFFFFFF,1,0,0,0,100,100,0,0,4,0,0,5,30,30,80,1
 
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
-Dialogue: 0,0:00:00.00,0:00:04.00,Main,,0,0,0,,거울, 제대로 보고 있나요?
-Dialogue: 0,0:00:04.00,0:00:08.00,Main,,0,0,0,,1. 피부 결 — 윤기가 답이다
-Dialogue: 0,0:00:08.00,0:00:12.00,Main,,0,0,0,,2. 눈썹 — 인상을 결정한다
-Dialogue: 0,0:00:12.00,0:00:16.00,Main,,0,0,0,,3. 헤어라인 — 첫인상의 시작
-Dialogue: 0,0:00:16.00,0:00:20.00,Main,,0,0,0,,4. 입술 — 건조하면 끝이다
-Dialogue: 0,0:00:20.00,0:00:24.00,Main,,0,0,0,,5. 목선 — 디테일이 완성한다
-Dialogue: 0,0:00:24.00,0:00:29.00,Main,,0,0,0,,디테일이 남자를 만든다
+Dialogue: 0,0:00:00.00,0:00:03.00,Main,,0,0,0,,이걸 매일 100번 완성하면
+Dialogue: 0,0:00:03.00,0:00:07.00,Main,,0,0,0,,불균형과 척추측만이 잡힌다
+Dialogue: 0,0:00:07.00,0:00:10.00,Main,,0,0,0,,이걸 매일 100번 완성하면
+Dialogue: 0,0:00:10.00,0:00:14.00,Main,,0,0,0,,말려 들어간 어깨 라운드숄더
+Dialogue: 0,0:00:14.00,0:00:18.00,Main,,0,0,0,,자세가 눈에 띄게 달라진다
+Dialogue: 0,0:00:18.00,0:00:21.00,Main,,0,0,0,,이걸 매일 100번 완성하면
+Dialogue: 0,0:00:21.00,0:00:25.00,Main,,0,0,0,,목의 압박이 풀리기 시작한다
+Dialogue: 0,0:00:25.00,0:00:29.00,Main,,0,0,0,,방치했던 승모근이 깨어난다
+Dialogue: 0,0:00:29.00,0:00:32.00,Main,,0,0,0,,승모근 긴장 완전히 해소
+Dialogue: 0,0:00:32.00,0:00:35.00,Main,,0,0,0,,이걸 매일 100번 완성하면
+Dialogue: 0,0:00:35.00,0:00:38.00,Main,,0,0,0,,가슴이 활짝 열린다
+Dialogue: 0,0:00:38.00,0:00:41.00,Main,,0,0,0,,장시간 데스크워크로 굳은
+Dialogue: 0,0:00:41.00,0:00:45.00,Main,,0,0,0,,어깨·목 긴장이 사라진다
