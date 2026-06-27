@@ -6,20 +6,21 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
-Style: Main,Noto Sans CJK KR,60,&H00000000,&H000000FF,&H00FFFFFF,&HFFFFFFFF,1,0,0,0,100,100,0,0,4,0,0,5,30,30,80,1
+Style: KO,Noto Sans CJK KR,52,&H00000000,&H000000FF,&H00FFFFFF,&H00FFFFFF,1,0,0,0,100,100,0,0,1,0,0,5,0,0,0,1
 
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
-Dialogue: 0,0:00:00.00,0:00:03.00,Main,,0,0,0,,이걸 매일 100번 완성하면
-Dialogue: 0,0:00:03.00,0:00:07.00,Main,,0,0,0,,불균형과 척추측만이 잡힌다
-Dialogue: 0,0:00:07.00,0:00:10.00,Main,,0,0,0,,이걸 매일 100번 완성하면
-Dialogue: 0,0:00:10.00,0:00:14.00,Main,,0,0,0,,말려 들어간 어깨 라운드숄더
-Dialogue: 0,0:00:14.00,0:00:18.00,Main,,0,0,0,,자세가 눈에 띄게 달라진다
-Dialogue: 0,0:00:18.00,0:00:21.00,Main,,0,0,0,,이걸 매일 100번 완성하면
-Dialogue: 0,0:00:21.00,0:00:25.00,Main,,0,0,0,,목의 압박이 풀리기 시작한다
-Dialogue: 0,0:00:25.00,0:00:29.00,Main,,0,0,0,,방치했던 승모근이 깨어난다
-Dialogue: 0,0:00:29.00,0:00:32.00,Main,,0,0,0,,승모근 긴장 완전히 해소
-Dialogue: 0,0:00:32.00,0:00:35.00,Main,,0,0,0,,이걸 매일 100번 완성하면
-Dialogue: 0,0:00:35.00,0:00:38.00,Main,,0,0,0,,가슴이 활짝 열린다
-Dialogue: 0,0:00:38.00,0:00:41.00,Main,,0,0,0,,장시간 데스크워크로 굳은
-Dialogue: 0,0:00:41.00,0:00:45.00,Main,,0,0,0,,어깨·목 긴장이 사라진다
+Dialogue: 0,0:00:00.01,0:00:02.02,KO,,0,0,0,,{\pos(665,439)\an5}이 동작 꾸준히 하면
+Dialogue: 0,0:00:02.02,0:00:05.05,KO,,0,0,0,,{\pos(640,439)\an5}좌우 불균형·척추측만 잡힌다
+Dialogue: 0,0:00:05.05,0:00:07.08,KO,,0,0,0,,{\pos(665,439)\an5}이 동작 꾸준히 하면
+Dialogue: 0,0:00:07.08,0:00:08.29,KO,,0,0,0,,{\pos(605,439)\an5}말린 어깨·굽은 등
+Dialogue: 0,0:00:08.09,0:00:09.29,KO,,0,0,0,,{\pos(615,439)\an5}전부 사라진다
+Dialogue: 0,0:00:09.10,0:00:11.12,KO,,0,0,0,,{\pos(540,459)\an5}자세가 눈에 띄게 달라진다
+Dialogue: 0,0:00:11.12,0:00:14.16,KO,,0,0,0,,{\pos(540,645)\an5}이 동작 꾸준히 하면
+Dialogue: 0,0:00:14.16,0:00:16.18,KO,,0,0,0,,{\pos(540,459)\an5}목 눌림이 풀린다
+Dialogue: 0,0:00:16.19,0:00:18.20,KO,,0,0,0,,{\pos(540,459)\an5}방치했던 승모근이\N깨어나기 시작한다
+Dialogue: 0,0:00:18.21,0:00:19.41,KO,,0,0,0,,{\pos(615,439)\an5}지금껏 완전히 놓쳤던 근육
+Dialogue: 0,0:00:19.21,0:00:23.27,KO,,0,0,0,,{\pos(615,615)\an5}마지막으로 이 동작 꾸준히 하면
+Dialogue: 0,0:00:23.27,0:00:24.46,KO,,0,0,0,,{\pos(615,595)\an5}가슴이 활짝 열린다
+Dialogue: 0,0:00:24.28,0:00:26.29,KO,,0,0,0,,{\pos(615,620)\an5}상부 등·목 긴장이\N싹 풀린다
+Dialogue: 0,0:00:26.30,0:00:32.37,KO,,0,0,0,,{\pos(590,830)\an5}오래 앉아서 쌓인 피로\N이게 원인이었다
