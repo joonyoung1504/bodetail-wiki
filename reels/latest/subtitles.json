@@ -9,17 +9,17 @@
   "subtitles": [
     {
       "text_en": "If you can complete this 100 times daily",
-      "text_ko": "매일 이 동작을 완수하면",
+      "text_ko": "매일 이 동작을 꾸준히 완성하면",
       "start": 0.0,
       "end": 2.04,
-      "box_x": 205,
+      "box_x": 233,
       "box_y": 330,
-      "box_w": 669,
-      "box_h": 117
+      "box_w": 614,
+      "box_h": 190
     },
     {
       "text_en": "You will solve imbalance and scoliosis",
-      "text_ko": "척추 불균형과 측만증이 개선된다",
+      "text_ko": "척추 불균형과 측만증이 잡힌다",
       "start": 2.04,
       "end": 5.1,
       "box_x": 212,
@@ -29,32 +29,32 @@
     },
     {
       "text_en": "If you can complete this 100 times daily",
-      "text_ko": "매일 이 동작을 완수하면",
+      "text_ko": "매일 이 동작을 꾸준히 완성하면",
       "start": 5.1,
       "end": 7.14,
-      "box_x": 205,
+      "box_x": 233,
       "box_y": 330,
-      "box_w": 669,
-      "box_h": 117
+      "box_w": 614,
+      "box_h": 190
     },
     {
       "text_en": "Forward shoulders",
-      "text_ko": "라운드 숄더가 사라지고",
+      "text_ko": "굽은 어깨도",
       "start": 7.14,
       "end": 8.16,
-      "box_x": 212,
+      "box_x": 357,
       "box_y": 330,
-      "box_w": 655,
+      "box_w": 365,
       "box_h": 117
     },
     {
       "text_en": "and hunch back will be gone",
-      "text_ko": "굽은 등도 펴진다",
+      "text_ko": "라운드숄더도 사라진다",
       "start": 8.16,
       "end": 9.18,
-      "box_x": 295,
+      "box_x": 219,
       "box_y": 330,
-      "box_w": 489,
+      "box_w": 641,
       "box_h": 117
     },
     {
@@ -69,13 +69,13 @@
     },
     {
       "text_en": "If you can complete this 100 times daily",
-      "text_ko": "매일 이 동작을 완수하면",
+      "text_ko": "매일 이 동작을 꾸준히 완성하면",
       "start": 11.22,
       "end": 14.28,
-      "box_x": 205,
+      "box_x": 233,
       "box_y": 330,
-      "box_w": 669,
-      "box_h": 117
+      "box_w": 614,
+      "box_h": 190
     },
     {
       "text_en": "Pressure at your neck will release",
@@ -99,22 +99,22 @@
     },
     {
       "text_en": "which you have been neglecting",
-      "text_ko": "지금껏 못 쓰던 근육이다",
+      "text_ko": "지금껏 쓰지 않던 근육이다",
       "start": 18.36,
       "end": 19.38,
-      "box_x": 205,
+      "box_x": 295,
       "box_y": 330,
-      "box_w": 669,
-      "box_h": 117
+      "box_w": 489,
+      "box_h": 190
     },
     {
       "text_en": "Lastly if you can complete this 100 times daily",
-      "text_ko": "마지막으로 매일 이 동작을 완수하면",
+      "text_ko": "마지막으로 매일 꾸준히 완성하면",
       "start": 19.38,
       "end": 23.46,
-      "box_x": 267,
+      "box_x": 212,
       "box_y": 330,
-      "box_w": 545,
+      "box_w": 655,
       "box_h": 190
     },
     {
@@ -129,22 +129,22 @@
     },
     {
       "text_en": "and relief tension around your upper back and neck",
-      "text_ko": "상부 등·목 긴장이 풀린다",
+      "text_ko": "등 상부와 목 긴장이 풀린다",
       "start": 24.48,
       "end": 26.52,
-      "box_x": 277,
+      "box_x": 261,
       "box_y": 330,
-      "box_w": 526,
+      "box_w": 558,
       "box_h": 190
     },
     {
       "text_en": "caused by long term desk job",
-      "text_ko": "장시간 책상 업무로 쌓인 피로까지",
+      "text_ko": "장시간 데스크워크로 굳은 몸에 딱이다",
       "start": 26.52,
       "end": 30.6,
-      "box_x": 205,
+      "box_x": 247,
       "box_y": 330,
-      "box_w": 669,
+      "box_w": 586,
       "box_h": 190
     }
   ]
