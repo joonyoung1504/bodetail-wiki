@@ -6,15 +6,14 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
-Style: Main,Noto Sans CJK KR,68,&H00FFFFFF,&H000000FF,&H00000000,&HC0000000,1,0,0,0,100,100,0,0,3,3,0,2,40,40,80,1
-Style: Small,Noto Sans CJK KR,48,&H00EDE6D8,&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,3,2,0,2,40,40,60,1
+Style: Main,Noto Sans CJK KR,60,&H00000000,&H000000FF,&H00FFFFFF,&HFFFFFFFF,1,0,0,0,100,100,0,0,4,0,0,8,30,30,160,1
 
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
-Dialogue: 0,0:00:00.00,0:00:04.00,Main,,0,0,0,,거울 제대로 못 보고 있다
-Dialogue: 0,0:00:04.00,0:00:07.00,Main,,0,0,0,,남자가 봐야 할 5곳
-Dialogue: 0,0:00:07.00,0:00:11.00,Main,,0,0,0,,1. 헤어라인 — 정돈됐나
-Dialogue: 0,0:00:11.00,0:00:15.00,Main,,0,0,0,,2. 눈 밑 — 다크서클 상태
-Dialogue: 0,0:00:15.00,0:00:19.00,Main,,0,0,0,,3. 코 — 모공·블랙헤드
-Dialogue: 0,0:00:19.00,0:00:23.00,Main,,0,0,0,,4. 입꼬리 — 각질·건조함
-Dialogue: 0,0:00:23.00,0:00:28.00,Main,,0,0,0,,5. 턱선 — 수염 경계선
+Dialogue: 0,0:00:00.00,0:00:04.00,Main,,0,0,0,,거울, 제대로 보고 있어?
+Dialogue: 0,0:00:04.00,0:00:08.00,Main,,0,0,0,,1. 헤어라인이 인상을 만든다
+Dialogue: 0,0:00:08.00,0:00:12.00,Main,,0,0,0,,2. 눈썹이 얼굴을 정리한다
+Dialogue: 0,0:00:12.00,0:00:16.00,Main,,0,0,0,,3. 귀밑선이 청결을 말한다
+Dialogue: 0,0:00:16.00,0:00:20.00,Main,,0,0,0,,4. 피부결이 컨디션을 드러낸다
+Dialogue: 0,0:00:20.00,0:00:24.00,Main,,0,0,0,,5. 목선이 전체를 완성한다
+Dialogue: 0,0:00:24.00,0:00:29.00,Main,,0,0,0,,디테일이 당신을 설명한다
