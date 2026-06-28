@@ -1,0 +1,105 @@
+{
+  "section_label": "오늘의 스타일",
+  "vol": "VOL.01",
+  "caption_full": "센스 있는 남자들은 옷 태그를 자르기 전에 이 3가지를 먼저 잡는다.\n\n손톱 · 목선 · 향.\n작은 순서 하나가 전체 인상을 결정한다.\n\n저장해두고 오늘 하나씩 체크해보세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자스타일 #남자그루밍 #남자디테일 #남성패션 #남자향수 #남자손톱 #스타일팁 #그루밍팁 #남자셀프케어 #남자옷 #패션매거진 #스타일매거진 #멘즈그루밍 #멘즈패션",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "옷을 입기 전, 이미 결정된 것들",
+      "headline_main": [
+        "3가지",
+        "디테일"
+      ],
+      "headline_serif": "옷보다 먼저 완성되는 남자의 인상",
+      "image_queries": [
+        "man dark studio portrait editorial moody",
+        "male fashion editorial ink black background",
+        "men shadow moody portrait cinematic"
+      ],
+      "image_url": ""
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "손톱 — 0.5초에 읽힌다",
+      "body": [
+        "짧고 균일하게. 길이 차이가 나면 끝난다.",
+        "파일로 끝선만 정리해도 인상이 달라진다."
+      ],
+      "caption": "깔끔함은 손끝에서 시작된다.",
+      "image_queries": [
+        "man hands dark moody closeup editorial",
+        "male hands ink black studio detail",
+        "men wrist watch dark cinematic closeup"
+      ],
+      "image_url": ""
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "목선 — 윤곽이 곧 실루엣",
+      "body": [
+        "뒷목 잔털 하나가 전체 핏을 죽인다.",
+        "2주마다 정리. 셀프 정리기로 충분하다."
+      ],
+      "caption": "실루엣은 면도날이 만든다.",
+      "image_queries": [
+        "man neck nape dark studio moody editorial",
+        "male haircut neckline dark cinematic closeup",
+        "men back neck shadow ink black portrait"
+      ],
+      "image_url": ""
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "향 — 방에 들어오기 전 이미 말한다",
+      "body": [
+        "뿌리는 위치: 목·가슴·팔 안쪽 안쪽 순.",
+        "옷에 직접 뿌리지 않는다. 얼룩과 변질."
+      ],
+      "caption": "향은 외모보다 먼저 닿는다.",
+      "image_queries": [
+        "man applying perfume dark moody studio",
+        "male fragrance bottle ink black editorial",
+        "men cologne dark cinematic detail closeup"
+      ],
+      "image_url": ""
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "정리",
+      "subhead": "센스 있는 남자들의 공통점",
+      "body": [
+        "옷 사기 전, 이 셋부터 루틴으로 잡는다.",
+        "디테일이 먼저 완성된 사람은 어떤 옷도 된다."
+      ],
+      "caption": "옷은 마지막이다.",
+      "image_queries": [
+        "man dark editorial full body moody studio",
+        "male style dark cinematic portrait editorial",
+        "men shadow ink black fashion lookbook"
+      ],
+      "image_url": ""
+    },
+    {
+      "slide_num": 6,
+      "type": "closing",
+      "wordmark": "bodetail",
+      "closing_line": "디테일을 챙기는 남자의 안목",
+      "series_label": "STYLE · VOL.03",
+      "image_queries": [
+        "man dark ink black studio minimal portrait",
+        "male editorial moody dark background cinematic",
+        "men silhouette dark studio editorial shadow"
+      ],
+      "image_url": ""
+    }
+  ]
+}
