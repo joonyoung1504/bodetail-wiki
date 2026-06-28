@@ -1,0 +1,122 @@
+{
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.01",
+  "caption_full": "거울 앞에 서는 시간, 5곳만 보면 인상이 달라진다.\n\n헤어라인 · 눈 밑 · 입술 · 목선 · 손.\n대부분의 남자가 놓치는 바로 그 지점들.\n\n큰 노력 없이도 완성도는 올라간다.\n오늘 아침 거울 앞에서 하나씩 확인해보길.\n\n저장해두고 내일 아침 루틴에 꺼내 쓸 것.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #남자자기관리 #남자피부 #남자외모 #그루밍팁 #남자루틴 #자기관리 #남자헤어 #남성그루밍 #디테일 #남자패션 #첫인상 #외모관리 #남자스킨케어",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "첫인상은 디테일이 만든다",
+      "headline_main": [
+        "거울 볼 때",
+        "5곳을 본다"
+      ],
+      "headline_serif": "놓치고 있던 그 한 곳",
+      "image_queries": [
+        "man dark studio mirror reflection editorial",
+        "male moody portrait ink black background",
+        "men dark cinematic close up face editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/16807428/pexels-photo-16807428.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "헤어라인",
+      "body": [
+        "구레나룻 정리 하나로 인상이 달라진다.",
+        "면도 후 헤어라인을 반드시 확인할 것."
+      ],
+      "caption": "인상의 시작은 헤어라인에서 결정된다.",
+      "image_queries": [
+        "man hairline close up dark moody editorial",
+        "male grooming dark studio hair detail",
+        "men face side profile dark cinematic"
+      ],
+      "image_url": "https://images.pexels.com/photos/4730941/pexels-photo-4730941.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "눈 밑",
+      "body": [
+        "다크서클은 피로한 인상의 가장 빠른 신호.",
+        "아이크림 하나로 즉시 개선이 가능하다."
+      ],
+      "caption": "눈 밑이 정돈되면 얼굴 전체가 깨어난다.",
+      "image_queries": [
+        "man eye dark close up moody editorial",
+        "male under eye dark studio detail shot",
+        "men face close up dark cinematic portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/24986830/pexels-photo-24986830.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "입술 컨디션",
+      "body": [
+        "갈라진 입술은 관리의 빈틈을 드러낸다.",
+        "립밤 하나가 전체 인상의 밀도를 높인다."
+      ],
+      "caption": "말하기 전에 입술이 먼저 말한다.",
+      "image_queries": [
+        "man lips dark close up editorial moody",
+        "male mouth detail dark studio portrait",
+        "men face lower half dark cinematic close up"
+      ],
+      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "목선",
+      "body": [
+        "목 뒤 잔털은 깔끔함을 가르는 기준선.",
+        "셔츠 칼라 위로 드러나기 전에 정리한다."
+      ],
+      "caption": "목선이 정돈된 남자는 뒷모습도 다르다.",
+      "image_queries": [
+        "man neck nape dark editorial moody studio",
+        "male back of neck close up dark cinematic",
+        "men collar neckline dark moody portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/13927646/pexels-photo-13927646.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "content",
+      "number": "05",
+      "subhead": "손 상태",
+      "body": [
+        "악수 한 번에 관리 수준이 전달된다.",
+        "큐티클 정리와 보습만으로 인상이 달라진다."
+      ],
+      "caption": "손은 말보다 먼저 상대에게 닿는다.",
+      "image_queries": [
+        "man hands dark moody editorial close up",
+        "male hands studio dark cinematic detail",
+        "men wrist hand dark ink background editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/37033378/pexels-photo-37033378.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 7,
+      "type": "outro",
+      "wordmark": "bodetail",
+      "closing_line": "디테일을 챙기는 남자의 안목",
+      "cta_label": "저장하고 내일 아침 확인할 것",
+      "image_queries": [
+        "man dark ink black studio minimal editorial",
+        "male silhouette dark moody cinematic portrait",
+        "men dark background minimal editorial fashion"
+      ],
+      "image_url": ""
+    }
+  ]
+}
