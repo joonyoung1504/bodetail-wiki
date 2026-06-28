@@ -611,6 +611,26 @@ for name,img in rendered:
     img.save(latest/f"{name}_1080x1440.png","PNG")
 (latest/"caption.txt").write_text((OUT/"caption.txt").read_text("utf-8"),encoding="utf-8")
 
+# ★ 편집기용 post_content.json 저장
+import copy
+export_slides=[]
+for s in content.get("slides",[]):
+    sl=copy.deepcopy(s)
+    sl.pop("_photo",None)   # PIL 이미지 객체 제거
+    sl["image_url"]=""      # 편집기에서 직접 교체
+    export_slides.append(sl)
+post_json={
+    "section_label": content.get("section_label",""),
+    "vol":           content.get("vol",""),
+    "caption_full":  content.get("caption_full",""),
+    "hashtags":      content.get("hashtags",""),
+    "slides":        export_slides,
+}
+json_path=latest/"post_content.json"
+json_path.write_text(json.dumps(post_json,ensure_ascii=False,indent=2),encoding="utf-8")
+(OUT/"post_content.json").write_text(json.dumps(post_json,ensure_ascii=False,indent=2),encoding="utf-8")
+print("  ✅ post_content.json 저장 (편집기용)")
+
 print(f"\n🎉 {len(rendered)}장 완료 → posts/latest/ & {OUT}/")
 print(f"\n📋 수동 이미지 사용법:")
 print(f"   posts/images/manual/01_커버.jpg, 02_슬라이드2.jpg ... 형식으로 올리면")
