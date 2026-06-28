@@ -26,7 +26,7 @@ DATE  = TODAY.strftime("%Y-%m-%d")
 
 RW, RH = 1080, 1920
 REEL_DURATION_A = 28
-OUTRO_DURATION  = 7
+OUTRO_DURATION  = 1
 
 DARK=(8,6,4); GOLD=(176,132,74); GOLD_BRIGHT=(200,154,92)
 CREAM=(237,230,216); WHITE=(245,244,240)
@@ -329,12 +329,20 @@ def layout_subtitle(seg):
     font=fnt(KO_SUB_FONT_FILE,KO_SUB_SIZE)
     dd=ImageDraw.Draw(Image.new("RGB",(10,10)))
     ko=seg.get("text_ko") or seg.get("text_en","")
-    lines=wrap_ko(ko,font,BOX_MAX_TEXT_W)
+
+    # 편집본이 box_w를 줬으면 그 폭 기준으로 줄바꿈(내부 여백 고려)
+    has_w = "box_w" in seg and seg["box_w"]
+    wrap_w = (int(seg["box_w"])-BOX_PAD_X*2) if has_w else BOX_MAX_TEXT_W
+    wrap_w = max(120, wrap_w)
+    lines=wrap_ko(ko,font,wrap_w)
+
     line_h=int(KO_SUB_SIZE*LINE_SPACING)
     text_w=max(dd.textlength(l,font=font) for l in lines)
     text_h=line_h*len(lines)
-    box_w=int(text_w+BOX_PAD_X*2)
+    box_w=int(seg["box_w"]) if has_w else int(text_w+BOX_PAD_X*2)
+    box_w=max(box_w, int(text_w+BOX_PAD_X*2))   # 글자보다 작아지지 않게
     box_h=int(text_h+BOX_PAD_Y*2)
+
     # 편집본이 좌표를 줬으면 그걸 우선
     if "box_x" in seg and "box_y" in seg:
         box_x=int(seg["box_x"]); box_y=int(seg["box_y"])
@@ -709,11 +717,13 @@ if MODE=="B":
         # ── 편집본 경로: HTML에서 다듬은 좌표/타이밍/텍스트 그대로 ──
         print("  ✏️ 편집본 좌표/타이밍 사용 (Vision 건너뜀)")
         for s in edited["subtitles"]:
-            timed.append({
+            item={
                 "text_en": s.get("text_en",""), "text_ko": s.get("text_ko",""),
                 "start": float(s["start"]), "end": float(s["end"]),
                 "box_x": int(s["box_x"]), "box_y": int(s["box_y"]),
-            })
+            }
+            if s.get("box_w"): item["box_w"]=int(s["box_w"])
+            timed.append(item)
         # 캡션/썸네일은 편집본에 있으면 쓰고 없으면 생성
         content = edited.get("content") or {}
         if not content:
