@@ -8,144 +8,24 @@
   "font_size": 60,
   "subtitles": [
     {
-      "text_en": "If you can complete this 100 times daily",
-      "text_ko": "매일 꾸준히 하면",
+      "text_en": "Stop doing pushups like this...",
+      "text_ko": "그렇게 푸시업 하지 마라...",
       "start": 0.0,
-      "end": 2.04,
-      "box_x": 74,
-      "box_y": 459,
-      "box_w": 963,
-      "box_h": 117
-    },
-    {
-      "text_en": "You will solve imbalance and scoliosis",
-      "text_ko": "척추 불균형·측만증이 잡힌다",
-      "start": 2.04,
-      "end": 5.1,
-      "box_x": 86,
-      "box_y": 477,
-      "box_w": 927,
-      "box_h": 117
-    },
-    {
-      "text_en": "If you can complete this 100 times daily",
-      "text_ko": "매일 꾸준히 하면",
-      "start": 5.1,
-      "end": 7.14,
-      "box_x": 80,
-      "box_y": 483,
-      "box_w": 957,
-      "box_h": 117
-    },
-    {
-      "text_en": "Forward shoulders",
-      "text_ko": "굽은 어깨도",
-      "start": 7.14,
-      "end": 8.16,
-      "box_x": 306,
-      "box_y": 480,
-      "box_w": 462,
-      "box_h": 117
-    },
-    {
-      "text_en": "and hunch back will be gone",
-      "text_ko": "라운드숄더도 사라진다",
-      "start": 8.16,
-      "end": 9.18,
-      "box_x": 210,
-      "box_y": 477,
-      "box_w": 641,
+      "end": 3.27,
+      "box_x": 267,
+      "box_y": 820,
+      "box_w": 545,
       "box_h": 190
     },
     {
-      "text_en": "And your posture will improve greatly",
-      "text_ko": "자세가 눈에 띄게 달라진다",
-      "start": 9.18,
-      "end": 11.22,
-      "box_x": 103,
-      "box_y": 486,
-      "box_w": 852,
+      "text_en": "Do half reps instead (caption)",
+      "text_ko": "대신 하프 렙으로 해라",
+      "start": 4.34,
+      "end": 10.87,
+      "box_x": 233,
+      "box_y": 820,
+      "box_w": 614,
       "box_h": 117
-    },
-    {
-      "text_en": "If you can complete this 100 times daily",
-      "text_ko": "매일 꾸준히 하면",
-      "start": 11.22,
-      "end": 14.28,
-      "box_x": 95,
-      "box_y": 480,
-      "box_w": 870,
-      "box_h": 117
-    },
-    {
-      "text_en": "Pressure at your neck will release",
-      "text_ko": "목 압박이 풀린다",
-      "start": 14.28,
-      "end": 15.3,
-      "box_x": 145,
-      "box_y": 459,
-      "box_w": 783,
-      "box_h": 117
-    },
-    {
-      "text_en": "And you will activate trapezius muscles",
-      "text_ko": "그동안 방치했던 승모근이 깨어난다",
-      "start": 15.3,
-      "end": 18.36,
-      "box_x": 103,
-      "box_y": 486,
-      "box_w": 885,
-      "box_h": 190
-    },
-    {
-      "text_en": "which you have been neglecting",
-      "text_ko": "제대로 쓰지 못했던 근육들이",
-      "start": 18.36,
-      "end": 19.38,
-      "box_x": 109,
-      "box_y": 465,
-      "box_w": 882,
-      "box_h": 117
-    },
-    {
-      "text_en": "Lastly if you can complete this 100 times daily",
-      "text_ko": "마지막으로, 매일 꾸준히 하면",
-      "start": 19.38,
-      "end": 23.46,
-      "box_x": 155,
-      "box_y": 444,
-      "box_w": 759,
-      "box_h": 190
-    },
-    {
-      "text_en": "You will opened up the chest",
-      "text_ko": "가슴이 활짝 열린다",
-      "start": 23.46,
-      "end": 24.48,
-      "box_x": 186,
-      "box_y": 447,
-      "box_w": 726,
-      "box_h": 117
-    },
-    {
-      "text_en": "and relief tension around your upper back and neck",
-      "text_ko": "오래 앉아 굳은 등·목 긴장이 풀린다",
-      "start": 24.48,
-      "end": 26.52,
-      "box_x": 207,
-      "box_y": 426,
-      "box_w": 651,
-      "box_h": 190
-    },
-    {
-      "text_en": "caused by long term desk job",
-      "text_ko": "장시간 데스크 생활로 쌓인 피로가 해소된다",
-      "start": 26.52,
-      "end": 30.6,
-      "box_x": 61,
-      "box_y": 474,
-      "box_w": 903,
-      "box_h": 190
     }
   ]
 }
