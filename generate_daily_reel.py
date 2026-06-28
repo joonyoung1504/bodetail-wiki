@@ -812,6 +812,17 @@ if MODE=="B":
         shutil.copy(normalized,latest/"normalized.mp4")
     print("  ✅ latest/ 에 subtitles.json + normalized.mp4 복사(편집용)")
 
+    # ★ inbox 파일 → videos/archive/날짜/ 로 이동 (inbox 자동 정리)
+    archive=Path(f"videos/archive/{DATE}"); archive.mkdir(parents=True,exist_ok=True)
+    moved=[]
+    for f in INBOX.iterdir():
+        if f.is_file() and f.name!=".gitkeep":
+            shutil.move(str(f), str(archive/f.name))
+            moved.append(f.name)
+    if moved:
+        print(f"  ✅ inbox → videos/archive/{DATE}/ 이동: {', '.join(moved)}")
+        print("     (다음 영상 올리면 inbox 비어있어서 새로 자동 생성됨)")
+
 if IG_USER_ID and IG_TOKEN and GITHUB_TOKEN:
     print("\n📤 인스타그램 게시...")
     vp=upload_to_github_release(final_reel,f"reel_{DATE}.mp4")
