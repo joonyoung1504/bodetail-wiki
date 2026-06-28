@@ -1,0 +1,108 @@
+{
+  "section_label": "오늘의 컨디션",
+  "vol": "VOL.01",
+  "caption_full": "자세 하나로 키가 3cm 달라 보인다.\n\n옷도, 신발도 아니다.\n서 있는 방식이 먼저다.\n\n오늘 알려준 4가지 디테일 —\n턱 / 어깨 / 발끝 / 무게중심.\n\n거울 앞에서 30초만 써봐요.\n체감이 달라지는 게 느껴질 거예요.\n\n저장해두고 오늘 한 번, 내일 한 번.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자자세 #자세교정 #키커보이는법 #남자그루밍 #남자관리 #체형관리 #남자패션 #남자스타일 #자기관리 #남자바디 #posture #mensgrooming #mensstyle #menfashion #darkmoody #editorialmen #mensbody #grooming #selfcare",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "자세 하나가 키를 바꾼다",
+      "headline_main": [
+        "3cm의",
+        "차이"
+      ],
+      "headline_serif": "아무도 안 알려준 자세 디테일 4",
+      "image_queries": [
+        "man dark studio standing portrait moody",
+        "male editorial full body dark background",
+        "men posture silhouette dark ink moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/14833446/pexels-photo-14833446.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "턱을 당겨라",
+      "body": [
+        "턱이 1cm 나올수록 목이 짧아진다.",
+        "턱 끝을 살짝 당기면 목이 길게 선다."
+      ],
+      "caption": "턱 하나가 목 길이를 결정한다.",
+      "image_queries": [
+        "man jaw profile dark moody editorial",
+        "male neck jawline dark studio closeup",
+        "men face side profile ink black moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/7447142/pexels-photo-7447142.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "어깨를 뒤로, 아래로",
+      "body": [
+        "어깨를 올리는 건 긴장이다. 내려라.",
+        "뒤로 열고 아래로 고정하면 흉곽이 열린다."
+      ],
+      "caption": "어깨 방향이 체형 전체를 바꾼다.",
+      "image_queries": [
+        "man shoulder back dark moody studio editorial",
+        "male upper body posture dark background",
+        "men torso dark ink editorial moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/30263576/pexels-photo-30263576.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "발끝 방향을 11자로",
+      "body": [
+        "발이 벌어지면 무게중심이 내려간다.",
+        "11자 보행만으로 중심이 위로 올라간다."
+      ],
+      "caption": "발끝이 키의 시작점이다.",
+      "image_queries": [
+        "man feet shoes dark floor moody editorial",
+        "male legs standing dark studio ink",
+        "men shoes dark floor low angle moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/36834159/pexels-photo-36834159.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "무게중심을 앞발에",
+      "body": [
+        "뒤꿈치에 체중을 실으면 자연히 구부린다.",
+        "앞발 볼에 60% 실으면 척추가 세워진다."
+      ],
+      "caption": "서는 법이 곧 보이는 법이다.",
+      "image_queries": [
+        "man standing dark editorial weight balance moody",
+        "male full body dark ink studio posture",
+        "men standing silhouette moody dark background"
+      ],
+      "image_url": "https://images.pexels.com/photos/30740433/pexels-photo-30740433.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "closing",
+      "headline_main": [
+        "디테일이",
+        "인상이다"
+      ],
+      "body": "자세 4가지. 오늘부터 의식하면 달라진다.",
+      "wordmark": "bodetail",
+      "image_queries": [
+        "man dark editorial full body moody cinematic",
+        "male standing dark ink black studio portrait",
+        "men silhouette dark moody editorial closing"
+      ],
+      "image_url": ""
+    }
+  ]
+}
