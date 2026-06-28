@@ -148,16 +148,28 @@ input[type=file]{display:none;}
 [contenteditable]{
   outline:none;cursor:text;border-radius:2px;transition:background .12s;
   white-space:pre-wrap;word-break:break-word;
-  display:block;overflow:auto;
-  resize:both;           /* ★ 좌우+상하 크기 조절 가능 */
+  display:block;overflow:hidden;
+  position:relative;
   min-width:40px;min-height:1em;
 }
 [contenteditable]:hover{background:rgba(255,255,255,.06);}
 [contenteditable]:focus{
   background:rgba(255,255,255,.10);
   box-shadow:0 0 0 1px rgba(176,132,74,.5);
-  overflow:auto;
 }
+/* ★ 텍스트박스 리사이즈 핸들 */
+.ce-wrap{position:relative;display:block;}
+.ce-wrap .ce-handle{
+  position:absolute;width:10px;height:10px;
+  background:var(--gold-b);border-radius:50%;
+  z-index:20;display:none;cursor:nwse-resize;
+}
+.ce-wrap:hover .ce-handle,
+.ce-wrap:focus-within .ce-handle{display:block;}
+.ce-wrap .ce-handle.r {right:-5px;top:50%;transform:translateY(-50%);cursor:ew-resize;}
+.ce-wrap .ce-handle.l {left:-5px;top:50%;transform:translateY(-50%);cursor:ew-resize;}
+.ce-wrap .ce-handle.t {top:-5px;left:50%;transform:translateX(-50%);cursor:ns-resize;}
+.ce-wrap .ce-handle.b {bottom:-5px;left:50%;transform:translateX(-50%);cursor:ns-resize;}
 .s-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
 .s-sec{font-size:10px;font-weight:500;color:var(--gold);white-space:nowrap;}
 .s-line{flex:1;height:1px;background:rgba(176,132,74,.4);}
@@ -546,7 +558,47 @@ function p_makeOutro(){
   [b1,wm,b2,cp,ct].forEach(el=>d.appendChild(el));return d;
 }
 function p_makeSig(){const d=document.createElement('div');d.className='s-sig';d.textContent='bodetail';return d;}
-function pce(tag,cls,text,onInput){const el=document.createElement(tag);el.className=cls;el.contentEditable='true';el.textContent=text;el.addEventListener('input',()=>onInput(el));return el;}
+function pce(tag,cls,text,onInput){
+  const el=document.createElement(tag);
+  el.className=cls;el.contentEditable='true';
+  el.textContent=text;
+  el.addEventListener('input',()=>onInput(el));
+
+  // ★ ce-wrap으로 감싸서 8방향 핸들 추가
+  const wrap=document.createElement('div');
+  wrap.className='ce-wrap';
+  wrap.appendChild(el);
+
+  ['t','r','b','l'].forEach(dir=>{
+    const h=document.createElement('div');
+    h.className='ce-handle '+dir;
+    wrap.appendChild(h);
+    let sx,sy,ow,oh,res=false;
+    h.addEventListener('mousedown',e=>{
+      res=true; e.preventDefault(); e.stopPropagation();
+      sx=e.clientX; sy=e.clientY;
+      ow=el.offsetWidth||el.getBoundingClientRect().width;
+      oh=el.offsetHeight||el.getBoundingClientRect().height;
+    });
+    window.addEventListener('mousemove',e=>{
+      if(!res)return;
+      const dx=e.clientX-sx, dy=e.clientY-sy;
+      // 가로 조절
+      if(dir.includes('r')) el.style.width=Math.max(40,ow+dx)+'px';
+      if(dir.includes('l')) el.style.width=Math.max(40,ow-dx)+'px';
+      // 세로 조절
+      if(dir.includes('b')) el.style.height=Math.max(20,oh+dy)+'px';
+      if(dir==='t'||dir.includes('t')&&!dir.includes('r')&&!dir.includes('l'))
+        el.style.height=Math.max(20,oh-dy)+'px';
+      if(dir==='tl'||dir==='tr') el.style.height=Math.max(20,oh-dy)+'px';
+    });
+    window.addEventListener('mouseup',()=>{ res=false; });
+  });
+
+  // el 대신 wrap을 반환 — 호출부에서 appendChild할 때 wrap이 들어감
+  wrap._ceEl=el;  // 필요시 내부 el 접근용
+  return wrap;
+}
 
 function p_exportJSON(){
   if(!P_DATA){alert('먼저 JSON을 불러오세요.');return;}
