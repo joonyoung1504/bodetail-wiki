@@ -348,14 +348,18 @@ def fetch_for(slide: dict, fallback_q: str, slide_num: int) -> Image.Image | Non
     result = pick_best(qs, slide_num)
     if result is None:
         print(f"  ⚠️ 슬라이드{slide_num} 이미지 없음 → 검정 배경")
+        slide["image_url"] = ""
         return None
 
     pid, src, src_type = result
     if src_type == "manual":
         img = Image.open(src).convert("RGB")
+        slide["image_url"] = ""  # 로컬 파일은 URL 없음
     else:
         img = download_image(src)
-        if img: session_used.append(pid)
+        if img:
+            session_used.append(pid)
+            slide["image_url"] = src  # ★ URL 저장 → JSON에 포함돼서 편집기에서 바로 보임
 
     return smart_crop(img) if img else None
 
@@ -616,8 +620,10 @@ import copy
 export_slides=[]
 for s in content.get("slides",[]):
     sl=copy.deepcopy(s)
-    sl.pop("_photo",None)   # PIL 이미지 객체 제거
-    sl["image_url"]=""      # 편집기에서 직접 교체
+    sl.pop("_photo",None)          # PIL 이미지 객체 제거
+    # image_url은 fetch_for에서 이미 저장됨 — 그대로 유지
+    if "image_url" not in sl:
+        sl["image_url"]=""
     export_slides.append(sl)
 post_json={
     "section_label": content.get("section_label",""),
