@@ -147,7 +147,7 @@ def load_md(f):
 
 design_md = load_md("brand/DESIGN-bodetail-B-realphoto.md")
 voice_md  = load_md("brand/voice_guide.md")
-client    = anthropic.Anthropic(api_key=os.environ["ANTROPIC_API_KEY"])
+client    = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 SYSTEM = f"""너는 bodetail 인스타그램 콘텐츠 매니저야.
 다음 디자인 시스템과 보이스 가이드를 따라 오늘의 게시물 콘텐츠를 JSON으로만 출력해.
