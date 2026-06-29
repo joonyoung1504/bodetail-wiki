@@ -1,0 +1,51 @@
+name: bodetail Category A Reel
+
+on:
+  push:
+    paths:
+      - 'videos/inbox_a/**'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 패키지 설치
+        run: |
+          sudo apt-get install -y ffmpeg fonts-noto-cjk --fix-missing
+          pip install requests
+
+      - name: SFX 무음 파일 생성 (없으면)
+        run: |
+          mkdir -p reels/sfx
+          for f in whoosh bass_drop tick; do
+            if [ ! -f "reels/sfx/${f}.mp3" ]; then
+              ffmpeg -f lavfi -i "anullsrc=r=44100:cl=mono" \
+                     -t 0.4 "reels/sfx/${f}.mp3" -y -loglevel quiet
+            fi
+          done
+
+      - name: 카테고리 A 릴스 생성
+        env:
+          ASSEMBLYAI_API_KEY: ${{ secrets.ASSEMBLYAI_API_KEY }}
+          ANTROPIC_API_KEY:   ${{ secrets.ANTROPIC_API_KEY }}
+          PEXELS_API_KEY:     ${{ secrets.PEXELS_API_KEY }}
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+        run: python generate_category_a.py
+
+      - name: 결과물 커밋
+        run: |
+          git config user.name  "bodetail-bot"
+          git config user.email "bot@bodetail.com"
+          git add reels/latest_a/ reels/category_a/ videos/archive_a/ || true
+          git diff --cached --quiet || \
+            git commit -m "🎬 [skip ci] Category A 자동생성 #${{ github.run_number }}"
+          git push
