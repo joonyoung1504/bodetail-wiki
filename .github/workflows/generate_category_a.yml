@@ -44,6 +44,7 @@ jobs:
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
           YOUTUBE_URL:         ${{ github.event.inputs.youtube_url }}
           BGM_YOUTUBE_URL:     ${{ github.event.inputs.bgm_youtube_url }}
+          YOUTUBE_COOKIES:     ${{ secrets.YOUTUBE_COOKIES }}
           REEL_DURATION:       ${{ github.event.inputs.reel_duration || '45' }}
           BEATS_PER_CUT:       ${{ github.event.inputs.beats_per_cut || '2' }}
         run: python generate_category_a.py
