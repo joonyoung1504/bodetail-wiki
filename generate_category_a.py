@@ -48,15 +48,26 @@ BGM_URL_INPUT = os.environ.get("BGM_YOUTUBE_URL","").strip()
 def download_youtube(url: str) -> Path:
     print(f"📥 STEP 0: 유튜브 다운로드 중...\n  URL: {url}")
     out_tmpl = str(ASSETS/"yt_source.%(ext)s")
-    # 720p 이하 mp4 우선 (용량/속도 균형)
+
+    # 쿠키 파일 생성 (GitHub Secret에서)
+    cookies_content = os.environ.get("YOUTUBE_COOKIES","").strip()
+    cookies_file = None
+    if cookies_content:
+        cookies_file = ASSETS/"yt_cookies.txt"
+        cookies_file.write_text(cookies_content, encoding="utf-8")
+        print("  → 쿠키 인증 사용")
+
     cmd = [
         "yt-dlp",
         "-f", "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best",
         "--merge-output-format", "mp4",
         "-o", out_tmpl,
         "--no-playlist",
-        url
+        "--no-check-certificates",
     ]
+    if cookies_file:
+        cmd += ["--cookies", str(cookies_file)]
+    cmd.append(url)
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         print(f"❌ yt-dlp 오류:\n{r.stderr[-2000:]}")
@@ -84,9 +95,16 @@ def download_youtube_audio(url: str) -> Path:
     """유튜브 URL에서 오디오만 추출해서 배경음악으로 사용"""
     print(f"🎵 배경음악 유튜브 다운로드 중...\n  URL: {url}")
     out_tmpl = str(BGM_DIR/"bgm_from_youtube.%(ext)s")
-    # 기존 유튜브 배경음악 제거 (새로 받은 걸로 교체)
     for old in BGM_DIR.glob("bgm_from_youtube.*"):
         old.unlink()
+
+    cookies_content = os.environ.get("YOUTUBE_COOKIES","").strip()
+    cookies_file = None
+    if cookies_content:
+        cookies_file = ASSETS/"yt_cookies.txt"
+        if not cookies_file.exists():
+            cookies_file.write_text(cookies_content, encoding="utf-8")
+
     cmd = [
         "yt-dlp",
         "-f", "bestaudio/best",
@@ -94,8 +112,11 @@ def download_youtube_audio(url: str) -> Path:
         "--audio-quality", "0",
         "-o", out_tmpl,
         "--no-playlist",
-        url
+        "--no-check-certificates",
     ]
+    if cookies_file:
+        cmd += ["--cookies", str(cookies_file)]
+    cmd.append(url)
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         print(f"  ⚠️ 배경음악 다운로드 실패:\n{r.stderr[-1000:]}")
