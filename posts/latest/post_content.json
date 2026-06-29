@@ -1,39 +1,39 @@
 {
-  "section_label": "오늘의 컨디션",
+  "section_label": "오늘의 디테일",
   "vol": "VOL.01",
-  "caption_full": "자세 하나로 키가 3cm 달라 보인다.\n\n옷도, 신발도 아니다.\n서 있는 방식이 먼저다.\n\n오늘 알려준 4가지 디테일 —\n턱 / 어깨 / 발끝 / 무게중심.\n\n거울 앞에서 30초만 써봐요.\n체감이 달라지는 게 느껴질 거예요.\n\n저장해두고 오늘 한 번, 내일 한 번.\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자자세 #자세교정 #키커보이는법 #남자그루밍 #남자관리 #체형관리 #남자패션 #남자스타일 #자기관리 #남자바디 #posture #mensgrooming #mensstyle #menfashion #darkmoody #editorialmen #mensbody #grooming #selfcare",
+  "caption_full": "거울 볼 때, 이 5곳을 안 보면 인상의 절반을 놓치는 겁니다.\n\n헤어라인 / 눈 밑 / 코털귀털 / 손끝 / 목선.\n\n대부분의 남자가 전체를 보고 '됐다'고 넘기는데,\n안목 있는 사람은 5곳을 순서대로 훑고 나간다.\n\n작은 루틴 하나가 첫인상의 밀도를 바꿉니다.\n내일 아침부터 바로 써먹을 수 있어요.\n\n저장해두고 외출 전에 펼쳐보세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #남자자기관리 #남성뷰티 #그루밍팁 #남자인상 #셀프케어 #남자헤어 #남성케어 #자기관리루틴 #거울체크 #남자손관리 #디테일남자 #남성매거진 #스타일팁",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "자세 하나가 키를 바꾼다",
+      "headline_sub": "센스 있는 남자의 셀프 체크 루틴",
       "headline_main": [
-        "3cm의",
-        "차이"
+        "거울 속",
+        "5곳"
       ],
-      "headline_serif": "아무도 안 알려준 자세 디테일 4",
+      "headline_serif": "안목은 디테일에서 시작된다",
       "image_queries": [
-        "man dark studio standing portrait moody",
-        "male editorial full body dark background",
-        "men posture silhouette dark ink moody"
+        "man dark studio mirror reflection moody editorial",
+        "male grooming mirror dark moody portrait",
+        "men bathroom mirror dark cinematic closeup"
       ],
-      "image_url": "https://images.pexels.com/photos/14833446/pexels-photo-14833446.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/21369550/pexels-photo-21369550.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "content",
       "number": "01",
-      "subhead": "턱을 당겨라",
+      "subhead": "헤어라인 경계",
       "body": [
-        "턱이 1cm 나올수록 목이 짧아진다.",
-        "턱 끝을 살짝 당기면 목이 길게 선다."
+        "구레나룻 끝선이 비대칭이면 얼굴이 먼저 흔들린다.",
+        "좌우 길이를 엄지손가락 두께로 맞춰 확인한다."
       ],
-      "caption": "턱 하나가 목 길이를 결정한다.",
+      "caption": "첫인상은 헤어라인에서 결정된다.",
       "image_queries": [
-        "man jaw profile dark moody editorial",
-        "male neck jawline dark studio closeup",
-        "men face side profile ink black moody"
+        "man dark moody hairline close up editorial",
+        "male hair detail dark studio side profile",
+        "men barber haircut dark cinematic closeup"
       ],
       "image_url": "https://images.pexels.com/photos/7447142/pexels-photo-7447142.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
@@ -41,66 +41,80 @@
       "slide_num": 3,
       "type": "content",
       "number": "02",
-      "subhead": "어깨를 뒤로, 아래로",
+      "subhead": "눈 밑·다크서클",
       "body": [
-        "어깨를 올리는 건 긴장이다. 내려라.",
-        "뒤로 열고 아래로 고정하면 흉곽이 열린다."
+        "수면 부족은 눈 밑이 먼저 말한다.",
+        "형광등 아래서 45도 위를 보며 피부 톤을 점검한다."
       ],
-      "caption": "어깨 방향이 체형 전체를 바꾼다.",
+      "caption": "피로는 숨길 수 없다. 눈 밑이 먼저 드러낸다.",
       "image_queries": [
-        "man shoulder back dark moody studio editorial",
-        "male upper body posture dark background",
-        "men torso dark ink editorial moody"
+        "man dark moody under eye close up portrait",
+        "male face detail dark studio cinematic skin",
+        "men eyes close up editorial dark moody"
       ],
-      "image_url": "https://images.pexels.com/photos/30263576/pexels-photo-30263576.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/37711448/pexels-photo-37711448.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "03",
-      "subhead": "발끝 방향을 11자로",
+      "subhead": "코털·귀털",
       "body": [
-        "발이 벌어지면 무게중심이 내려간다.",
-        "11자 보행만으로 중심이 위로 올라간다."
+        "본인은 보이지 않아도 대화 상대는 반드시 본다.",
+        "외출 전 조명 밝은 곳에서 정면 확인이 필수."
       ],
-      "caption": "발끝이 키의 시작점이다.",
+      "caption": "놓치는 곳이 인상 전체를 무너뜨린다.",
       "image_queries": [
-        "man feet shoes dark floor moody editorial",
-        "male legs standing dark studio ink",
-        "men shoes dark floor low angle moody"
+        "man dark moody face nose detail close up editorial",
+        "male grooming nose trim dark cinematic",
+        "men face detail dark studio portrait closeup"
       ],
-      "image_url": "https://images.pexels.com/photos/36834159/pexels-photo-36834159.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/13927646/pexels-photo-13927646.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "04",
-      "subhead": "무게중심을 앞발에",
+      "subhead": "손끝 상태",
       "body": [
-        "뒤꿈치에 체중을 실으면 자연히 구부린다.",
-        "앞발 볼에 60% 실으면 척추가 세워진다."
+        "손은 악수·식사·작업 중 끊임없이 노출된다.",
+        "큐티클과 손톱 길이를 3일 간격으로 정리한다."
       ],
-      "caption": "서는 법이 곧 보이는 법이다.",
+      "caption": "손 관리가 곧 매너의 마지막 서명이다.",
       "image_queries": [
-        "man standing dark editorial weight balance moody",
-        "male full body dark ink studio posture",
-        "men standing silhouette moody dark background"
+        "man hands dark moody closeup editorial male",
+        "male hands clean groomed dark cinematic studio",
+        "men hands detail dark editorial portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/30740433/pexels-photo-30740433.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
-      "type": "closing",
-      "headline_main": [
-        "디테일이",
-        "인상이다"
+      "type": "content",
+      "number": "05",
+      "subhead": "목선·칼라 라인",
+      "body": [
+        "셔츠 칼라 안쪽 목선이 정돈되지 않으면 전체가 허물어진다.",
+        "2주 간격 넥 라인 정리로 실루엣을 살린다."
       ],
-      "body": "자세 4가지. 오늘부터 의식하면 달라진다.",
-      "wordmark": "bodetail",
+      "caption": "옷이 아니라 목선이 핏을 완성한다.",
       "image_queries": [
-        "man dark editorial full body moody cinematic",
-        "male standing dark ink black studio portrait",
-        "men silhouette dark moody editorial closing"
+        "man dark moody neck collar detail editorial male",
+        "male shirt collar dark cinematic studio portrait",
+        "men neck detail dark moody close up editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/8648050/pexels-photo-8648050.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 7,
+      "type": "closing",
+      "wordmark": "bodetail",
+      "closing_line": "디테일이 인상이다.",
+      "closing_sub": "저장해두고, 내일 아침 거울 앞에서 펼쳐보세요.",
+      "image_queries": [
+        "man dark studio moody editorial full portrait male",
+        "male dark cinematic portrait standing editorial",
+        "men dark ink background moody editorial portrait"
       ],
       "image_url": ""
     }
