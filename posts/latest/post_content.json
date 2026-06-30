@@ -1,22 +1,22 @@
 {
   "section_label": "오늘의 디테일",
   "vol": "VOL.01",
-  "caption_full": "거울 볼 때, 이 5곳을 안 보면 인상의 절반을 놓치는 겁니다.\n\n헤어라인 / 눈 밑 / 코털귀털 / 손끝 / 목선.\n\n대부분의 남자가 전체를 보고 '됐다'고 넘기는데,\n안목 있는 사람은 5곳을 순서대로 훑고 나간다.\n\n작은 루틴 하나가 첫인상의 밀도를 바꿉니다.\n내일 아침부터 바로 써먹을 수 있어요.\n\n저장해두고 외출 전에 펼쳐보세요.\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자그루밍 #남자자기관리 #남성뷰티 #그루밍팁 #남자인상 #셀프케어 #남자헤어 #남성케어 #자기관리루틴 #거울체크 #남자손관리 #디테일남자 #남성매거진 #스타일팁",
+  "caption_full": "거울 앞에서 뭘 보는지가, 결국 어떻게 보이는지를 결정한다.\n\n센스 있는 남자들은 전체를 보기 전에 5곳을 먼저 훑는다.\n목선·눈 밑·입술·손끝·신발 코.\n작은 순서 하나가 인상의 완성도를 올린다.\n\n저장해두고 내일 아침 거울 앞에서 써봐요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #남자자기관리 #남자패션 #그루밍팁 #남자뷰티 #자기관리 #남자스타일 #셀프케어 #남자외모관리 #디테일 #남자일상 #패션남자 #외모관리 #그루밍",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "센스 있는 남자의 셀프 체크 루틴",
+      "headline_sub": "거울 앞 30초, 보는 곳이 다르다",
       "headline_main": [
-        "거울 속",
-        "5곳"
+        "5곳을",
+        "본다"
       ],
-      "headline_serif": "안목은 디테일에서 시작된다",
+      "headline_serif": "안목 있는 남자의 셀프 체크",
       "image_queries": [
-        "man dark studio mirror reflection moody editorial",
-        "male grooming mirror dark moody portrait",
-        "men bathroom mirror dark cinematic closeup"
+        "man dark studio mirror reflection moody",
+        "male editorial dark bathroom grooming",
+        "men moody portrait checking appearance"
       ],
       "image_url": "https://images.pexels.com/photos/21369550/pexels-photo-21369550.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
@@ -24,99 +24,86 @@
       "slide_num": 2,
       "type": "content",
       "number": "01",
-      "subhead": "헤어라인 경계",
+      "subhead": "목선 · 귀 뒷라인",
       "body": [
-        "구레나룻 끝선이 비대칭이면 얼굴이 먼저 흔들린다.",
-        "좌우 길이를 엄지손가락 두께로 맞춰 확인한다."
+        "헤어라인이 끝나는 목선부터 확인.",
+        "잔털 하나가 전체 인상을 흐린다."
       ],
-      "caption": "첫인상은 헤어라인에서 결정된다.",
+      "caption": "가장 먼저 눈 가는 곳.",
       "image_queries": [
-        "man dark moody hairline close up editorial",
-        "male hair detail dark studio side profile",
-        "men barber haircut dark cinematic closeup"
+        "man neck hairline dark closeup moody",
+        "male grooming neckline editorial dark",
+        "men back of neck hair trimming moody studio"
       ],
-      "image_url": "https://images.pexels.com/photos/7447142/pexels-photo-7447142.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/9363610/pexels-photo-9363610.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
       "type": "content",
       "number": "02",
-      "subhead": "눈 밑·다크서클",
+      "subhead": "눈 밑 · 다크서클",
       "body": [
-        "수면 부족은 눈 밑이 먼저 말한다.",
-        "형광등 아래서 45도 위를 보며 피부 톤을 점검한다."
+        "수면 부족은 눈 밑에 가장 먼저 쌓인다.",
+        "컨실러 한 점이 피로감을 지운다."
       ],
-      "caption": "피로는 숨길 수 없다. 눈 밑이 먼저 드러낸다.",
+      "caption": "첫인상은 눈 아래서 결정된다.",
       "image_queries": [
-        "man dark moody under eye close up portrait",
-        "male face detail dark studio cinematic skin",
-        "men eyes close up editorial dark moody"
+        "man dark under eyes closeup moody portrait",
+        "male editorial eye detail dark studio",
+        "men face closeup dark moody skin texture"
       ],
-      "image_url": "https://images.pexels.com/photos/37711448/pexels-photo-37711448.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/24986830/pexels-photo-24986830.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "03",
-      "subhead": "코털·귀털",
+      "subhead": "입술 각질 · 입꼬리",
       "body": [
-        "본인은 보이지 않아도 대화 상대는 반드시 본다.",
-        "외출 전 조명 밝은 곳에서 정면 확인이 필수."
+        "각질 들뜬 입술은 건강해 보이지 않는다.",
+        "립밤 하나로 정돈, 입꼬리까지 확인."
       ],
-      "caption": "놓치는 곳이 인상 전체를 무너뜨린다.",
+      "caption": "말하기 전에 입술부터.",
       "image_queries": [
-        "man dark moody face nose detail close up editorial",
-        "male grooming nose trim dark cinematic",
-        "men face detail dark studio portrait closeup"
+        "man lips closeup dark moody editorial",
+        "male face lip detail dark studio portrait",
+        "men mouth jawline dark moody closeup"
       ],
-      "image_url": "https://images.pexels.com/photos/13927646/pexels-photo-13927646.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "04",
-      "subhead": "손끝 상태",
+      "subhead": "손 · 손톱 끝",
       "body": [
-        "손은 악수·식사·작업 중 끊임없이 노출된다.",
-        "큐티클과 손톱 길이를 3일 간격으로 정리한다."
+        "손은 나이와 습관을 동시에 드러낸다.",
+        "손톱 끝 0.5mm, 정리 여부가 티 난다."
       ],
-      "caption": "손 관리가 곧 매너의 마지막 서명이다.",
+      "caption": "디테일은 손끝에서 갈린다.",
       "image_queries": [
-        "man hands dark moody closeup editorial male",
-        "male hands clean groomed dark cinematic studio",
-        "men hands detail dark editorial portrait"
+        "man hands dark moody closeup editorial",
+        "male hands fingers dark studio grooming",
+        "men hand detail dark moody ink shadow"
       ],
-      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7447142/pexels-photo-7447142.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
       "type": "content",
       "number": "05",
-      "subhead": "목선·칼라 라인",
+      "subhead": "신발 코 · 굽 상태",
       "body": [
-        "셔츠 칼라 안쪽 목선이 정돈되지 않으면 전체가 허물어진다.",
-        "2주 간격 넥 라인 정리로 실루엣을 살린다."
+        "전신 거울이라면 발끝까지 내려본다.",
+        "굽 닳은 신발은 전체 코디를 무너뜨린다."
       ],
-      "caption": "옷이 아니라 목선이 핏을 완성한다.",
+      "caption": "시선은 결국 바닥까지 내려간다.",
       "image_queries": [
-        "man dark moody neck collar detail editorial male",
-        "male shirt collar dark cinematic studio portrait",
-        "men neck detail dark moody close up editorial"
+        "man shoes dark moody editorial closeup",
+        "male dress shoes dark floor studio",
+        "men leather shoes dark moody detail"
       ],
-      "image_url": "https://images.pexels.com/photos/8648050/pexels-photo-8648050.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    },
-    {
-      "slide_num": 7,
-      "type": "closing",
-      "wordmark": "bodetail",
-      "closing_line": "디테일이 인상이다.",
-      "closing_sub": "저장해두고, 내일 아침 거울 앞에서 펼쳐보세요.",
-      "image_queries": [
-        "man dark studio moody editorial full portrait male",
-        "male dark cinematic portrait standing editorial",
-        "men dark ink background moody editorial portrait"
-      ],
-      "image_url": ""
+      "image_url": "https://images.pexels.com/photos/37813631/pexels-photo-37813631.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     }
   ]
 }

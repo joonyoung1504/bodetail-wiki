@@ -1,0 +1,109 @@
+{
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.01",
+  "caption_full": "거울 앞에서 뭘 보는지가, 결국 어떻게 보이는지를 결정한다.\n\n센스 있는 남자들은 전체를 보기 전에 5곳을 먼저 훑는다.\n목선·눈 밑·입술·손끝·신발 코.\n작은 순서 하나가 인상의 완성도를 올린다.\n\n저장해두고 내일 아침 거울 앞에서 써봐요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #남자자기관리 #남자패션 #그루밍팁 #남자뷰티 #자기관리 #남자스타일 #셀프케어 #남자외모관리 #디테일 #남자일상 #패션남자 #외모관리 #그루밍",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "거울 앞 30초, 보는 곳이 다르다",
+      "headline_main": [
+        "5곳을",
+        "본다"
+      ],
+      "headline_serif": "안목 있는 남자의 셀프 체크",
+      "image_queries": [
+        "man dark studio mirror reflection moody",
+        "male editorial dark bathroom grooming",
+        "men moody portrait checking appearance"
+      ],
+      "image_url": "https://images.pexels.com/photos/21369550/pexels-photo-21369550.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "목선 · 귀 뒷라인",
+      "body": [
+        "헤어라인이 끝나는 목선부터 확인.",
+        "잔털 하나가 전체 인상을 흐린다."
+      ],
+      "caption": "가장 먼저 눈 가는 곳.",
+      "image_queries": [
+        "man neck hairline dark closeup moody",
+        "male grooming neckline editorial dark",
+        "men back of neck hair trimming moody studio"
+      ],
+      "image_url": "https://images.pexels.com/photos/9363610/pexels-photo-9363610.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "눈 밑 · 다크서클",
+      "body": [
+        "수면 부족은 눈 밑에 가장 먼저 쌓인다.",
+        "컨실러 한 점이 피로감을 지운다."
+      ],
+      "caption": "첫인상은 눈 아래서 결정된다.",
+      "image_queries": [
+        "man dark under eyes closeup moody portrait",
+        "male editorial eye detail dark studio",
+        "men face closeup dark moody skin texture"
+      ],
+      "image_url": "https://images.pexels.com/photos/24986830/pexels-photo-24986830.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "입술 각질 · 입꼬리",
+      "body": [
+        "각질 들뜬 입술은 건강해 보이지 않는다.",
+        "립밤 하나로 정돈, 입꼬리까지 확인."
+      ],
+      "caption": "말하기 전에 입술부터.",
+      "image_queries": [
+        "man lips closeup dark moody editorial",
+        "male face lip detail dark studio portrait",
+        "men mouth jawline dark moody closeup"
+      ],
+      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "손 · 손톱 끝",
+      "body": [
+        "손은 나이와 습관을 동시에 드러낸다.",
+        "손톱 끝 0.5mm, 정리 여부가 티 난다."
+      ],
+      "caption": "디테일은 손끝에서 갈린다.",
+      "image_queries": [
+        "man hands dark moody closeup editorial",
+        "male hands fingers dark studio grooming",
+        "men hand detail dark moody ink shadow"
+      ],
+      "image_url": "https://images.pexels.com/photos/7447142/pexels-photo-7447142.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "content",
+      "number": "05",
+      "subhead": "신발 코 · 굽 상태",
+      "body": [
+        "전신 거울이라면 발끝까지 내려본다.",
+        "굽 닳은 신발은 전체 코디를 무너뜨린다."
+      ],
+      "caption": "시선은 결국 바닥까지 내려간다.",
+      "image_queries": [
+        "man shoes dark moody editorial closeup",
+        "male dress shoes dark floor studio",
+        "men leather shoes dark moody detail"
+      ],
+      "image_url": "https://images.pexels.com/photos/37813631/pexels-photo-37813631.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    }
+  ]
+}
