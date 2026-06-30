@@ -59,19 +59,40 @@ def download_youtube(url: str) -> Path:
 
     cmd = [
         "yt-dlp",
-        "-f", "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best",
+        "-f", "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best",
         "--merge-output-format", "mp4",
         "-o", out_tmpl,
         "--no-playlist",
         "--no-check-certificates",
+        "--extractor-retries", "3",
+        "--js-runtimes", "nodejs",
     ]
     if cookies_file:
         cmd += ["--cookies", str(cookies_file)]
     cmd.append(url)
+    print(f"  → 실행: {' '.join(cmd[:6])} ...")
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
-        print(f"❌ yt-dlp 오류:\n{r.stderr[-2000:]}")
-        raise RuntimeError("유튜브 다운로드 실패")
+        print(f"  ⚠️ 1차 시도 실패 (코드 {r.returncode})")
+        print(f"  stderr 일부: {r.stderr[-500:]}")
+        # 폴백: 포맷 제한 없이 재시도
+        print("  → 폴백 포맷으로 재시도...")
+        cmd2 = [
+            "yt-dlp",
+            "-f", "best[height<=720]/best",
+            "-o", out_tmpl,
+            "--no-playlist",
+            "--no-check-certificates",
+            "--extractor-retries", "5",
+            "--js-runtimes", "nodejs",
+        ]
+        if cookies_file:
+            cmd2 += ["--cookies", str(cookies_file)]
+        cmd2.append(url)
+        r = subprocess.run(cmd2, capture_output=True, text=True)
+        if r.returncode != 0:
+            print(f"❌ yt-dlp 오류 (코드 {r.returncode}):\n{r.stderr[-2500:]}")
+            raise RuntimeError("유튜브 다운로드 실패")
 
     downloaded = list(ASSETS.glob("yt_source.*"))
     mp4s = [f for f in downloaded if f.suffix == ".mp4"]
