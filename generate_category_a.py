@@ -65,7 +65,7 @@ def download_youtube(url: str) -> Path:
         "--no-playlist",
         "--no-check-certificates",
         "--extractor-retries", "3",
-        "--js-runtimes", "node",
+        "--remote-components", "ejs:github",
     ]
     if cookies_file:
         cmd += ["--cookies", str(cookies_file)]
@@ -84,7 +84,7 @@ def download_youtube(url: str) -> Path:
             "--no-playlist",
             "--no-check-certificates",
             "--extractor-retries", "5",
-            "--js-runtimes", "node",
+            "--remote-components", "ejs:github",
         ]
         if cookies_file:
             cmd2 += ["--cookies", str(cookies_file)]
@@ -134,7 +134,7 @@ def download_youtube_audio(url: str) -> Path:
         "-o", out_tmpl,
         "--no-playlist",
         "--no-check-certificates",
-        "--js-runtimes", "node",
+        "--remote-components", "ejs:github",
     ]
     if cookies_file:
         cmd += ["--cookies", str(cookies_file)]
@@ -224,11 +224,24 @@ def generate_direction(transcript, total_dur):
 {json.dumps(sents,ensure_ascii=False,indent=2)}
 
 가장 바이럴 가능성 높은 {TARGET_DURATION}초 구간을 골라줘.
-기준: 강한 훅 문장 + 핵심 통찰 + 임팩트 마무리.
+
+[선택 기준 — 중요]
+1. 가슴이 뜨거워지고 동기부여가 되는 구절을 반드시 포함시켜.
+   (예: 강한 선언, 인생을 바꾸는 통찰, 듣고 나면 행동하고 싶어지는 말)
+2. 고정관념 버려. 꼭 연속된 구간일 필요 없어.
+   가장 임팩트 있는 핵심 한두 문장만 뽑고,
+   나머지 시간은 배경음악 + 이미지 교차로 채워도 돼.
+3. 말이 적은 구간이라도 그 한마디가 강력하면 그걸 선택해.
+   자막은 핵심 문장만 띄우고 나머지는 음악과 이미지로 분위기를 만들어.
+
+[자막 규칙]
+- 핵심 문장만 subtitle로. 모든 말을 자막으로 넣을 필요 없어.
+- 임팩트 있는 한 구절을 화면에 띄우고 여운을 줘.
+- emphasis_words로 가장 강력한 단어를 골드색 강조.
 
 순수 JSON만:
 {{"clip_start":시작초,"clip_end":끝초,
-"hook_reason":"이 구간 고른 이유 한줄",
+"hook_reason":"이 구간 고른 이유 (어떤 동기부여 포인트인지)",
 "subtitles":[{{"start":원본초,"end":원본초,"subtitle_ko":"16자이내","emphasis_words":["강조어"]}}],
 "broll_keywords":["man neck jawline dark cinematic","man hands dark moody","men cologne bottle dark","man face closeup moody","male suit dark editorial","man ear closeup dark","man mirror reflection dark"]}}
 
