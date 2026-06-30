@@ -31,10 +31,17 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Node.js 설치 (yt-dlp JS 챌린지 해결용)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: 패키지 설치
         run: |
           sudo apt-get install -y ffmpeg fonts-noto-cjk --fix-missing
-          pip install requests librosa soundfile numpy yt-dlp
+          pip install requests librosa soundfile numpy "yt-dlp[default]"
+          node --version
+          which node
 
       - name: 카테고리 A 생성
         env:
