@@ -36,13 +36,18 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Deno 설치 (yt-dlp JS 챌린지 솔버)
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
       - name: 패키지 설치
         run: |
           sudo apt-get install -y ffmpeg fonts-noto-cjk --fix-missing
           pip install requests librosa soundfile numpy
           pip install -U --pre "yt-dlp[default]"
           node --version
-          which node
+          deno --version
           yt-dlp --version
 
       - name: 카테고리 A 생성
