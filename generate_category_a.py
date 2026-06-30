@@ -36,7 +36,7 @@ RW, RH = 1080, 1920
 FPS    = 30
 N_IMGS = 7
 TARGET_DURATION = int(os.environ.get("REEL_DURATION","45"))
-BEATS_PER_CUT   = int(os.environ.get("BEATS_PER_CUT","2"))
+BEATS_PER_CUT   = max(1, int(os.environ.get("BEATS_PER_CUT","2")))
 # Actions 입력으로 URL 직접 전달도 가능
 URL_INPUT = os.environ.get("YOUTUBE_URL","").strip()
 # 배경음악 유튜브 URL (선택)
@@ -172,6 +172,8 @@ def transcribe(video_path: Path, force_lang=None) -> dict:
     with open(audio,"rb") as f:
         up=requests.post("https://api.assemblyai.com/v2/upload",
             headers={"authorization":ASSEMBLYAI_KEY},data=f,timeout=180)
+    if up.status_code != 200 or "upload_url" not in up.json():
+        raise RuntimeError(f"AssemblyAI 업로드 실패 ({up.status_code}): {up.text[:500]}")
     url=up.json()["upload_url"]
 
     # 언어 자동 감지 옵션 사용
@@ -183,6 +185,8 @@ def transcribe(video_path: Path, force_lang=None) -> dict:
 
     tr=requests.post("https://api.assemblyai.com/v2/transcript",
         headers=hdrs,json=body,timeout=30)
+    if tr.status_code != 200 or "id" not in tr.json():
+        raise RuntimeError(f"AssemblyAI 요청 실패 ({tr.status_code}): {tr.text[:500]}")
     tid=tr.json()["id"]
     while True:
         poll=requests.get(f"https://api.assemblyai.com/v2/transcript/{tid}",
@@ -215,6 +219,13 @@ def generate_direction(transcript, total_dur):
     words=transcript.get("words",[])
     is_en=transcript.get("language_code","en")!="ko"
     sents=build_sents(words)
+
+    # 아주 긴 원본(문장 600개 초과)은 프롬프트 비대화 방지를 위해 균등 샘플링
+    if len(sents) > 600:
+        step = len(sents)/600
+        sents = [sents[int(i*step)] for i in range(600)]
+        print(f"  → 문장 {len(sents)}개로 다운샘플링 (원본이 너무 긺)")
+
     prompt=f"""bodetail 바이럴 릴스 편집 감독.
 원본 {total_dur:.0f}초 → 목표 {TARGET_DURATION}초 추출
 언어: {'영어→한국어 번역' if is_en else '한국어'}
@@ -225,18 +236,23 @@ def generate_direction(transcript, total_dur):
 
 가장 바이럴 가능성 높은 {TARGET_DURATION}초 구간을 골라줘.
 
+[중요 — 길이 제약]
+clip_end - clip_start는 반드시 {TARGET_DURATION}초 근처(±20% 이내)여야 해.
+즉 clip_start ~ clip_end는 하나의 연속된 짧은 구간이어야 하고,
+원본 영상 전체를 다 가져오면 절대 안 돼.
+
 [선택 기준 — 중요]
-1. 가슴이 뜨거워지고 동기부여가 되는 구절을 반드시 포함시켜.
+1. 그 {TARGET_DURATION}초 구간 안에 가슴이 뜨거워지고 동기부여가 되는
+   핵심 구절이 반드시 포함되어야 해.
    (예: 강한 선언, 인생을 바꾸는 통찰, 듣고 나면 행동하고 싶어지는 말)
-2. 고정관념 버려. 꼭 연속된 구간일 필요 없어.
-   가장 임팩트 있는 핵심 한두 문장만 뽑고,
-   나머지 시간은 배경음악 + 이미지 교차로 채워도 돼.
-3. 말이 적은 구간이라도 그 한마디가 강력하면 그걸 선택해.
-   자막은 핵심 문장만 띄우고 나머지는 음악과 이미지로 분위기를 만들어.
+2. 자막은 구간 전체의 모든 말을 다 띄울 필요 없어.
+   {TARGET_DURATION}초 구간 안에서도 가장 임팩트 있는 한두 문장만
+   subtitles에 넣고, 나머지 시간은 자막 없이 배경음악+이미지 교차로
+   채워도 돼. (subtitles 배열이 짧아도 됨)
+3. 말이 적은 구간이라도 그 한마디가 강력하면 그 구간을 선택해.
 
 [자막 규칙]
 - 핵심 문장만 subtitle로. 모든 말을 자막으로 넣을 필요 없어.
-- 임팩트 있는 한 구절을 화면에 띄우고 여운을 줘.
 - emphasis_words로 가장 강력한 단어를 골드색 강조.
 
 순수 JSON만:
@@ -248,12 +264,36 @@ def generate_direction(transcript, total_dur):
 broll_keywords는 정확히 {N_IMGS}개, 모두 "man/male/men"+"dark/moody/cinematic" 포함."""
     res=requests.post("https://api.anthropic.com/v1/messages",
         headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-        json={"model":"claude-sonnet-4-6","max_tokens":2500,
-              "messages":[{"role":"user","content":prompt}]},timeout=60)
-    raw=res.json()["content"][0]["text"].strip()
+        json={"model":"claude-sonnet-4-6","max_tokens":3000,
+              "messages":[{"role":"user","content":prompt}]},timeout=90)
+    if res.status_code != 200:
+        raise RuntimeError(f"Claude API 오류 {res.status_code}: {res.text[:500]}")
+    body = res.json()
+    if "content" not in body:
+        raise RuntimeError(f"Claude 응답 형식 오류: {json.dumps(body)[:500]}")
+    raw=body["content"][0]["text"].strip()
     raw=re.sub(r'^```json\s*','',raw); raw=re.sub(r'\s*```$','',raw)
     data=json.loads(raw)
-    print(f"  ✅ 구간: {data['clip_start']:.1f}~{data['clip_end']:.1f}초")
+
+    # ── 안전 클램프: clip_start/end가 비정상(문자열·범위폭주)이어도 강제 보정 ──
+    try:
+        cs = float(data.get("clip_start", 0))
+    except (TypeError, ValueError):
+        cs = 0.0
+    try:
+        ce = float(data.get("clip_end", cs + TARGET_DURATION))
+    except (TypeError, ValueError):
+        ce = cs + TARGET_DURATION
+
+    cs = max(0.0, min(cs, max(0.0, total_dur - 1)))
+    max_allowed = TARGET_DURATION * 1.3
+    if ce <= cs or (ce - cs) > max_allowed:
+        print(f"  ⚠️ Claude가 비정상 구간({cs:.1f}~{ce:.1f}) 반환 → {TARGET_DURATION}초로 강제 보정")
+        ce = min(cs + TARGET_DURATION, total_dur)
+    ce = min(ce, total_dur)
+    data["clip_start"], data["clip_end"] = cs, ce
+
+    print(f"  ✅ 구간: {cs:.1f}~{ce:.1f}초 ({ce-cs:.1f}초)")
     print(f"     이유: {data.get('hook_reason','')}")
     return data
 
@@ -286,8 +326,8 @@ def get_img(kw,save):
                 params={"query":q,"per_page":3,"orientation":"portrait","content_filter":"high"},timeout=10)
             res=r.json().get("results",[])
             if res:
-                requests.get(res[0]["urls"]["regular"],timeout=20)
-                Path(save).write_bytes(requests.get(res[0]["urls"]["regular"],timeout=20).content)
+                img_resp=requests.get(res[0]["urls"]["regular"],timeout=20)
+                Path(save).write_bytes(img_resp.content)
                 return True
         except: pass
     if PEXELS_KEY:
@@ -317,6 +357,7 @@ def download_images(keywords):
 # ══════════════════════════════════════════════════
 def analyze_beats(bgm, dur):
     print(f"\n🥁 STEP 5: 배경음악 박자 분석...")
+    MAX_CUTS = 150  # 너무 잦은 컷으로 렌더링 시간 폭주 방지
     try:
         import librosa, numpy as np
         y,sr=librosa.load(str(bgm),sr=22050,duration=dur+5)
@@ -327,6 +368,10 @@ def analyze_beats(bgm, dur):
         cuts=[float(b) for i,b in enumerate(bt) if i%BEATS_PER_CUT==0 and float(b)<dur]
         if not cuts or cuts[0]>0.1: cuts=[0.0]+cuts
         cuts.append(dur)
+        if len(cuts)-1 > MAX_CUTS:
+            print(f"  ⚠️ 컷 수 {len(cuts)-1}개 → {MAX_CUTS}개로 제한 (균등 샘플링)")
+            step=(len(cuts)-1)/MAX_CUTS
+            cuts=[cuts[int(i*step)] for i in range(MAX_CUTS)]+[dur]
         print(f"  → {len(cuts)-1}컷 ({BEATS_PER_CUT}박자마다)")
         return cuts
     except Exception as e:
@@ -384,57 +429,97 @@ Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
     return ass
 
 # ══════════════════════════════════════════════════
-# STEP 7: 박자싱크 FFmpeg 합성
+# STEP 7: 박자싱크 FFmpeg 합성 (2단계 방식)
 # ══════════════════════════════════════════════════
 def render(clip,dur,cuts,imgs,ass,bgm):
     n=len(cuts)-1
     print(f"\n🎬 STEP 7: FFmpeg 합성 ({dur:.1f}초 {n}컷)...")
     valid=[p for p in imgs if p and Path(p).exists()]
     if not valid:
+        print("  ⚠️ 다운로드된 이미지가 하나도 없음 → 검정 폴백 이미지 생성")
         blk=ASSETS/"black.jpg"
-        subprocess.run(["ffmpeg","-y","-f","lavfi",
-            f"-i","color=c=black:size={RW}x{RH}:rate=1","-frames:v","1",str(blk)],capture_output=True)
+        r_blk=subprocess.run(["ffmpeg","-y","-f","lavfi",
+            "-i", f"color=c=black:size={RW}x{RH}:rate=1",
+            "-frames:v","1",str(blk)],capture_output=True,text=True)
+        if r_blk.returncode!=0 or not blk.exists():
+            raise RuntimeError(f"검정 폴백 이미지 생성 실패: {r_blk.stderr[-500:]}")
         valid=[str(blk)]
     out=OUT_DIR/"reel_final.mp4"
-    cmd_in=["-i",str(clip)]
-    ii={}
-    for i,p in enumerate(valid):
-        ii[i]=len(cmd_in)//2
-        cmd_in+=["-loop","1","-t",str(dur+2),"-i",p]
+
+    # ── 1단계: 각 박자 컷을 개별 영상 세그먼트로 생성 ──
+    seg_dir=ASSETS/"segs"; seg_dir.mkdir(exist_ok=True)
+    for old in seg_dir.glob("*.mp4"): old.unlink()
+
+    zes=[("min(zoom+0.0012,1.08)","iw/2-(iw/zoom/2)","ih/2-(ih/zoom/2)"),
+         ("if(eq(on,1),1.08,max(zoom-0.0012,1.0))","iw/2-(iw/zoom/2)","ih/2-(ih/zoom/2)"),
+         ("min(zoom+0.0015,1.09)","0","0"),
+         ("if(eq(on,1),1.09,max(zoom-0.0015,1.0))","iw-(iw/zoom)","ih-(ih/zoom)")]
+
+    print(f"  → {n}개 세그먼트 생성 중...")
+    seg_files=[]
+    for i in range(n):
+        seg_dur=cuts[i+1]-cuts[i]
+        if seg_dur<0.05: seg_dur=0.05
+        img=valid[i%len(valid)]
+        ze,xp,yp=zes[i%4]
+        fr=max(2,int(seg_dur*FPS))
+        seg_path=seg_dir/f"seg_{i:05d}.mp4"
+        cmd=["ffmpeg","-y","-loop","1","-t",f"{seg_dur:.4f}","-i",str(img),
+            "-vf",
+            f"scale={RW*2}:{RH*2}:force_original_aspect_ratio=increase,"
+            f"crop={RW}:{RH}:(iw-{RW})/2:(ih-{RH})/2,"
+            f"zoompan=z='{ze}':x='{xp}':y='{yp}':d={fr}:s={RW}x{RH}:fps={FPS},"
+            f"format=yuv420p",
+            "-r",str(FPS),"-c:v","libx264","-preset","ultrafast","-crf","22",
+            "-an",str(seg_path)]
+        r=subprocess.run(cmd,capture_output=True,text=True)
+        if r.returncode!=0:
+            print(f"  ⚠️ 세그먼트 {i} 실패: {r.stderr[-300:]}")
+            continue
+        seg_files.append(seg_path)
+
+    if not seg_files:
+        raise RuntimeError("세그먼트 생성 전부 실패")
+    print(f"  ✅ {len(seg_files)}개 세그먼트 생성 완료")
+
+    # ── 2단계: 세그먼트 concat ──
+    concat_list=ASSETS/"concat.txt"
+    concat_list.write_text(
+        "\n".join(f"file '{s}'" for s in seg_files), encoding="utf-8")
+    video_only=ASSETS/"video_only.mp4"
+    cmd_concat=["ffmpeg","-y","-f","concat","-safe","0","-i",str(concat_list),
+        "-c:v","libx264","-preset","fast","-crf","20","-pix_fmt","yuv420p",
+        "-r",str(FPS),str(video_only)]
+    r=subprocess.run(cmd_concat,capture_output=True,text=True)
+    if r.returncode!=0:
+        print(f"❌ concat 실패:\n{r.stderr[-2000:]}"); raise RuntimeError("concat 실패")
+    print(f"  ✅ 영상 이어붙이기 완료")
+
+    # ── 3단계: 자막 + 오디오 합성 ──
+    ae=str(ass).replace("\\","/").replace(":","\\:")
+    cmd_in=["-i",str(video_only),"-i",str(clip)]  # [0]영상 [1]원본(오디오용)
     bi=None
     if bgm and bgm.exists():
-        bi=len(cmd_in)//2; cmd_in+=["-i",str(bgm)]
-    f=[]
-    zes=[("min(zoom+0.0006,1.04)","iw/2-(iw/zoom/2)","ih/2-(ih/zoom/2)"),
-         ("if(eq(on,1),1.04,max(zoom-0.0006,1.0))","iw/2-(iw/zoom/2)","ih/2-(ih/zoom/2)"),
-         ("min(zoom+0.0008,1.05)","0","0"),
-         ("if(eq(on,1),1.05,max(zoom-0.0008,1.0))","iw-(iw/zoom)","ih-(ih/zoom)")]
-    for i,p in enumerate(valid):
-        ze,xp,yp=zes[i%4]; fr=max(1,int((dur+2)*FPS))
-        f.append(f"[{ii[i]}:v]scale={RW*2}:{RH*2}:force_original_aspect_ratio=increase,"
-                 f"crop={RW}:{RH}:(iw-{RW})/2:(ih-{RH})/2,"
-                 f"zoompan=z='{ze}':x='{xp}':y='{yp}':d={fr}:s={RW}x{RH}:fps={FPS},"
-                 f"setpts=PTS-STARTPTS[kb{i}]")
-    segs=[]
-    for i in range(n):
-        s=cuts[i];e=cuts[i+1];slot=i%len(valid);lb=f"s{i:05d}"
-        f.append(f"[kb{slot}]trim={s:.4f}:{e:.4f},setpts=PTS-STARTPTS[{lb}]")
-        segs.append(f"[{lb}]")
-    f.append(f"{''.join(segs)}concat=n={n}:v=1:a=0[vcat]")
-    ae=str(ass).replace("\\","/").replace(":","\\:")
-    f.append(f"[vcat]ass='{ae}'[vout]")
+        bi=2; cmd_in+=["-i",str(bgm)]
+
+    filters=[f"[0:v]ass='{ae}'[vout]"]
     if bi is not None:
-        f.append(f"[0:a]volume=1.0[oa];[{bi}:a]volume=0.25,aloop=loop=-1:size=2205000[ba];[oa][ba]amix=inputs=2:duration=first[aout]")
-    fs=";\n".join(f)
-    m=["-map","[vout]"]
-    m+=["-map","[aout]"] if bi is not None else ["-map","0:a?"]
-    cmd=["ffmpeg","-y"]+cmd_in+["-filter_complex",fs]+m+[
+        filters.append(
+            f"[1:a]volume=1.0[oa];"
+            f"[{bi}:a]volume=0.25,aloop=loop=-1:size=2205000[ba];"
+            f"[oa][ba]amix=inputs=2:duration=first[aout]")
+        amap=["-map","[aout]"]
+    else:
+        amap=["-map","1:a?"]
+
+    cmd=["ffmpeg","-y"]+cmd_in+["-filter_complex",";".join(filters),
+        "-map","[vout]"]+amap+[
         "-c:v","libx264","-preset","fast","-crf","20",
         "-c:a","aac","-b:a","192k","-ar","48000",
         "-r",str(FPS),"-pix_fmt","yuv420p","-t",str(dur),str(out)]
     r=subprocess.run(cmd,capture_output=True,text=True)
     if r.returncode!=0:
-        print(f"❌ FFmpeg:\n{r.stderr[-3000:]}"); raise RuntimeError("FFmpeg 실패")
+        print(f"❌ 최종합성 실패:\n{r.stderr[-2500:]}"); raise RuntimeError("FFmpeg 실패")
     print(f"  ✅ {out.name} ({out.stat().st_size/1024/1024:.1f}MB)")
     return out
 
@@ -515,13 +600,14 @@ if __name__=="__main__":
     cs=direction.get("clip_start",0); ce=direction.get("clip_end",min(TARGET_DURATION,total_dur))
     clip,dur   = extract_clip(video, cs, ce)
     imgs       = download_images(direction.get("broll_keywords",[]))
-    cuts       = analyze_beats(bgm,dur) if bgm else (
-                 [0.0]+[round(t,3) for t in __import__("numpy").arange(0.5,dur,0.5)]+[dur]
-                 if False else None)
-    if cuts is None:
+    if bgm:
+        cuts = analyze_beats(bgm, dur)
+    else:
+        # 배경음악 없으면 0.5초 고정 간격 폴백
         cuts=[0.0]; t=0.5
         while t<dur: cuts.append(round(t,3)); t+=0.5
         cuts.append(dur)
+        print("\n⚠️ 배경음악 없음 → 0.5초 고정 간격으로 이미지 교차")
     ass        = build_ass(direction.get("subtitles",[]),transcript.get("words",[]),cs)
     final      = render(clip,dur,cuts,imgs,ass,bgm)
     save_cleanup(final,direction,transcript,source_info)
