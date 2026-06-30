@@ -65,7 +65,7 @@ def download_youtube(url: str) -> Path:
         "--no-playlist",
         "--no-check-certificates",
         "--extractor-retries", "3",
-        "--js-runtimes", "nodejs",
+        "--js-runtimes", "node",
     ]
     if cookies_file:
         cmd += ["--cookies", str(cookies_file)]
@@ -84,7 +84,7 @@ def download_youtube(url: str) -> Path:
             "--no-playlist",
             "--no-check-certificates",
             "--extractor-retries", "5",
-            "--js-runtimes", "nodejs",
+            "--js-runtimes", "node",
         ]
         if cookies_file:
             cmd2 += ["--cookies", str(cookies_file)]
@@ -134,6 +134,7 @@ def download_youtube_audio(url: str) -> Path:
         "-o", out_tmpl,
         "--no-playlist",
         "--no-check-certificates",
+        "--js-runtimes", "node",
     ]
     if cookies_file:
         cmd += ["--cookies", str(cookies_file)]
