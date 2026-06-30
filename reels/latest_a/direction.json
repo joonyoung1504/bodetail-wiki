@@ -1,0 +1,40 @@
+{
+  "clip_start": 297.32,
+  "clip_end": 342.44,
+  "hook_reason": "300파운드의 실패자에서 극한의 인간으로 변신한 반전 서사. '나는 항상 강한 사람이 아니었다'는 자기고백 후 Medal of Honor 영웅들의 이야기를 읽고 각성하는 순간까지 — 듣는 사람 누구든 자신의 한계를 돌아보게 만드는 가장 강력한 동기부여 구간",
+  "subtitles": [
+    {
+      "start": 297.32,
+      "end": 305.04,
+      "subtitle_ko": "나는 항상 강하지 않았다",
+      "emphasis_words": [
+        "강하지"
+      ]
+    },
+    {
+      "start": 321.05,
+      "end": 327.61,
+      "subtitle_ko": "175kg → 300파운드",
+      "emphasis_words": [
+        "300파운드"
+      ]
+    },
+    {
+      "start": 339.61,
+      "end": 342.44,
+      "subtitle_ko": "나는 비범한 사람이 되고 싶었다",
+      "emphasis_words": [
+        "비범한"
+      ]
+    }
+  ],
+  "broll_keywords": [
+    "man neck jawline dark cinematic",
+    "man hands dark moody",
+    "men cologne bottle dark editorial",
+    "man face closeup moody cinematic",
+    "male suit dark editorial",
+    "man ear closeup dark moody",
+    "man mirror reflection dark cinematic"
+  ]
+}
