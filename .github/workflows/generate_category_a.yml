@@ -39,9 +39,11 @@ jobs:
       - name: 패키지 설치
         run: |
           sudo apt-get install -y ffmpeg fonts-noto-cjk --fix-missing
-          pip install requests librosa soundfile numpy "yt-dlp[default]"
+          pip install requests librosa soundfile numpy
+          pip install -U --pre "yt-dlp[default]"
           node --version
           which node
+          yt-dlp --version
 
       - name: 카테고리 A 생성
         env:
