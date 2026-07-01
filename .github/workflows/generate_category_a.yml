@@ -47,10 +47,20 @@ jobs:
           sudo apt-get install -y ffmpeg fonts-noto-cjk libsndfile1
           fc-cache -f
 
+      - name: Deno 설치 (유튜브 다운로드용 JS 챌린지 해결기 — 2025.11 이후 yt-dlp 필수)
+        run: |
+          curl -fsSL https://deno.land/install.sh | sh
+          echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
+
       - name: 파이썬 라이브러리 설치
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade yt-dlp requests librosa soundfile numpy pillow
+          pip install --upgrade "yt-dlp[default]" requests librosa soundfile numpy pillow
+
+      - name: 설치 확인 (문제 생기면 이 로그로 진단)
+        run: |
+          deno --version
+          yt-dlp --version
 
       - name: 카테고리 A 생성
         env:
