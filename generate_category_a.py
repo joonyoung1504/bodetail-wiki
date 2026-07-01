@@ -71,14 +71,22 @@ def download_youtube(url: str) -> Path:
     cmd.append(url)
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
-        print(f"  ⚠️ 1차 실패\n  {r.stderr[-500:]}\n  → 폴백")
+        print(f"  ⚠️ 1차 실패\n  {r.stderr[-500:]}\n  → 폴백(2차)")
         cmd2=["yt-dlp","-f","best[height<=720]/best","-o",out_tmpl,"--no-playlist",
               "--no-check-certificates","--extractor-retries","5","--remote-components","ejs:github"]
         if cookies_file: cmd2 += ["--cookies", str(cookies_file)]
         cmd2.append(url)
         r=subprocess.run(cmd2,capture_output=True,text=True)
+    if r.returncode != 0:
+        print(f"  ⚠️ 2차 실패\n  {r.stderr[-500:]}\n  → 폴백(3차: 플레이어 클라이언트 강제 지정)")
+        cmd3=["yt-dlp","-f","best[height<=720]/best","-o",out_tmpl,"--no-playlist",
+              "--no-check-certificates","--extractor-retries","5","--remote-components","ejs:github",
+              "--extractor-args","youtube:player_client=default,tv,android"]
+        if cookies_file: cmd3 += ["--cookies", str(cookies_file)]
+        cmd3.append(url)
+        r=subprocess.run(cmd3,capture_output=True,text=True)
         if r.returncode!=0:
-            print(f"❌ yt-dlp:\n{r.stderr[-2500:]}"); raise RuntimeError("유튜브 다운로드 실패")
+            print(f"❌ yt-dlp (3차까지 모두 실패):\n{r.stderr[-2500:]}"); raise RuntimeError("유튜브 다운로드 실패")
     downloaded=list(ASSETS.glob("yt_source.*"))
     mp4s=[f for f in downloaded if f.suffix==".mp4"]
     if not mp4s:
@@ -103,7 +111,15 @@ def download_youtube_audio(url: str) -> Path:
     cmd.append(url)
     r=subprocess.run(cmd,capture_output=True,text=True)
     if r.returncode!=0:
-        print(f"  ⚠️ 실패:\n{r.stderr[-800:]}"); return None
+        print(f"  ⚠️ 1차 실패\n  {r.stderr[-500:]}\n  → 폴백(플레이어 클라이언트 강제 지정)")
+        cmd2=["yt-dlp","-f","bestaudio/best","-x","--audio-format","mp3","--audio-quality","0",
+              "-o",out_tmpl,"--no-playlist","--no-check-certificates","--remote-components","ejs:github",
+              "--extractor-args","youtube:player_client=default,tv,android"]
+        if cookies_file: cmd2 += ["--cookies", str(cookies_file)]
+        cmd2.append(url)
+        r=subprocess.run(cmd2,capture_output=True,text=True)
+    if r.returncode!=0:
+        print(f"  ⚠️ 최종 실패:\n{r.stderr[-800:]}"); return None
     mp3s=list(BGM_DIR.glob("bgm_from_youtube.mp3"))
     if mp3s:
         print(f"  ✅ {mp3s[0].name} ({mp3s[0].stat().st_size/1024/1024:.1f}MB)")
