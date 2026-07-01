@@ -2,16 +2,21 @@
 generate_category_a.py — bodetail 카테고리 A v8 (20초 퐁크 하이브리드)
 =====================================================
 구조:
-  훅(고긴스 영상+음성) → 드롭 구절 → 그 이후 BGM 드롭 + 박자싱크 이미지 몽타주
-  전 구간 한국어 단어단위 자막(팝+페이드), BGM 드롭을 영상 드롭에 정렬.
+  훅(고긴스 영상+음성) → 한 방짜리 명대사(드롭) → 그 이후 BGM+박자싱크 이미지 몽타주
 
-v7 → v8 변경:
-  - 기본 길이 20초 (REEL_DURATION 기본값)
-  - drop_at(마음 울리는 구절 끝) 이후 이미지 6~7장 박자싱크 교차편집으로 전환
-  - BGM_START_SEC(또는 자동탐지)로 'BGM 트랙의 어느 지점부터' 쓸지 순수 트림(정렬 아님)
-  - 드롭에서 BGM 0.12→0.34, 보이스 1.0→0.7 덕킹
-  - 줌(켄번즈) 세그먼트 정상화(정확한 프레임수), 폰트 'Noto Sans CJK KR'
-  - 모든 ffmpeg 명령 사전 검증됨
+핵심 사양:
+  - 기본 길이 20초 (REEL_DURATION 환경변수로 조절)
+  - drop_at(가장 강렬한 한 줄이 끝나는 지점) 이후 이미지 몽타주로 전환
+  - BGM_START_SEC(또는 자동탐지)로 'BGM 트랙의 어느 지점부터' 쓸지 순수 트림
+    (영상 드롭 시점과 억지로 정렬 안 함 — 사용자가 원하는 구간을 그대로 사용)
+  - BGM은 드롭 전엔 완전 무음, 드롭 순간 0.05초 만에 확 치고 들어옴(펀치)
+  - 자막은 영어 원문 그대로, 단어별 실제 타이밍에 맞춰 한 단어씩 화면 중앙에 등장
+    (핵심 단어=Anton 볼드 대문자 / 연결어=Playfair Display 이탤릭 소문자, 강조어=골드)
+  - 대본 선택 시 "설명적인 구간"이 아니라 SNS에 캡션으로 박제될 만한
+    한 방짜리 명대사가 포함된 구간을 우선 탐색 (자세한 기준은 generate_direction 참고)
+  - reels/latest_a/assets/ 에 clip.mp4·bgm_used.mp3·images/·direction_edit.json을
+    저장해서, bodetail_editor.html에서 이미지 교체 등 재편집 후
+    rerender_category_a.py로 빠르게 재렌더 가능
 
 입력: youtube_url / videos/inbox_a/url.txt / *.mp4 직접 업로드
 """
@@ -23,8 +28,8 @@ from datetime import datetime, timezone, timedelta
 KST  = timezone(timedelta(hours=9))
 DATE = datetime.now(KST).strftime("%Y-%m-%d")
 
-ASSEMBLYAI_KEY = os.environ["ASSEMBLYAI_API_KEY"]
-ANTHROPIC_KEY  = os.environ["ANTROPIC_API_KEY"]
+ASSEMBLYAI_KEY = os.environ.get("ASSEMBLYAI_API_KEY","")   # rerender_category_a.py는 이 키가 없어도 import 가능해야 함
+ANTHROPIC_KEY  = os.environ.get("ANTROPIC_API_KEY","")
 PEXELS_KEY     = os.environ.get("PEXELS_API_KEY","")
 UNSPLASH_KEY   = os.environ.get("UNSPLASH_ACCESS_KEY","")
 
@@ -174,13 +179,22 @@ def transcribe(video_path, force_lang=None):
 # STEP 2: 핵심구간 + 드롭시점 + 자막
 # ══════════════════════════════════════════════════
 def build_sents(words):
-    s=[]; buf=[]; st=None
+    """대본을 문장 단위로 묶음. 문장부호/12단어뿐 아니라 '말 사이 공백(pause)'
+    으로도 끊어서, "I don't give a fuck" 같은 짧고 강렬한 한 줄이 앞뒤 말에
+    뭉개지지 않고 독립된 문장으로 Claude에게 보이도록 함(연설에서 임팩트 있는
+    말 뒤엔 대개 숨 고르는 pause가 옴 — 그 지점을 문장 경계로 활용)."""
+    s=[]; buf=[]; st=None; prev_end=None
     for w in words:
-        t=w["text"]
-        if st is None: st=w["start"]/1000
+        t=w["text"]; ws=w["start"]/1000
+        gap = (ws - prev_end) if prev_end is not None else 0
+        if buf and gap>0.45:
+            s.append({"start":round(st,2),"end":round(prev_end,2),"text":" ".join(buf)})
+            buf=[]; st=None
+        if st is None: st=ws
         buf.append(t)
+        prev_end=w["end"]/1000
         if (t and t[-1] in "。！？!?.") or len(buf)>=12:
-            s.append({"start":round(st,2),"end":round(w["end"]/1000,2),"text":" ".join(buf)})
+            s.append({"start":round(st,2),"end":round(prev_end,2),"text":" ".join(buf)})
             buf=[]; st=None
     if buf and st: s.append({"start":round(st,2),"end":round(words[-1]["end"]/1000,2),"text":" ".join(buf)})
     return s
@@ -190,9 +204,15 @@ def generate_direction(transcript, total_dur):
     words=transcript.get("words",[])
     is_en=transcript.get("language_code","en")!="ko"
     sents=build_sents(words)
-    if len(sents)>600:
-        step=len(sents)/600; sents=[sents[int(i*step)] for i in range(600)]
-        print(f"  → 문장 {len(sents)}개로 다운샘플링")
+    # 예전엔 문장이 600개 넘으면 등간격으로 솎아내서(stride sampling) 대본 대부분을
+    # 버렸음 — 이러면 정확히 원하는 임팩트 한 줄이 Claude 눈에 아예 안 보일 수 있음.
+    # Sonnet 컨텍스트는 충분히 크므로(문장당 ~30~50토큰) 왠만한 인터뷰 전체를
+    # 그대로 다 넣어도 안전함. 정말 극단적으로 긴 경우(3시간+)에만 안내만 출력.
+    MAX_SENTS = 4000
+    if len(sents) > MAX_SENTS:
+        print(f"  ⚠️ 문장 {len(sents)}개 — 매우 긴 원본. 앞부분 {MAX_SENTS}개만 사용(전체를 넣기엔 너무 김)")
+        sents = sents[:MAX_SENTS]
+    print(f"  → 대본 문장 {len(sents)}개 (전체 그대로 Claude에 전달)")
 
     prompt=f"""bodetail 바이럴 퐁크 모티베이션 릴스 편집 감독.
 원본 {total_dur:.0f}초 → 목표 {TARGET_DURATION}초.
@@ -200,22 +220,36 @@ def generate_direction(transcript, total_dur):
 자막은 화자의 '영어 원문 그대로' 단어별로 싱크됨(번역 안 함). 넌 강조할 영어 단어만 고르면 됨.
 브랜드: bodetail (남성 그루밍, 잉크블랙+골드)
 
-[전체 대본]
+[전체 대본 — 반드시 끝까지 다 읽고 판단할 것]
 {json.dumps(sents,ensure_ascii=False,indent=2)}
 
-가장 바이럴 가능성 높은 {TARGET_DURATION}초 '연속' 구간 하나를 골라줘.
+[가장 중요한 선택 기준 — 반드시 지킬 것]
+이건 그냥 "요약이 잘 되는 구간"을 고르는 게 아니야. 듣는 순간 소름 돋고 그대로
+캡션으로 박제하고 싶은 **한 방짜리 명대사(quotable one-liner)** 가 반드시 포함된
+구간을 찾아야 해. 예를 들면 이런 톤:
+  - 짧고 단정적인 자기선언 ("I don't give a fuck", "Nobody's coming to save you")
+  - 욕설·거친 표현이 섞여도 괜찮음 — 오히려 그게 화자 본연의 날것 그대로의 힘임.
+    검열하거나 순화된 문장으로 대체하지 말고 대본에 실제로 있는 표현 그대로 골라.
+  - 설명하거나 예시 드는 문장, 잔잔한 서사/일화 구간은 절대 고르지 마.
+  - "아 이 말은 SNS에 캡션으로 박제될 만하다" 싶은 문장이 구간 안에 최소 1개
+    반드시 있어야 함. 없으면 그 구간은 탈락.
+  - 그런 문장 앞뒤로 말 사이 공백(pause)이 있다면 화자가 임팩트를 위해 쉰
+    지점일 가능성이 높음 — 대본의 timestamp 간격을 참고해서 그런 지점을 우선 탐색.
+  - 원본 전체를 훑어서 이런 문장이 여러 개 있으면, 그중 가장 강력한 것 하나를
+    중심으로 {TARGET_DURATION}초 구간을 잡아. 도입부만 보고 대충 고르지 말 것.
 
 [길이 제약] clip_end - clip_start 는 {TARGET_DURATION}초 ±20% 이내의 하나의 연속 구간.
 
 [drop_at — 중요]
-구간 안에서 '가장 가슴을 때리는 한 구절'이 끝나는 지점의 원본 초를 drop_at 으로.
+구간 안에서 그 '한 방짜리 명대사'가 끝나는 지점의 원본 초를 drop_at 으로.
 이 시점 이후부터 화면이 이미지 몽타주로 전환됨. (clip_start+4 ~ clip_end-3 사이)
 
-[emphasis_words] 선택 구간에서 골드로 강조할 '영어 단어'들(핵심 임팩트어 5~12개). 대본에 실제로 등장하는 단어 그대로.
+[emphasis_words] 선택 구간에서 골드로 강조할 '영어 단어'들(핵심 임팩트어 5~12개,
+특히 그 한 방짜리 문장 안의 단어들 우선). 대본에 실제로 등장하는 단어 그대로.
 
 순수 JSON만:
 {{"clip_start":시작초,"clip_end":끝초,"drop_at":드롭초,
-"hook_reason":"고른 이유",
+"hook_reason":"고른 이유 — 어떤 한 줄이 왜 임팩트 있는지 구체적으로",
 "emphasis_words":["never","quit","pain","war","...대본 속 실제 영어단어"],
 "broll_keywords":["man neck jawline dark cinematic","man hands dark moody","men cologne bottle dark","man face closeup moody","male suit dark editorial","man silhouette dark rim light","man mirror reflection dark"]}}
 
@@ -343,14 +377,34 @@ def resolve_bgm_start(bgm):
 # ══════════════════════════════════════════════════
 # 화자가 그 단어를 말하는 '실제 타임스탬프'(AssemblyAI)에 맞춰
 # 한 단어만 화면 정중앙에 크게 떴다가 다음 단어로 교체됨 (LOOKING → because 식).
-# 새 단어는 70→100 팝, 강조어는 골드.
+# 핵심 단어는 Anton 볼드 대문자, 연결어(because/and/so 등)는 Playfair Display
+# 이탤릭 소문자 — 바이럴 릴스 특유의 '폰트 교차' 스타일. 강조어는 골드.
+
+CONNECTOR_WORDS = {
+    "because","and","but","so","if","when","while","since","as","that",
+    "which","who","the","of","to","is","was","are","were","be","been",
+    "with","for","in","on","at","or","not","no","yet","then","than",
+    "you","your","i","it","its","a","an"
+}
 
 def ts(s):
     h=int(s//3600);m=int((s%3600)//60);sec=int(s%60);cs=int((s%1)*100)
     return f"{h}:{m:02d}:{sec:02d}.{cs:02d}"
 
+def words_to_relative(words, clip_start, clip_dur):
+    """AssemblyAI 절대(ms) 단어 리스트를 클립 기준 상대(초)로 변환+필터링.
+    build_ass()와 편집용 JSON 저장(render()) 양쪽에서 공용으로 씀."""
+    W=[]
+    for w in words:
+        s=w.get("start",0)/1000-clip_start; e=w.get("end",0)/1000-clip_start
+        if e<=0 or s>=clip_dur: continue
+        txt=str(w.get("text","")).strip()
+        if not txt: continue
+        W.append({"t":round(max(0.0,s),3),"e":round(min(clip_dur,e),3),"w":txt})
+    return W
+
 def build_ass(words, clip_start, clip_dur, emphasis, out):
-    print("\n📝 STEP 6: 한 단어씩 중앙 자막...")
+    print("\n📝 STEP 6: 한 단어씩 중앙 자막 (폰트 교차)...")
     GOLD="&H004A84B0&"; WHITE="&H00FFFFFF&"
     hdr=f"""[Script Info]
 ScriptType: v4.00+
@@ -361,19 +415,14 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
-Style: Main,Noto Sans CJK KR,140,{WHITE},&H000000FF,&H00000000,&H90000000,1,0,0,0,100,100,1,0,1,7,4,5,60,60,0,1
+Style: Bold,Anton,150,{WHITE},&H000000FF,&H00000000,&H90000000,0,0,0,0,100,100,1,0,1,7,4,5,60,60,0,1
+Style: Italic,Playfair Display,138,{WHITE},&H000000FF,&H00000000,&H90000000,0,-1,0,0,100,100,1,0,1,6,3,5,60,60,0,1
 
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
 """
     # clip 범위 안 단어만(초 단위, clip 기준 상대시간)
-    W=[]
-    for w in words:
-        s=w.get("start",0)/1000-clip_start; e=w.get("end",0)/1000-clip_start
-        if e<=0 or s>=clip_dur: continue
-        txt=str(w.get("text","")).strip()
-        if not txt: continue
-        W.append({"t":max(0.0,s),"e":min(clip_dur,e),"w":txt})
+    W=words_to_relative(words, clip_start, clip_dur)
     emph={str(e).lower().strip(".,!?") for e in (emphasis or [])}
     ev=[]
     for i,x in enumerate(W):
@@ -387,16 +436,19 @@ Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
             ee = natural_end
         ee=min(ee, clip_dur)
         if ee<=es: ee=es+0.10
-        wt=x["w"].upper()
-        L=len(wt)
-        fs = 150 if L<=6 else (128 if L<=9 else 104)   # 긴 단어는 자동 축소
-        ie = x["w"].lower().strip(".,!?") in emph
+        clean = x["w"].lower().strip(".,!?")
+        is_connector = clean in CONNECTOR_WORDS
+        ie = clean in emph
         col = GOLD if ie else WHITE
-        tag=("{\\an5\\1c"+col+"\\fs"+str(fs)+
+        if is_connector:
+            style="Italic"; wt=x["w"].lower()
+        else:
+            style="Bold"; wt=x["w"].upper()
+        tag=("{\\an5\\1c"+col+
              "\\fscx70\\fscy70\\t(0,80,\\fscx100\\fscy100)\\fad(30,20)}")
-        ev.append("Dialogue: 0,"+ts(es)+","+ts(ee)+",Main,,0,0,0,,"+tag+wt)
+        ev.append("Dialogue: 0,"+ts(es)+","+ts(ee)+","+style+",,0,0,0,,"+tag+wt)
     Path(out).write_text(hdr+"\n".join(ev)+"\n",encoding="utf-8")
-    print(f"  ✅ {len(ev)}개 단어 (한 단어씩 중앙)")
+    print(f"  ✅ {len(ev)}개 단어 (Anton/Playfair 폰트 교차)")
     return out
 
 # ══════════════════════════════════════════════════
@@ -458,9 +510,15 @@ def finalize(video_only,clip,bgm,ass,out,drop_t,dur,bgm_start):
         inputs+=["-stream_loop","-1","-ss",f"{max(0.0,bgm_start):.3f}","-i",str(bgm)]
     fc=[f"[0:v]ass='{ae}'[vout]"]
     if bidx is not None:
+        # 드롭 전: BGM 완전 무음(0) → 고긴스 목소리 풀볼륨으로 또렷하게 들림.
+        # 드롭 순간: 0.05초 만에 확 치고 들어옴(펀치), 그 이후 목소리는 살짝 덕킹.
+        # eval=frame 필수: 없으면 ffmpeg가 표현식을 처음 한 번만 계산해서
+        # 시간에 따라 값이 절대 안 바뀜(이게 이전 버전의 실제 버그였음).
+        ramp_end = drop_t + 0.05
         fc.append(
-            f"[1:a]volume='if(lt(t,{drop_t:.3f}),1.0,0.7)'[oa];"
-            f"[{bidx}:a]volume='if(lt(t,{drop_t:.3f}),0.12,0.34)'[bl];"
+            f"[1:a]volume='if(lt(t,{drop_t:.3f}),1.0,0.7)':eval=frame[oa];"
+            f"[{bidx}:a]volume='if(lt(t,{drop_t:.3f}),0,"
+            f"if(lt(t,{ramp_end:.3f}),(t-{drop_t:.3f})/0.05*0.34,0.34))':eval=frame[bl];"
             "[oa][bl]amix=inputs=2:duration=first:normalize=0[aout]")
         amap=["-map","[aout]"]
     else:
@@ -470,6 +528,37 @@ def finalize(video_only,clip,bgm,ass,out,drop_t,dur,bgm_start):
         "-c:a","aac","-b:a","192k","-ar","48000","-r",str(FPS),
         "-pix_fmt","yuv420p","-t",f"{dur:.3f}",str(out)],"finalize")
     return out
+
+def save_edit_bundle(clip,bgm,bgm_start,valid_images,words,emphasis,clip_start,dur,drop_t,cuts,montage):
+    """에디터(bodetail_editor.html)에서 이미지 교체 등 재편집이 가능하도록
+    소스 클립/BGM/이미지/자막데이터를 reels/latest_a/assets/ 에 통째로 남김.
+    이걸로 rerender_category_a.py가 유튜브 재다운로드·AssemblyAI·Claude 호출 없이
+    ffmpeg만으로 빠르게 재렌더할 수 있음."""
+    assets=LATEST/"assets"; imgdir=assets/"images"
+    assets.mkdir(parents=True,exist_ok=True); imgdir.mkdir(parents=True,exist_ok=True)
+    for old in imgdir.glob("*"): old.unlink()
+    shutil.copy(clip, assets/"clip.mp4")
+    img_names=[]
+    for i,p in enumerate(valid_images):
+        name=f"img_{i:02d}.jpg"
+        shutil.copy(p, imgdir/name)
+        img_names.append(name)
+    bgm_saved=False
+    if bgm:
+        shutil.copy(bgm, assets/"bgm_used.mp3"); bgm_saved=True
+    edit=dict(
+        reel_duration=round(dur,3),
+        drop_at_rel=round(drop_t,3),
+        bgm_start=round(bgm_start,3) if bgm else 0.0,
+        bgm_present=bgm_saved,
+        montage=montage,
+        cuts=[round(c,3) for c in cuts] if cuts else [],
+        images=img_names,
+        emphasis_words=list(emphasis or []),
+        words=words_to_relative(words, clip_start, dur),
+    )
+    (LATEST/"direction_edit.json").write_text(json.dumps(edit,ensure_ascii=False,indent=2),encoding="utf-8")
+    print(f"  📝 편집용 에셋 저장 완료 (assets/, direction_edit.json) — 이미지 {len(img_names)}장")
 
 def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,drop_at):
     print(f"\n🎬 STEP 7: 합성...")
@@ -482,6 +571,7 @@ def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,drop_at):
 
     ass=build_ass(words,clip_start,dur,emphasis,ASSETS/"subs.ass")
     pA=make_vertical(clip,ASSETS/"partA.mp4",0,drop_t)
+    cuts=[]
     if montage:
         pb=[round(b-drop_t,3) for b in beats if b>drop_t]
         cuts=[0.0]+[pb[i] for i in range(len(pb)) if i%BEATS_PER_CUT==0]
@@ -497,6 +587,7 @@ def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,drop_at):
     out=OUT_DIR/"reel_final.mp4"
     finalize(vo,clip,(bgm if bgm else None),ass,out,min(drop_t,dur),dur,bgm_start)
     print(f"  ✅ {out.name} ({out.stat().st_size/1024/1024:.1f}MB)")
+    save_edit_bundle(clip,bgm,bgm_start,valid,words,emphasis,clip_start,dur,drop_t,cuts,montage)
     return out
 
 # ══════════════════════════════════════════════════
@@ -516,8 +607,12 @@ def save_cleanup(final,direction,source_info):
 # ══════════════════════════════════════════════════
 # 메인
 # ══════════════════════════════════════════════════
-if __name__=="__main__":
+def main():
     print(f"\n{'='*60}\n🎬 bodetail Category A v8 (20초 퐁크) | {DATE}\n   목표 {TARGET_DURATION}초 / {BEATS_PER_CUT}박자마다\n{'='*60}")
+    if not ASSEMBLYAI_KEY or not ANTHROPIC_KEY:
+        missing=[n for n,v in [("ASSEMBLYAI_API_KEY",ASSEMBLYAI_KEY),("ANTROPIC_API_KEY",ANTHROPIC_KEY)] if not v]
+        raise RuntimeError(f"❌ 필수 시크릿 없음: {', '.join(missing)} — GitHub Secrets 확인해줘 (ANTROPIC_API_KEY는 H 빠진 오타 그대로여야 함)")
+
     source_info=""; force_lang=None; video=None
     url=URL_INPUT
     uf=INBOX/"url.txt"
@@ -528,7 +623,9 @@ if __name__=="__main__":
         if uf.exists(): uf.unlink()
     else:
         vids=sorted(INBOX.glob("*.mp4"))
-        if not vids: print("❌ 입력 없음."); exit(1)
+        if not vids:
+            print("❌ 입력 없음.")
+            raise SystemExit(1)
         video=vids[0]
         if "_ko" in video.stem.lower(): force_lang="ko"
         source_info=f"파일: {video.name}\n생성: {DATE}"
@@ -560,3 +657,6 @@ if __name__=="__main__":
                  direction.get("emphasis_words",[]),bgm,bgm_start,drop_at)
     save_cleanup(final,direction,source_info)
     print(f"\n🎉 완료! → reels/latest_a/reel_final.mp4")
+
+if __name__=="__main__":
+    main()
