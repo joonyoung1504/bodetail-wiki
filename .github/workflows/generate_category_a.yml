@@ -47,6 +47,15 @@ jobs:
           sudo apt-get install -y ffmpeg fonts-noto-cjk libsndfile1
           fc-cache -f
 
+      - name: 자막 폰트 설치 (Anton 볼드 / Playfair Display 이탤릭)
+        run: |
+          mkdir -p ~/.fonts
+          curl -fsSL -o ~/.fonts/Anton-Regular.ttf \
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/anton/Anton-Regular.ttf"
+          curl -fsSL -o ~/.fonts/PlayfairDisplay-Italic.ttf \
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/PlayfairDisplay-Italic%5Bwght%5D.ttf"
+          fc-cache -f ~/.fonts
+
       - name: Deno 설치 (유튜브 다운로드용 JS 챌린지 해결기 — 2025.11 이후 yt-dlp 필수)
         run: |
           curl -fsSL https://deno.land/install.sh | sh
@@ -61,6 +70,8 @@ jobs:
         run: |
           deno --version
           yt-dlp --version
+          fc-match "Anton"
+          fc-match "Playfair Display:italic"
 
       - name: 카테고리 A 생성
         env:
