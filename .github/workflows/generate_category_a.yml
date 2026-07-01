@@ -1,77 +1,78 @@
-name: bodetail Category A Reel
+name: 카테고리 A 릴스 생성
 
+# 실행: Actions 탭 → "카테고리 A 릴스 생성" → Run workflow
 on:
-  push:
-    paths:
-      - 'videos/inbox_a/**'
   workflow_dispatch:
     inputs:
       youtube_url:
-        description: '영상 유튜브 URL (여기 붙여넣으면 자동 다운로드)'
-        required: false
+        description: '소스 유튜브 URL (예: 데이비드 고긴스 인터뷰)'
+        required: true
         default: ''
       bgm_youtube_url:
-        description: '배경음악 유튜브 URL (선택, 비우면 reels/bgm 폴더 음악 사용)'
+        description: 'BGM 유튜브 URL (비우면 reels/bgm 폴더의 mp3 사용)'
+        required: false
+        default: ''
+      bgm_drop_sec:
+        description: 'BGM 드롭 시점(초). 알면 입력 / 비우면 자동탐지'
         required: false
         default: ''
       reel_duration:
         description: '릴스 길이(초)'
-        default: '45'
+        required: false
+        default: '20'
       beats_per_cut:
-        description: '몇 박자마다 이미지 교체 (1=빠름, 2=보통, 4=느림)'
+        description: '이미지 몇 박자마다 컷할지 (작을수록 빠른 교차편집)'
+        required: false
         default: '2'
 
+permissions:
+  contents: write
+
 jobs:
-  generate:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-python@v4
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 파이썬 설정
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Node.js 설치 (yt-dlp JS 챌린지 해결용)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Deno 설치 (yt-dlp JS 챌린지 솔버)
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
-      - name: 패키지 설치
+      - name: 시스템 패키지 설치 (ffmpeg / 한글폰트 / 오디오)
         run: |
-          sudo apt-get install -y ffmpeg fonts-noto-cjk --fix-missing
-          pip install requests librosa soundfile numpy
-          pip install -U --pre "yt-dlp[default]"
-          node --version
-          deno --version
-          yt-dlp --version
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk libsndfile1
+          fc-cache -f
+
+      - name: 파이썬 라이브러리 설치
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade yt-dlp requests librosa soundfile numpy pillow
 
       - name: 카테고리 A 생성
         env:
-          ASSEMBLYAI_API_KEY:  ${{ secrets.ASSEMBLYAI_API_KEY }}
-          ANTROPIC_API_KEY:    ${{ secrets.ANTROPIC_API_KEY }}
-          PEXELS_API_KEY:      ${{ secrets.PEXELS_API_KEY }}
+          # ── 시크릿 (Settings → Secrets and variables → Actions) ──
+          ASSEMBLYAI_API_KEY: ${{ secrets.ASSEMBLYAI_API_KEY }}
+          ANTROPIC_API_KEY:   ${{ secrets.ANTROPIC_API_KEY }}   # H 빠진 오타 그대로 (릴스 전용)
+          PEXELS_API_KEY:     ${{ secrets.PEXELS_API_KEY }}
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
-          YOUTUBE_URL:         ${{ github.event.inputs.youtube_url }}
-          BGM_YOUTUBE_URL:     ${{ github.event.inputs.bgm_youtube_url }}
-          YOUTUBE_COOKIES:     ${{ secrets.YOUTUBE_COOKIES }}
-          REEL_DURATION:       ${{ github.event.inputs.reel_duration || '45' }}
-          BEATS_PER_CUT:       ${{ github.event.inputs.beats_per_cut || '2' }}
-        run: python generate_category_a.py
+          YOUTUBE_COOKIES:    ${{ secrets.YOUTUBE_COOKIES }}
+          # ── 실행 시 입력값 ──
+          YOUTUBE_URL:     ${{ github.event.inputs.youtube_url }}
+          BGM_YOUTUBE_URL: ${{ github.event.inputs.bgm_youtube_url }}
+          BGM_DROP_SEC:    ${{ github.event.inputs.bgm_drop_sec }}
+          REEL_DURATION:   ${{ github.event.inputs.reel_duration }}
+          BEATS_PER_CUT:   ${{ github.event.inputs.beats_per_cut }}
+        run: |
+          python generate_category_a.py
 
-      - name: 결과 커밋
+      - name: 결과 커밋 & 푸시
         run: |
           git config user.name  "bodetail-bot"
-          git config user.email "bot@bodetail.com"
-          git add reels/latest_a/ reels/category_a/ videos/archive_a/ videos/inbox_a/ reels/bgm/ || true
-          git diff --cached --quiet || \
-            git commit -m "🎬 [skip ci] Category A #${{ github.run_number }}"
+          git config user.email "bodetail-bot@users.noreply.github.com"
+          git add -A
+          git commit -m "🎬 카테고리 A 릴스 생성 ($(date +%F))" || echo "변경 없음"
           git push
