@@ -8,7 +8,7 @@ generate_category_a.py — bodetail 카테고리 A v8 (20초 퐁크 하이브리
 v7 → v8 변경:
   - 기본 길이 20초 (REEL_DURATION 기본값)
   - drop_at(마음 울리는 구절 끝) 이후 이미지 6~7장 박자싱크 교차편집으로 전환
-  - BGM 드롭(detect 또는 BGM_DROP_SEC)을 영상 드롭 시점에 맞춰 -ss/adelay 정렬
+  - BGM_START_SEC(또는 자동탐지)로 'BGM 트랙의 어느 지점부터' 쓸지 순수 트림(정렬 아님)
   - 드롭에서 BGM 0.12→0.34, 보이스 1.0→0.7 덕킹
   - 줌(켄번즈) 세그먼트 정상화(정확한 프레임수), 폰트 'Noto Sans CJK KR'
   - 모든 ffmpeg 명령 사전 검증됨
@@ -42,7 +42,7 @@ TARGET_DURATION = int(os.environ.get("REEL_DURATION","20"))
 BEATS_PER_CUT   = max(1, int(os.environ.get("BEATS_PER_CUT","2")))
 URL_INPUT       = os.environ.get("YOUTUBE_URL","").strip()
 BGM_URL_INPUT   = os.environ.get("BGM_YOUTUBE_URL","").strip()
-BGM_DROP_ENV    = os.environ.get("BGM_DROP_SEC","").strip()
+BGM_START_ENV   = os.environ.get("BGM_START_SEC","").strip()
 
 def run(cmd, tag):
     r=subprocess.run(cmd,capture_output=True,text=True)
@@ -298,14 +298,18 @@ def analyze_beats(bgm,dur):
         print(f"  ⚠️ {e} → 0.45초 균등")
         return [round(i*0.45,3) for i in range(1,int(dur/0.45))]
 
-def detect_bgm_drop(bgm):
-    if BGM_DROP_ENV:
+def resolve_bgm_start(bgm):
+    """BGM 트랙에서 '어디서부터' 잘라 쓸지 결정.
+    이 지점부터 릴스 길이만큼 그대로 트림해서 영상 처음(0초)부터 씀.
+    (영상의 감정 피크와 정렬시키는 게 아니라, 순수하게 '이 구간을 쓴다'는 선택)"""
+    if BGM_START_ENV:
         try:
-            v=float(BGM_DROP_ENV); print(f"  🎯 BGM 드롭(수동 지정): {v:.1f}초"); return v
+            v=max(0.0,float(BGM_START_ENV))
+            print(f"  🎯 BGM 시작 지점(수동 지정): {v:.1f}초"); return v
         except: pass
     try:
         import librosa, numpy as np
-        y,sr=librosa.load(str(bgm),sr=22050,duration=45)
+        y,sr=librosa.load(str(bgm),sr=22050,duration=60)
         rms=librosa.feature.rms(y=y,frame_length=2048,hop_length=512)[0]
         times=librosa.frames_to_time(np.arange(len(rms)),sr=sr,hop_length=512)
         sm=np.convolve(rms,np.ones(8)/8,mode='same')
@@ -313,10 +317,10 @@ def detect_bgm_drop(bgm):
         for i in range(int(1.5*sr/512),len(sm)):
             prev=sm[max(0,i-40):i].mean()
             if sm[i]-prev>best: best=sm[i]-prev; best_t=float(times[i])
-        print(f"  🎯 BGM 드롭(자동탐지): {best_t:.1f}초")
+        print(f"  🎯 BGM 시작 지점(자동탐지 — 가장 고조되는 구간): {best_t:.1f}초")
         return best_t
     except Exception as e:
-        print(f"  ⚠️ 드롭탐지 실패({e}) → 0초"); return 0.0
+        print(f"  ⚠️ 자동탐지 실패({e}) → 0초부터"); return 0.0
 
 # ══════════════════════════════════════════════════
 # STEP 6: 영어 원문 단어싱크 자막 (한 단어씩 화면 중앙에 크게)
@@ -427,20 +431,20 @@ def concat_videos(parts,out):
         "-pix_fmt","yuv420p",str(out)],"concat_AB")
     return out
 
-def finalize(video_only,clip,bgm,ass,out,drop_t,dur,bgm_offset):
+def finalize(video_only,clip,bgm,ass,out,drop_t,dur,bgm_start):
     ae=str(ass).replace("\\","/").replace(":","\\:")
     inputs=["-i",str(video_only),"-i",str(clip)]
     bidx=None
     if bgm:
         bidx=2
-        if bgm_offset>=0: inputs+=["-ss",f"{bgm_offset:.3f}","-i",str(bgm)]
-        else: inputs+=["-i",str(bgm)]
+        # 순수 트림: bgm_start초 지점부터 릴스 길이(dur)만큼 그대로 사용.
+        # -stream_loop -1 로 트랙이 짧아도 항상 dur만큼 채워짐.
+        inputs+=["-stream_loop","-1","-ss",f"{max(0.0,bgm_start):.3f}","-i",str(bgm)]
     fc=[f"[0:v]ass='{ae}'[vout]"]
     if bidx is not None:
-        delay="" if bgm_offset>=0 else f"adelay={int(-bgm_offset*1000)}:all=1,"
         fc.append(
             f"[1:a]volume='if(lt(t,{drop_t:.3f}),1.0,0.7)'[oa];"
-            f"[{bidx}:a]{delay}volume='if(lt(t,{drop_t:.3f}),0.12,0.34)'[bl];"
+            f"[{bidx}:a]volume='if(lt(t,{drop_t:.3f}),0.12,0.34)'[bl];"
             "[oa][bl]amix=inputs=2:duration=first:normalize=0[aout]")
         amap=["-map","[aout]"]
     else:
@@ -451,14 +455,14 @@ def finalize(video_only,clip,bgm,ass,out,drop_t,dur,bgm_offset):
         "-pix_fmt","yuv420p","-t",f"{dur:.3f}",str(out)],"finalize")
     return out
 
-def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_drop,drop_at):
+def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,drop_at):
     print(f"\n🎬 STEP 7: 합성...")
     valid=[p for p in imgs if p and Path(p).exists()]
     drop_t=drop_at-clip_start
     montage=(len(valid)>=2 and bool(bgm))
     if montage: drop_t=max(4.0,min(drop_t,dur-3.0))
     else:       drop_t=dur
-    print(f"  드롭 {drop_t:.1f}초 | 몽타주 {'ON' if montage else 'OFF(영상 풀)'} | B롤 {len(valid)}장")
+    print(f"  드롭(영상 전환) {drop_t:.1f}초 | 몽타주 {'ON' if montage else 'OFF(영상 풀)'} | B롤 {len(valid)}장")
 
     ass=build_ass(words,clip_start,dur,emphasis,ASSETS/"subs.ass")
     pA=make_vertical(clip,ASSETS/"partA.mp4",0,drop_t)
@@ -474,9 +478,8 @@ def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_drop,drop_at):
         vo=concat_videos([pA,pB],ASSETS/"video_only.mp4")
     else:
         vo=pA
-    bgm_offset=(bgm_drop-drop_t) if bgm else 0.0
     out=OUT_DIR/"reel_final.mp4"
-    finalize(vo,clip,(bgm if bgm else None),ass,out,min(drop_t,dur),dur,bgm_offset)
+    finalize(vo,clip,(bgm if bgm else None),ass,out,min(drop_t,dur),dur,bgm_start)
     print(f"  ✅ {out.name} ({out.stat().st_size/1024/1024:.1f}MB)")
     return out
 
@@ -536,8 +539,8 @@ if __name__=="__main__":
     clip,dur=extract_clip(video,cs,ce)
     imgs=download_images(direction.get("broll_keywords",[]))
     beats=analyze_beats(bgm,dur) if bgm else []
-    bgm_drop=detect_bgm_drop(bgm) if bgm else 0.0
+    bgm_start=resolve_bgm_start(bgm) if bgm else 0.0
     final=render(clip,dur,cs,beats,imgs,transcript.get("words",[]),
-                 direction.get("emphasis_words",[]),bgm,bgm_drop,drop_at)
+                 direction.get("emphasis_words",[]),bgm,bgm_start,drop_at)
     save_cleanup(final,direction,source_info)
     print(f"\n🎉 완료! → reels/latest_a/reel_final.mp4")
