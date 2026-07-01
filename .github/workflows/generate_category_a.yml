@@ -12,8 +12,8 @@ on:
         description: 'BGM 유튜브 URL (비우면 reels/bgm 폴더의 mp3 사용)'
         required: false
         default: ''
-      bgm_drop_sec:
-        description: 'BGM 드롭 시점(초). 알면 입력 / 비우면 자동탐지'
+      bgm_start_sec:
+        description: 'BGM 트랙에서 몇 초 지점부터 쓸지 (그 지점부터 릴스 길이만큼 그대로 사용 / 비우면 자동으로 고조되는 구간 탐지)'
         required: false
         default: ''
       reel_duration:
@@ -63,7 +63,7 @@ jobs:
           # ── 실행 시 입력값 ──
           YOUTUBE_URL:     ${{ github.event.inputs.youtube_url }}
           BGM_YOUTUBE_URL: ${{ github.event.inputs.bgm_youtube_url }}
-          BGM_DROP_SEC:    ${{ github.event.inputs.bgm_drop_sec }}
+          BGM_START_SEC:   ${{ github.event.inputs.bgm_start_sec }}
           REEL_DURATION:   ${{ github.event.inputs.reel_duration }}
           BEATS_PER_CUT:   ${{ github.event.inputs.beats_per_cut }}
         run: |
