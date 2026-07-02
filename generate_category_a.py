@@ -48,6 +48,13 @@ BEATS_PER_CUT   = max(1, int(os.environ.get("BEATS_PER_CUT","2")))
 URL_INPUT       = os.environ.get("YOUTUBE_URL","").strip()
 BGM_URL_INPUT   = os.environ.get("BGM_YOUTUBE_URL","").strip()
 BGM_START_ENV   = os.environ.get("BGM_START_SEC","").strip()
+BGM_CLIMAX_ENV  = os.environ.get("BGM_CLIMAX_SEC","").strip()
+EFFECT_TYPE     = os.environ.get("EFFECT_TYPE","montage").strip().lower()  # montage | bw | outro
+OUTRO_SEC       = float(os.environ.get("OUTRO_SEC","2.5") or 2.5)
+NO_VOICE_ENV    = os.environ.get("NO_VOICE","").strip().lower() in ("1","true","yes")
+CLIP_START_ENV  = os.environ.get("CLIP_START_SEC","").strip()
+if EFFECT_TYPE not in ("montage","bw","outro"):
+    EFFECT_TYPE="montage"
 
 def run(cmd, tag):
     r=subprocess.run(cmd,capture_output=True,text=True)
@@ -199,9 +206,31 @@ def build_sents(words):
     if buf and st: s.append({"start":round(st,2),"end":round(words[-1]["end"]/1000,2),"text":" ".join(buf)})
     return s
 
+MIN_WORDS_PER_20S = 4   # 20초당 이 단어수 미만이면 '내레이션 없음'으로 간주
+
+def heuristic_direction(total_dur, clip_start_override=None):
+    """음성이 없거나(NO_VOICE) 감지된 단어가 거의 없을 때 쓰는 대체 로직.
+    Claude 호출 없이 구간만 정함 — 전체 영상 그대로 쓰고 드롭/자막 개념 없음."""
+    if clip_start_override is not None:
+        cs = max(0.0, min(clip_start_override, max(0.0, total_dur-1)))
+    else:
+        cs = max(0.0, (total_dur-TARGET_DURATION)/2)  # 중앙 구간(인트로/아웃트로 배제)
+    ce = min(cs+TARGET_DURATION, total_dur)
+    print(f"  🔇 무음/내레이션 없음 모드 → 구간 {cs:.1f}~{ce:.1f} 그대로 사용 (드롭·자막 없음)")
+    return {
+        "clip_start": cs, "clip_end": ce, "drop_at": ce,
+        "hook_reason": "음성 내레이션 감지 안 됨 — 영상 전체를 그대로 사용, BGM을 처음부터 끝까지 재생",
+        "emphasis_words": [], "broll_keywords": ["man dark"]*N_IMGS,
+        "silent": True,
+    }
+
 def generate_direction(transcript, total_dur):
     print(f"\n🤖 STEP 2: 핵심구간+드롭+자막 (목표 {TARGET_DURATION}초)...")
     words=transcript.get("words",[])
+    min_words_needed = max(3, int(total_dur/20*MIN_WORDS_PER_20S))
+    if len(words) < min_words_needed:
+        print(f"  → 단어 {len(words)}개 (기준 {min_words_needed}개 미만) — 내레이션 없는 영상으로 판단")
+        return heuristic_direction(total_dur)
     is_en=transcript.get("language_code","en")!="ko"
     sents=build_sents(words)
     # 예전엔 문장이 600개 넘으면 등간격으로 솎아내서(stride sampling) 대본 대부분을
@@ -372,6 +401,36 @@ def resolve_bgm_start(bgm):
     except Exception as e:
         print(f"  ⚠️ 자동탐지 실패({e}) → 0초부터"); return 0.0
 
+def resolve_bgm_climax(bgm, bgm_start, dur):
+    """BGM 트랙에서 '클라이맥스(볼륨이 커지고 효과가 터지는 지점)'가 어딘지 결정.
+    bgm_start와 완전히 독립된 값 — 트랙의 어느 지점을 재생 시작점으로 쓰든,
+    그 안에서 '이 지점이 커지는 포인트다'를 따로 지정.
+    반환값은 '릴스 재생 시점 기준' 초(effect_t) = bgm_climax_sec - bgm_start_sec."""
+    if BGM_CLIMAX_ENV:
+        try:
+            v=float(BGM_CLIMAX_ENV)
+            effect_t=v-bgm_start
+            print(f"  🎯 BGM 클라이맥스(수동 지정): 트랙 {v:.1f}초 → 릴스 {effect_t:.1f}초 지점")
+            return max(1.0,min(effect_t,dur-0.5))
+        except: pass
+    try:
+        import librosa, numpy as np
+        y,sr=librosa.load(str(bgm),sr=22050,offset=max(0.0,bgm_start),duration=dur+2)
+        rms=librosa.feature.rms(y=y,frame_length=2048,hop_length=512)[0]
+        times=librosa.frames_to_time(np.arange(len(rms)),sr=sr,hop_length=512)
+        sm=np.convolve(rms,np.ones(8)/8,mode='same')
+        best_t,best=dur*0.65,0.0
+        for i in range(int(1.0*sr/512),len(sm)):
+            prev=sm[max(0,i-40):i].mean()
+            if sm[i]-prev>best: best=sm[i]-prev; best_t=float(times[i])
+        best_t=max(1.0,min(best_t,dur-0.5))
+        print(f"  🎯 BGM 클라이맥스(자동탐지 — 트림된 구간 내 가장 고조되는 지점): 릴스 {best_t:.1f}초 지점")
+        return best_t
+    except Exception as e:
+        fallback=max(1.0,min(dur*0.65,dur-0.5))
+        print(f"  ⚠️ 클라이맥스 자동탐지 실패({e}) → {fallback:.1f}초로 기본값")
+        return fallback
+
 # ══════════════════════════════════════════════════
 # STEP 6: 영어 원문 단어싱크 자막 (한 단어씩 화면 중앙에 크게)
 # ══════════════════════════════════════════════════
@@ -442,10 +501,12 @@ Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
         col = GOLD if ie else WHITE
         if is_connector:
             style="Italic"; wt=x["w"].lower()
+            target_scale = 128 if ie else 100   # 강조 이탤릭 단어는 28% 더 크게
         else:
             style="Bold"; wt=x["w"].upper()
+            target_scale = 138 if ie else 100   # 강조 볼드 단어는 38% 더 크게 — 화면에서 확실히 튐
         tag=("{\\an5\\1c"+col+
-             "\\fscx70\\fscy70\\t(0,80,\\fscx100\\fscy100)\\fad(30,20)}")
+             f"\\fscx70\\fscy70\\t(0,80,\\fscx{target_scale}\\fscy{target_scale})\\fad(30,20)}}")
         ev.append("Dialogue: 0,"+ts(es)+","+ts(ee)+","+style+",,0,0,0,,"+tag+wt)
     Path(out).write_text(hdr+"\n".join(ev)+"\n",encoding="utf-8")
     print(f"  ✅ {len(ev)}개 단어 (Anton/Playfair 폰트 교차)")
@@ -454,11 +515,16 @@ Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
 # ══════════════════════════════════════════════════
 # STEP 7: 렌더 (검증된 명령들)
 # ══════════════════════════════════════════════════
-def make_vertical(clip,out,t_start,t_dur):
+def make_vertical(clip,out,t_start,t_dur,bw_from=None):
+    """bw_from: 지정하면 그 시점(초, 이 함수의 로컬 타임라인 기준)부터 화면이
+    흑백으로 전환됨(효과타입 'bw' 전용). 자막 색(흰/골드)은 별도 레이어라 영향 없음."""
+    overlay_label = "v0" if bw_from is not None else "v"
     vf=("[0:v]split=2[a][b];"
         f"[b]scale={RW}:{RH}:force_original_aspect_ratio=increase,crop={RW}:{RH},gblur=sigma=28,eq=brightness=-0.12:saturation=0.85[bg];"
         f"[a]scale={RW}:{RH}:force_original_aspect_ratio=decrease[fg];"
-        "[bg][fg]overlay=(W-w)/2:(H-h)/2[v]")
+        f"[bg][fg]overlay=(W-w)/2:(H-h)/2[{overlay_label}]")
+    if bw_from is not None:
+        vf += f";[v0]hue=s=0:enable='gte(t,{bw_from:.3f})'[v]"
     run(["ffmpeg","-y","-ss",f"{t_start}","-i",str(clip),"-filter_complex",vf,
         "-map","[v]","-an","-t",f"{t_dur}","-c:v","libx264","-preset","medium","-crf","20",
         "-r",str(FPS),"-pix_fmt","yuv420p",str(out)],"make_vertical")
@@ -499,37 +565,87 @@ def concat_videos(parts,out):
         "-pix_fmt","yuv420p",str(out)],"concat_AB")
     return out
 
-def finalize(video_only,clip,bgm,ass,out,drop_t,dur,bgm_start):
+def _dt_escape(s):
+    """ffmpeg drawtext 필터용 텍스트 이스케이프 (콜론/백슬래시/작은따옴표/%)."""
+    return (str(s).replace("\\","\\\\\\\\").replace(":", "\\:")
+            .replace("'", "\\'").replace("%","\\%"))
+
+def build_outro_card(out, duration):
+    """효과타입 'outro' 전용: 잉크블랙 배경 + bodetail 워드마크 + 태그라인.
+    BGM 크레센도가 이 카드 구간까지 이어지면서 완결감을 줌."""
+    vf=(
+        f"drawtext=font='Anton':text='{_dt_escape('BODETAIL')}':fontsize=124:"
+        f"fontcolor=0xEDE6D8:x=(w-text_w)/2:y=(h/2)-150,"
+        f"drawtext=font='Noto Sans CJK KR':text='{_dt_escape('남들이 놓치는 한 끗')}':fontsize=42:"
+        f"fontcolor=0xB0844A:x=(w-text_w)/2:y=(h/2)-10,"
+        f"drawtext=font='Noto Sans CJK KR':text='{_dt_escape('@bodetail_official')}':fontsize=32:"
+        f"fontcolor=0xEDE6D8:x=(w-text_w)/2:y=(h/2)+60,"
+        f"fade=t=in:st=0:d=0.35:alpha=0"
+    )
+    run(["ffmpeg","-y","-f","lavfi","-i",f"color=c=0x0C0C0C:size={RW}x{RH}:duration={duration:.3f}:rate={FPS}",
+        "-vf",vf,"-t",f"{duration:.3f}","-c:v","libx264","-preset","medium","-crf","20",
+        "-pix_fmt","yuv420p",str(out)],"build_outro_card")
+    return out
+
+def finalize(video_only,clip,bgm,ass,out,effect_t,dur,bgm_start,voice_present=True,swell=True):
+    """오디오 믹스. 4가지 경우를 독립적으로 처리:
+      voice_present+bgm+swell  : BGM이 처음부터 작게 깔려있다가 effect_t에서 부드럽게
+                                  커짐(크레센도). 무음→갑자기 아님 — 항상 들림.
+      voice_present+bgm+!swell : effect_t 개념 없이 목소리+BGM 고정비율로 계속 섞임
+      voice_present+!bgm       : 클립 자체 오디오만
+      !voice_present+bgm       : 무음 영상 — BGM만 처음부터 끝까지 고정 볼륨
+      !voice_present+!bgm      : 둘 다 없음 — 무음 트랙 생성(인스타는 오디오 트랙 필요)
+    voice_present는 '내레이션 여부'가 아니라 '클립에 오디오 스트림이 물리적으로
+    있는지'(has_audio)로 결정 — 대사가 없어도 앰비언트 소리는 있을 수 있어서 분리.
+    dur은 아웃트로 효과 사용 시 아웃트로 카드까지 포함한 '총 길이'."""
+    QUIET,LOUD,RAMP = 0.14, 0.42, 1.2   # 작게→크게 크레센도 볼륨/램프 길이(초)
     ae=str(ass).replace("\\","/").replace(":","\\:")
-    inputs=["-i",str(video_only),"-i",str(clip)]
-    bidx=None
+    inputs=["-i",str(video_only)]; idx=1
+    clip_idx=None
+    if voice_present:
+        inputs+=["-i",str(clip)]; clip_idx=idx; idx+=1
+    bgm_idx=None
     if bgm:
-        bidx=2
-        # 순수 트림: bgm_start초 지점부터 릴스 길이(dur)만큼 그대로 사용.
-        # -stream_loop -1 로 트랙이 짧아도 항상 dur만큼 채워짐.
+        # 순수 트림: bgm_start초 지점부터 필요한 만큼 그대로 사용.
+        # -stream_loop -1 로 트랙이 짧아도 항상 채워짐(아웃트로까지 포함한 총길이 dur).
         inputs+=["-stream_loop","-1","-ss",f"{max(0.0,bgm_start):.3f}","-i",str(bgm)]
+        bgm_idx=idx; idx+=1
+    null_idx=None
+    if not voice_present and not bgm:
+        inputs+=["-f","lavfi","-t",f"{dur:.3f}","-i","anullsrc=r=48000:cl=stereo"]
+        null_idx=idx; idx+=1
+
     fc=[f"[0:v]ass='{ae}'[vout]"]
-    if bidx is not None:
-        # 드롭 전: BGM 완전 무음(0) → 고긴스 목소리 풀볼륨으로 또렷하게 들림.
-        # 드롭 순간: 0.05초 만에 확 치고 들어옴(펀치), 그 이후 목소리는 살짝 덕킹.
-        # eval=frame 필수: 없으면 ffmpeg가 표현식을 처음 한 번만 계산해서
-        # 시간에 따라 값이 절대 안 바뀜(이게 이전 버전의 실제 버그였음).
-        ramp_end = drop_t + 0.05
+    # eval=frame 필수: 없으면 ffmpeg가 volume 표현식을 처음 한 번만 계산해서
+    # 시간에 따라 값이 절대 안 바뀜(예전 실제 버그).
+    if voice_present and bgm and swell:
+        ramp_end=effect_t+RAMP
         fc.append(
-            f"[1:a]volume='if(lt(t,{drop_t:.3f}),1.0,0.7)':eval=frame[oa];"
-            f"[{bidx}:a]volume='if(lt(t,{drop_t:.3f}),0,"
-            f"if(lt(t,{ramp_end:.3f}),(t-{drop_t:.3f})/0.05*0.34,0.34))':eval=frame[bl];"
+            f"[{clip_idx}:a]volume='if(lt(t,{effect_t:.3f}),1.0,0.78)':eval=frame[oa];"
+            f"[{bgm_idx}:a]volume='if(lt(t,{effect_t:.3f}),{QUIET},"
+            f"if(lt(t,{ramp_end:.3f}),{QUIET}+(t-{effect_t:.3f})/{RAMP}*({LOUD}-{QUIET}),{LOUD}))':eval=frame[bl];"
             "[oa][bl]amix=inputs=2:duration=first:normalize=0[aout]")
         amap=["-map","[aout]"]
+    elif voice_present and bgm and not swell:
+        fc.append(f"[{clip_idx}:a]volume=0.9[oa];[{bgm_idx}:a]volume=0.28[bl];"
+                   "[oa][bl]amix=inputs=2:duration=first:normalize=0[aout]")
+        amap=["-map","[aout]"]
+    elif voice_present and not bgm:
+        amap=["-map",f"{clip_idx}:a"]
+    elif not voice_present and bgm:
+        fc.append(f"[{bgm_idx}:a]volume=0.55[aout]")
+        amap=["-map","[aout]"]
     else:
-        amap=["-map","1:a"]
+        amap=["-map",f"{null_idx}:a"]
+
     run(["ffmpeg","-y"]+inputs+["-filter_complex",";".join(fc),
         "-map","[vout]"]+amap+["-c:v","libx264","-preset","medium","-crf","20",
         "-c:a","aac","-b:a","192k","-ar","48000","-r",str(FPS),
         "-pix_fmt","yuv420p","-t",f"{dur:.3f}",str(out)],"finalize")
     return out
 
-def save_edit_bundle(clip,bgm,bgm_start,valid_images,words,emphasis,clip_start,dur,drop_t,cuts,montage):
+def save_edit_bundle(clip,bgm,bgm_start,valid_images,words,emphasis,clip_start,footage_dur,total_dur,
+                      effect_t,cuts,montage,voice_present,swell,effect_type,outro_sec):
     """에디터(bodetail_editor.html)에서 이미지 교체 등 재편집이 가능하도록
     소스 클립/BGM/이미지/자막데이터를 reels/latest_a/assets/ 에 통째로 남김.
     이걸로 rerender_category_a.py가 유튜브 재다운로드·AssemblyAI·Claude 호출 없이
@@ -547,47 +663,76 @@ def save_edit_bundle(clip,bgm,bgm_start,valid_images,words,emphasis,clip_start,d
     if bgm:
         shutil.copy(bgm, assets/"bgm_used.mp3"); bgm_saved=True
     edit=dict(
-        reel_duration=round(dur,3),
-        drop_at_rel=round(drop_t,3),
+        footage_duration=round(footage_dur,3),   # 소스 클립 구간 길이(아웃트로 제외)
+        reel_duration=round(total_dur,3),        # 최종 총 길이(아웃트로 effect_type이면 +outro_sec)
+        effect_t=round(effect_t,3),              # 클라이맥스(효과 트리거) 시점 — footage 기준 상대초
+        effect_type=effect_type,                 # montage | bw | outro
+        outro_sec=round(outro_sec,3),
         bgm_start=round(bgm_start,3) if bgm else 0.0,
         bgm_present=bgm_saved,
         montage=montage,
+        voice_present=bool(voice_present),
+        swell=bool(swell),
         cuts=[round(c,3) for c in cuts] if cuts else [],
         images=img_names,
         emphasis_words=list(emphasis or []),
-        words=words_to_relative(words, clip_start, dur),
+        words=words_to_relative(words, clip_start, footage_dur),
     )
     (LATEST/"direction_edit.json").write_text(json.dumps(edit,ensure_ascii=False,indent=2),encoding="utf-8")
     print(f"  📝 편집용 에셋 저장 완료 (assets/, direction_edit.json) — 이미지 {len(img_names)}장")
 
-def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,drop_at):
-    print(f"\n🎬 STEP 7: 합성...")
+def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,effect_t_raw,silent=False,effect_type="montage"):
+    print(f"\n🎬 STEP 7: 합성 (효과타입: {effect_type})...")
     valid=[p for p in imgs if p and Path(p).exists()]
-    drop_t=drop_at-clip_start
-    montage=(len(valid)>=2 and bool(bgm))
-    if montage: drop_t=max(4.0,min(drop_t,dur-3.0))
-    else:       drop_t=dur
-    print(f"  드롭(영상 전환) {drop_t:.1f}초 | 몽타주 {'ON' if montage else 'OFF(영상 풀)'} | B롤 {len(valid)}장")
+    voice_present=has_audio(clip)
+
+    if silent:
+        # 무음/내레이션 없는 영상: 클라이맥스 개념 없음, 효과 없음, BGM 고정 볼륨.
+        eff=dur; montage=False; bw=False; outro=False; swell=False
+    else:
+        # 클라이맥스 시점은 BGM 트랙 안에서 사용자가 지정한 지점(bgm_climax) 기준.
+        # 항상 "작게 깔려있다가 커지는" 크레센도(swell) — 무음→갑자기 아님.
+        eff=max(1.0,min(effect_t_raw,dur-1.0)) if dur>2 else effect_t_raw
+        montage=(effect_type=="montage" and len(valid)>=2 and bool(bgm))
+        bw=(effect_type=="bw")
+        outro=(effect_type=="outro")
+        swell=bool(bgm)
+    print(f"  클라이맥스 {eff:.1f}초 | 효과 {'몽타주' if montage else ('흑백' if bw else ('아웃트로' if outro else '없음'))} | "
+          f"음성트랙 {'있음' if voice_present else '없음'} | B롤 {len(valid)}장")
 
     ass=build_ass(words,clip_start,dur,emphasis,ASSETS/"subs.ass")
-    pA=make_vertical(clip,ASSETS/"partA.mp4",0,drop_t)
     cuts=[]
     if montage:
-        pb=[round(b-drop_t,3) for b in beats if b>drop_t]
+        pA=make_vertical(clip,ASSETS/"partA.mp4",0,eff)
+        pb=[round(b-eff,3) for b in beats if b>eff]
         cuts=[0.0]+[pb[i] for i in range(len(pb)) if i%BEATS_PER_CUT==0]
-        cuts=[c for c in cuts if 0<=c<(dur-drop_t)]
-        cuts=sorted(set(cuts+[round(dur-drop_t,3)]))
+        cuts=[c for c in cuts if 0<=c<(dur-eff)]
+        cuts=sorted(set(cuts+[round(dur-eff,3)]))
         if len(cuts)-1>60:
             step=(len(cuts)-1)/60
-            cuts=sorted(set([cuts[int(i*step)] for i in range(60)]+[round(dur-drop_t,3)]))
+            cuts=sorted(set([cuts[int(i*step)] for i in range(60)]+[round(dur-eff,3)]))
         pB=build_montage(valid,cuts,ASSETS/"partB.mp4",ASSETS/"segs")
-        vo=concat_videos([pA,pB],ASSETS/"video_only.mp4")
+        vo_footage=concat_videos([pA,pB],ASSETS/"video_footage.mp4")
+    elif bw:
+        # 클라이맥스 이후 화면이 서서히 흑백으로 전환(자막 색은 영향 없음)
+        vo_footage=make_vertical(clip,ASSETS/"video_footage.mp4",0,dur,bw_from=eff)
     else:
-        vo=pA
+        vo_footage=make_vertical(clip,ASSETS/"video_footage.mp4",0,dur)
+
+    if outro and not silent:
+        outro_card=build_outro_card(ASSETS/"outro.mp4",OUTRO_SEC)
+        vo=concat_videos([vo_footage,outro_card],ASSETS/"video_only.mp4")
+        total_dur=dur+OUTRO_SEC
+    else:
+        vo=vo_footage
+        total_dur=dur
+
     out=OUT_DIR/"reel_final.mp4"
-    finalize(vo,clip,(bgm if bgm else None),ass,out,min(drop_t,dur),dur,bgm_start)
-    print(f"  ✅ {out.name} ({out.stat().st_size/1024/1024:.1f}MB)")
-    save_edit_bundle(clip,bgm,bgm_start,valid,words,emphasis,clip_start,dur,drop_t,cuts,montage)
+    finalize(vo,clip,(bgm if bgm else None),ass,out,eff,total_dur,bgm_start,
+             voice_present=voice_present,swell=swell)
+    print(f"  ✅ {out.name} ({out.stat().st_size/1024/1024:.1f}MB, 총 {total_dur:.1f}초)")
+    save_edit_bundle(clip,bgm,bgm_start,valid,words,emphasis,clip_start,dur,total_dur,eff,
+                      cuts,montage,voice_present,swell,effect_type,OUTRO_SEC)
     return out
 
 # ══════════════════════════════════════════════════
@@ -646,15 +791,33 @@ def main():
         bgm=next(BGM_DIR.glob("*.mp3"),None) or next(BGM_DIR.glob("*.m4a"),None)
     print(f"🎵 배경음악: {bgm.name if bgm else '없음'}")
 
-    transcript=transcribe(video,force_lang)
-    direction =generate_direction(transcript,total_dur)
+    if NO_VOICE_ENV:
+        print("\n🔇 NO_VOICE 설정 — 음성인식/AI 구간선택 스킵, 영상 전체 그대로 사용")
+        words=[]
+        cs_override = float(CLIP_START_ENV) if CLIP_START_ENV else None
+        direction = heuristic_direction(total_dur, clip_start_override=cs_override)
+    else:
+        transcript=transcribe(video,force_lang)
+        words=transcript.get("words",[])
+        direction=generate_direction(transcript,total_dur)
+
+    silent = bool(direction.get("silent"))
     cs=direction["clip_start"]; ce=direction["clip_end"]; drop_at=direction["drop_at"]
     clip,dur=extract_clip(video,cs,ce)
-    imgs=download_images(direction.get("broll_keywords",[]))
-    beats=analyze_beats(bgm,dur) if bgm else []
-    bgm_start=resolve_bgm_start(bgm) if bgm else 0.0
-    final=render(clip,dur,cs,beats,imgs,transcript.get("words",[]),
-                 direction.get("emphasis_words",[]),bgm,bgm_start,drop_at)
+    imgs = [] if silent else download_images(direction.get("broll_keywords",[]))
+    if bgm and not silent:
+        beats=analyze_beats(bgm,dur)
+        bgm_start=resolve_bgm_start(bgm)
+        effect_t=resolve_bgm_climax(bgm,bgm_start,dur)
+    elif not silent:
+        # BGM이 없으면 클라이맥스 타이밍을 대사(Claude가 찾은 drop_at)로 대체
+        beats=[]; bgm_start=0.0
+        effect_t=max(1.0,min(drop_at-cs,dur-1.0)) if dur>2 else (drop_at-cs)
+    else:
+        beats=[]; bgm_start=0.0; effect_t=dur
+    final=render(clip,dur,cs,beats,imgs,words,
+                 direction.get("emphasis_words",[]),bgm,bgm_start,effect_t,
+                 silent=silent,effect_type=EFFECT_TYPE)
     save_cleanup(final,direction,source_info)
     print(f"\n🎉 완료! → reels/latest_a/reel_final.mp4")
 
