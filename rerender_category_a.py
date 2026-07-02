@@ -34,15 +34,21 @@ def main():
     if not clip.exists():
         raise RuntimeError(f"{clip} 없음 — assets/clip.mp4가 커밋되어 있는지 확인")
 
-    dur      = float(d.get("reel_duration", 20.0))
-    drop_t   = float(d.get("drop_at_rel", dur))
-    bgm_start= float(d.get("bgm_start", 0.0))
-    montage  = bool(d.get("montage", False))
-    cuts     = d.get("cuts", [])
-    emphasis = d.get("emphasis_words", [])
-    words    = d.get("words", [])   # 이미 clip 기준 상대(초) — clip_start=0으로 취급
-    img_names= d.get("images", [])
+    # 구버전 direction_edit.json(footage_duration/effect_t 필드 없음, drop_at_rel/punchy만 있음) 호환
+    footage_dur = float(d.get("footage_duration", d.get("reel_duration", 20.0)))
+    total_dur   = float(d.get("reel_duration", footage_dur))
+    effect_t    = float(d.get("effect_t", d.get("drop_at_rel", footage_dur)))
+    effect_type = d.get("effect_type", "montage" if d.get("montage") else "bw")
+    outro_sec   = float(d.get("outro_sec", 2.5))
+    bgm_start   = float(d.get("bgm_start", 0.0))
+    montage     = bool(d.get("montage", False)) and effect_type=="montage"
+    cuts        = d.get("cuts", [])
+    emphasis    = d.get("emphasis_words", [])
+    words       = d.get("words", [])   # 이미 clip 기준 상대(초) — clip_start=0으로 취급
+    img_names   = d.get("images", [])
     bgm_present = bool(d.get("bgm_present", False)) and bgm.exists()
+    voice_present = bool(d.get("voice_present", gen.has_audio(clip)))
+    swell         = bool(d.get("swell", d.get("punchy", bgm_present)))
 
     images = [str(IMGDIR/name) for name in img_names if (IMGDIR/name).exists()]
     missing = [name for name in img_names if not (IMGDIR/name).exists()]
@@ -50,27 +56,37 @@ def main():
         print(f"  ⚠️ 이미지 {len(missing)}장 못 찾음(건너뜀): {missing}")
 
     TMP.mkdir(parents=True, exist_ok=True)
-    for old in TMP.glob("*"):
-        pass  # 하위 파일은 각 build 함수가 덮어씀
 
-    print(f"🎬 재렌더 시작 | 길이 {dur:.1f}s | 드롭 {drop_t:.1f}s | 몽타주 {'ON' if montage else 'OFF'} | 이미지 {len(images)}장")
+    print(f"🎬 재렌더 시작 | 원본길이 {footage_dur:.1f}s | 총길이 {total_dur:.1f}s | "
+          f"클라이맥스 {effect_t:.1f}s | 효과 {effect_type} | 음성트랙 {'있음' if voice_present else '없음'} | "
+          f"이미지 {len(images)}장")
 
     # AssemblyAI 형식(ms, 절대) 대신 words_to_relative가 기대하는 형식으로 맞춰
     # build_ass에 바로 넣을 수 있도록 clip_start=0, 단위를 ms로 되돌려 전달
     words_ms = [{"start": w["t"]*1000, "end": w["e"]*1000, "text": w["w"]} for w in words]
 
-    ass = gen.build_ass(words_ms, 0.0, dur, emphasis, TMP/"subs.ass")
-    pA  = gen.make_vertical(clip, TMP/"partA.mp4", 0, drop_t)
+    ass = gen.build_ass(words_ms, 0.0, footage_dur, emphasis, TMP/"subs.ass")
 
     if montage and images and len(cuts) >= 2:
+        pA = gen.make_vertical(clip, TMP/"partA.mp4", 0, effect_t)
         pB = gen.build_montage(images, cuts, TMP/"partB.mp4", TMP/"segs")
-        vo = gen.concat_videos([pA, pB], TMP/"video_only.mp4")
+        vo_footage = gen.concat_videos([pA, pB], TMP/"video_footage.mp4")
+    elif effect_type=="bw":
+        vo_footage = gen.make_vertical(clip, TMP/"video_footage.mp4", 0, footage_dur, bw_from=effect_t)
     else:
-        vo = pA
+        # 몽타주 없음/그 외 → 전체 길이(footage_dur)로 구성 (일부만 자르면 영상이 잘리는 버그였음 — 수정됨)
+        vo_footage = gen.make_vertical(clip, TMP/"video_footage.mp4", 0, footage_dur)
+
+    if effect_type=="outro":
+        outro_card = gen.build_outro_card(TMP/"outro.mp4", outro_sec)
+        vo = gen.concat_videos([vo_footage, outro_card], TMP/"video_only.mp4")
+    else:
+        vo = vo_footage
 
     out = LATEST/"reel_final.mp4"
     gen.finalize(vo, clip, (bgm if bgm_present else None), ass, out,
-                 min(drop_t, dur), dur, bgm_start)
+                 effect_t, total_dur, bgm_start,
+                 voice_present=voice_present, swell=swell)
     print(f"✅ 재렌더 완료 → {out} ({out.stat().st_size/1024/1024:.1f}MB)")
 
 if __name__ == "__main__":
