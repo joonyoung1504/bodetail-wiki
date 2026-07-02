@@ -1,25 +1,26 @@
 {
-  "clip_start": 279.87,
-  "clip_end": 299.87,
+  "clip_start": 277.26,
+  "clip_end": 302.08,
   "drop_at": 284.79,
-  "hook_reason": "Goggins의 어머니 이야기—'넘어졌을 때 절대 일으켜주지 않았다, 스스로 일어나는 법을 가르쳐줬다'는 구절은 감정 직격탄이자 보편적 공감 코드. 직후 '난 항상 강한 남자가 아니었다'로 자연스럽게 흐르며 취약함→강함의 서사 전환이 완성됨. 퐁크 드롭과 몽타주 전환 타이밍이 284초에 정확히 맞아떨어짐.",
+  "hook_reason": "'Who never picked me up when I fell. She taught me how to get up when I was knocked down.' — 짧고 단정적이며 날것 그대로의 감정이 폭발하는 one-liner. 특히 'never picked me up'과 'get up when I was knocked down'의 대구 구조가 소름을 유발하고 SNS 캡션으로 박제될 만한 강도. 직후 'I was not always this strong guy you see'로 자기선언이 이어지며 드롭 이후 몽타주 전환 타이밍을 완성함. 앞 timestamp 간격(277.26→278.24→279.87→281.22→282.77)에서 의도적 pause가 반복되며 화자가 임팩트를 위해 끊어 말하는 구간임이 명확.",
   "emphasis_words": [
     "never",
     "picked",
     "fell",
     "taught",
     "get",
+    "up",
     "knocked",
     "down",
     "strong"
   ],
   "broll_keywords": [
+    "man neck jawline dark cinematic",
+    "man hands clenched dark moody",
+    "man face closeup scar dark editorial",
     "man silhouette dark rim light cinematic",
-    "man face closeup moody shadow",
-    "man hands clenched dark dramatic",
-    "man standing alone dark editorial",
-    "male jaw neck dark cinematic closeup",
-    "man mirror reflection dark moody",
-    "men back muscles dark cinematic sweat"
+    "man rising standing dark moody",
+    "men boots ground dark gritty cinematic",
+    "male mirror reflection dark brooding moody"
   ]
 }
