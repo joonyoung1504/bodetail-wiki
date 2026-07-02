@@ -13,9 +13,26 @@ on:
         required: false
         default: ''
       bgm_start_sec:
-        description: 'BGM 트랙에서 몇 초 지점부터 쓸지 (그 지점부터 릴스 길이만큼 그대로 사용 / 비우면 자동으로 고조되는 구간 탐지)'
+        description: 'BGM 트랙에서 몇 초 지점부터 재생 시작할지 (그 지점부터 그대로 사용 / 비우면 자동으로 고조되는 구간 탐지)'
         required: false
         default: ''
+      bgm_climax_sec:
+        description: 'BGM 트랙에서 클라이맥스(커지는/효과 터지는) 지점이 몇 초인지 — bgm_start_sec와 독립적으로 지정. 비우면 자동탐지'
+        required: false
+        default: ''
+      effect_type:
+        description: '클라이맥스에서 적용할 효과: montage(이미지 교차편집) / bw(흑백 전환) / outro(로고 카드 + BGM 커짐)'
+        required: false
+        default: 'montage'
+        type: choice
+        options:
+          - montage
+          - bw
+          - outro
+      outro_sec:
+        description: '(effect_type=outro일 때만) 아웃트로 카드 길이(초)'
+        required: false
+        default: '2.5'
       reel_duration:
         description: '릴스 길이(초)'
         required: false
@@ -24,6 +41,14 @@ on:
         description: '이미지 몇 박자마다 컷할지 (작을수록 빠른 교차편집)'
         required: false
         default: '2'
+      no_voice:
+        description: '음성/내레이션 없는 영상(달리기 영상 등)이면 true — 음성인식·AI구간선택 건너뛰고 BGM만 처음부터 끝까지'
+        required: false
+        default: 'false'
+      clip_start_sec:
+        description: '(no_voice=true일 때만) 원본 영상에서 몇 초 지점부터 릴스로 쓸지. 비우면 자동으로 중앙 구간 선택'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -85,8 +110,13 @@ jobs:
           YOUTUBE_URL:     ${{ github.event.inputs.youtube_url }}
           BGM_YOUTUBE_URL: ${{ github.event.inputs.bgm_youtube_url }}
           BGM_START_SEC:   ${{ github.event.inputs.bgm_start_sec }}
+          BGM_CLIMAX_SEC:  ${{ github.event.inputs.bgm_climax_sec }}
+          EFFECT_TYPE:     ${{ github.event.inputs.effect_type }}
+          OUTRO_SEC:       ${{ github.event.inputs.outro_sec }}
           REEL_DURATION:   ${{ github.event.inputs.reel_duration }}
           BEATS_PER_CUT:   ${{ github.event.inputs.beats_per_cut }}
+          NO_VOICE:        ${{ github.event.inputs.no_voice }}
+          CLIP_START_SEC:  ${{ github.event.inputs.clip_start_sec }}
         run: |
           python generate_category_a.py
 
