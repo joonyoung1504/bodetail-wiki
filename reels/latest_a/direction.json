@@ -1,8 +1,9 @@
 {
   "clip_start": 277.26,
-  "clip_end": 302.08,
+  "clip_end": 300.08,
   "drop_at": 284.79,
-  "hook_reason": "'Who never picked me up when I fell. She taught me how to get up when I was knocked down.' — 짧고 단정적이며 날것 그대로의 감정이 폭발하는 one-liner. 특히 'never picked me up'과 'get up when I was knocked down'의 대구 구조가 소름을 유발하고 SNS 캡션으로 박제될 만한 강도. 직후 'I was not always this strong guy you see'로 자기선언이 이어지며 드롭 이후 몽타주 전환 타이밍을 완성함. 앞 timestamp 간격(277.26→278.24→279.87→281.22→282.77)에서 의도적 pause가 반복되며 화자가 임팩트를 위해 끊어 말하는 구간임이 명확.",
+  "quote": "She taught me how to get up when I was knocked down.",
+  "hook_reason": "바로 앞 두 줄 'Who never picked me up. Who never picked me up when I fell.'의 반복이 숨을 참게 만들고, 'She taught me how to get up when I was knocked down'이 터지는 순간 — 설명이 없고, 구구절절하지 않고, 단 한 문장으로 모든 걸 끊어낸다. '일으켜준 게 아니라 스스로 일어나는 법을 가르쳤다'는 역설이 소름의 핵심. SNS 캡션으로 박제될 구조 그 자체다. 이후 'I was not always this strong guy you see'까지 이어지며 빌드업이 완성된다.",
   "emphasis_words": [
     "never",
     "picked",
@@ -15,12 +16,12 @@
     "strong"
   ],
   "broll_keywords": [
-    "man neck jawline dark cinematic",
-    "man hands clenched dark moody",
-    "man face closeup scar dark editorial",
-    "man silhouette dark rim light cinematic",
-    "man rising standing dark moody",
-    "men boots ground dark gritty cinematic",
-    "male mirror reflection dark brooding moody"
+    "man face closeup dark cinematic moody",
+    "man hands fist dark dramatic light",
+    "man silhouette dark rim light editorial",
+    "man mirror reflection dark brooding",
+    "men jaw neck closeup dark gold tone",
+    "man standing alone dark hallway cinematic",
+    "male figure rising shadow dramatic low angle"
   ]
 }

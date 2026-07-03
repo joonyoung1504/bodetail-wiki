@@ -1,36 +1,23 @@
 {
-  "footage_duration": 24.858,
-  "reel_duration": 24.858,
-  "effect_t": 11.0,
-  "effect_type": "montage",
+  "footage_duration": 22.856,
+  "reel_duration": 22.856,
+  "effect_t": 7.53,
+  "effect_type": "bw",
   "outro_sec": 2.5,
   "bgm_start": 15.0,
+  "bgm_climax": 26.0,
+  "sub_y": 50.0,
+  "broll_mode": "montage",
+  "cutaway_sec": 1.6,
+  "cutaway_style": "image",
+  "intro_black_sec": 0.0,
+  "sub_mode": "word",
+  "sub_scale": 1.0,
   "bgm_present": true,
-  "montage": true,
+  "montage": false,
   "voice_present": true,
   "swell": true,
-  "cuts": [
-    0.0,
-    0.656,
-    1.423,
-    2.189,
-    2.978,
-    3.745,
-    4.511,
-    5.3,
-    6.067,
-    6.833,
-    7.599,
-    8.389,
-    9.155,
-    9.921,
-    10.687,
-    11.477,
-    12.243,
-    13.009,
-    13.752,
-    13.858
-  ],
+  "cuts": [],
   "images": [
     "img_00.jpg",
     "img_01.jpg",
@@ -421,11 +408,6 @@
       "t": 22.561,
       "e": 22.818,
       "w": "see."
-    },
-    {
-      "t": 23.91,
-      "e": 24.086,
-      "w": "I"
     }
   ]
 }
