@@ -1,8 +1,8 @@
 {
-  "footage_duration": 22.856,
-  "reel_duration": 22.856,
+  "footage_duration": 24.791,
+  "reel_duration": 24.791,
   "effect_t": 7.53,
-  "effect_type": "bw",
+  "effect_type": "montage",
   "outro_sec": 2.5,
   "bgm_start": 15.0,
   "bgm_climax": 26.0,
@@ -14,10 +14,29 @@
   "sub_mode": "word",
   "sub_scale": 1.0,
   "bgm_present": true,
-  "montage": false,
+  "montage": true,
   "voice_present": true,
   "swell": true,
-  "cuts": [],
+  "cuts": [
+    0.0,
+    0.882,
+    1.927,
+    2.995,
+    4.04,
+    5.085,
+    6.13,
+    7.175,
+    8.243,
+    9.288,
+    10.333,
+    11.378,
+    12.446,
+    13.491,
+    14.536,
+    15.581,
+    16.625,
+    17.261
+  ],
   "images": [
     "img_00.jpg",
     "img_01.jpg",
@@ -30,6 +49,7 @@
   "emphasis_words": [
     "never",
     "picked",
+    "up",
     "fell",
     "taught",
     "get",
@@ -408,6 +428,11 @@
       "t": 22.561,
       "e": 22.818,
       "w": "see."
+    },
+    {
+      "t": 23.91,
+      "e": 24.086,
+      "w": "I"
     }
   ]
 }
