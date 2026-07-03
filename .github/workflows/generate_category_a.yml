@@ -29,24 +29,24 @@ on:
           - montage
           - bw
           - outro
-      outro_sec:
-        description: '(effect_type=outro일 때만) 아웃트로 카드 길이(초)'
-        required: false
-        default: '2.5'
       reel_duration:
         description: '릴스 길이(초)'
         required: false
         default: '20'
-      beats_per_cut:
-        description: '이미지 몇 박자마다 컷할지 (작을수록 빠른 교차편집)'
+      quote_hint:
+        description: '명대사 선정 힌트 — 원하는 주제/키워드/구절 (예: discipline, fuck your feelings). AI가 이 주제와 맞는 명대사를 우선 선택'
         required: false
-        default: '2'
+        default: ''
+      broll_mood:
+        description: '몽타주 이미지 무드 (예: gym grind sweat / luxury watch suit / dark rain street). 비우면 dark moody cinematic'
+        required: false
+        default: ''
       no_voice:
         description: '음성/내레이션 없는 영상(달리기 영상 등)이면 true — 음성인식·AI구간선택 건너뛰고 BGM만 처음부터 끝까지'
         required: false
         default: 'false'
-      clip_start_sec:
-        description: '(no_voice=true일 때만) 원본 영상에서 몇 초 지점부터 릴스로 쓸지. 비우면 자동으로 중앙 구간 선택'
+      advanced_opts:
+        description: '세부옵션 (key=value; 세미콜론 구분): outro_sec=2.5; beats_per_cut=2; clip_start_sec=40; audio_mode=swell|mix; sub_y=50; broll_mode=montage|cutaway; cutaway_style=image|blackword; cutaway_sec=1.6; intro_black_sec=3; sub_mode=word|phrase; sub_scale=1.0; broll_keywords=man running dark,man boxing gym'
         required: false
         default: ''
 
@@ -112,11 +112,11 @@ jobs:
           BGM_START_SEC:   ${{ github.event.inputs.bgm_start_sec }}
           BGM_CLIMAX_SEC:  ${{ github.event.inputs.bgm_climax_sec }}
           EFFECT_TYPE:     ${{ github.event.inputs.effect_type }}
-          OUTRO_SEC:       ${{ github.event.inputs.outro_sec }}
           REEL_DURATION:   ${{ github.event.inputs.reel_duration }}
-          BEATS_PER_CUT:   ${{ github.event.inputs.beats_per_cut }}
+          QUOTE_HINT:      ${{ github.event.inputs.quote_hint }}
+          BROLL_MOOD:      ${{ github.event.inputs.broll_mood }}
           NO_VOICE:        ${{ github.event.inputs.no_voice }}
-          CLIP_START_SEC:  ${{ github.event.inputs.clip_start_sec }}
+          ADVANCED_OPTS:   ${{ github.event.inputs.advanced_opts }}
         run: |
           python generate_category_a.py
 
