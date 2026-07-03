@@ -1,8 +1,8 @@
 {
-  "footage_duration": 24.791,
-  "reel_duration": 24.791,
+  "footage_duration": 18.919,
+  "reel_duration": 21.419,
   "effect_t": 7.53,
-  "effect_type": "montage",
+  "effect_type": "outro",
   "outro_sec": 2.5,
   "bgm_start": 15.0,
   "bgm_climax": 26.0,
@@ -14,29 +14,10 @@
   "sub_mode": "word",
   "sub_scale": 1.0,
   "bgm_present": true,
-  "montage": true,
+  "montage": false,
   "voice_present": true,
   "swell": true,
-  "cuts": [
-    0.0,
-    0.882,
-    1.927,
-    2.995,
-    4.04,
-    5.085,
-    6.13,
-    7.175,
-    8.243,
-    9.288,
-    10.333,
-    11.378,
-    12.446,
-    13.491,
-    14.536,
-    15.581,
-    16.625,
-    17.261
-  ],
+  "cuts": [],
   "images": [
     "img_00.jpg",
     "img_01.jpg",
@@ -55,8 +36,7 @@
     "get",
     "up",
     "knocked",
-    "down",
-    "strong"
+    "down"
   ],
   "words": [
     {
@@ -383,56 +363,6 @@
       "t": 18.611,
       "e": 18.884,
       "w": "me."
-    },
-    {
-      "t": 20.056,
-      "e": 20.233,
-      "w": "I"
-    },
-    {
-      "t": 20.458,
-      "e": 20.602,
-      "w": "was"
-    },
-    {
-      "t": 20.634,
-      "e": 20.875,
-      "w": "not"
-    },
-    {
-      "t": 20.939,
-      "e": 21.405,
-      "w": "always"
-    },
-    {
-      "t": 21.437,
-      "e": 21.582,
-      "w": "this"
-    },
-    {
-      "t": 21.71,
-      "e": 22.047,
-      "w": "strong"
-    },
-    {
-      "t": 22.143,
-      "e": 22.4,
-      "w": "guy"
-    },
-    {
-      "t": 22.465,
-      "e": 22.561,
-      "w": "you"
-    },
-    {
-      "t": 22.561,
-      "e": 22.818,
-      "w": "see."
-    },
-    {
-      "t": 23.91,
-      "e": 24.086,
-      "w": "I"
     }
   ]
 }
