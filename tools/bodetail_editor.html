@@ -387,24 +387,34 @@ input[type=file]{display:none;}
       </div>
 
       <div class="a-section">
-        <h2>클라이맥스 지점 (이 시점 이후 효과 적용 · BGM이 커짐)</h2>
+        <h2>효과 시점 · BGM 구간 (명대사 끝 → 음성·자막 꺼짐 + BGM 하이라이트 점프)</h2>
         <div class="a-drop-row">
-          <label>클라이맥스(초, 릴스 기준)</label>
+          <label>효과 시점(초, 릴스 기준)</label>
           <input type="number" id="a-dropInput" step="0.05" value="0">
-          <label style="margin-left:12px;">BGM 시작(트랙 초)</label>
+          <button class="btn-jump" id="a-jumpDrop">▶ 효과 위치로</button>
+        </div>
+        <div class="a-drop-row" style="margin-top:8px;">
+          <label>BGM 인트로 시작(트랙 초)</label>
           <input type="number" id="a-bgmStartInput" step="0.5" value="0">
-          <button class="btn-jump" id="a-jumpDrop">▶ 클라이맥스 위치로</button>
+          <label style="margin-left:12px;">BGM 하이라이트 지점(트랙 초)</label>
+          <input type="number" id="a-bgmClimaxInput" step="0.5" value="0">
+        </div>
+        <div class="a-drop-row" style="margin-top:8px;">
+          <label>자막 세로 위치</label>
+          <input type="range" id="a-subYInput" min="10" max="90" step="1" value="50" style="width:180px;accent-color:var(--gold);">
+          <span id="a-subYLabel" style="font-size:11px;color:#8a857c;">50% (정중앙)</span>
         </div>
         <div class="r-hint" style="margin-top:8px;">
-          <b>클라이맥스</b>는 이 릴스 안에서 효과가 터지는 시점(초)이야. BGM 트랙의 시작 지점과
-          클라이맥스 지점을 각각 따로 정하고 싶다면, 생성 단계(카테고리 A 릴스 생성 워크플로)의
-          <b>bgm_start_sec / bgm_climax_sec</b> 입력값을 조정하고 다시 생성해야 정확히 반영돼.
-          여기서는 이미 계산된 클라이맥스 시점(초)을 미세조정만 가능.
+          구조: <b>효과 시점</b>에 음성·자막이 완전히 꺼지고, BGM이 트랙의 <b>하이라이트 지점</b>으로
+          점프하며 크게 터지고, 선택한 효과가 시작돼. <b>인트로 시작</b>은 효과 전까지 작게 깔리는
+          BGM이 트랙의 어디서부터 재생될지. 세 값 모두 여기서 수정 → ③ JSON 내보내기 →
+          재업로드 → "카테고리 A 재렌더" 실행하면 그대로 반영됨.
         </div>
       </div>
 
       <div class="a-section">
-        <h2>몽타주 이미지 (효과=몽타주일 때 클라이맥스 이후 교차편집에 순서대로 사용됨)</h2>
+        <h2>B롤 이미지 (montage=효과 후 교차편집 / cutaway=말 도중 강조어 순간 삽입)</h2>
+        <div class="r-hint">cutaway 모드일 땐 아래 자막 목록에서 <b>강조(골드) 체크한 단어의 타이밍</b>에 이미지가 순서대로 삽입돼 — 강조 체크를 바꾸고 재렌더하면 컷어웨이 위치도 따라 바뀜.</div>
         <div class="a-imggrid" id="a-imgGrid"></div>
       </div>
 
@@ -813,8 +823,18 @@ const aWordList=document.getElementById('a-wordList');
 const aImgGrid=document.getElementById('a-imgGrid');
 const aDropInput=document.getElementById('a-dropInput');
 const aBgmStartInput=document.getElementById('a-bgmStartInput');
+const aBgmClimaxInput=document.getElementById('a-bgmClimaxInput');
+const aSubYInput=document.getElementById('a-subYInput');
+const aSubYLabel=document.getElementById('a-subYLabel');
 const aEffectType=document.getElementById('a-effectType');
 const aOutroSecInput=document.getElementById('a-outroSecInput');
+
+function a_applySubY(){
+  const y=parseFloat(aSubYInput.value)||50;
+  asubline.style.top=y+'%';
+  aSubYLabel.textContent=y+'%'+(y===50?' (정중앙)':'');
+  if(A_DATA)A_DATA.sub_y=y;
+}
 
 app_.onclick=()=>{av.muted=false;av.paused?av.play().catch(()=>{}):av.pause();};
 av.addEventListener('play',()=>app_.textContent='■ 정지');
@@ -833,6 +853,9 @@ document.getElementById('a-jsonFile').addEventListener('change',e=>{
       // effect_t가 새 필드명, drop_at_rel은 구버전 호환
       aDropInput.value=(A_DATA.effect_t!==undefined?A_DATA.effect_t:A_DATA.drop_at_rel)||0;
       aBgmStartInput.value=A_DATA.bgm_start||0;
+      aBgmClimaxInput.value=(A_DATA.bgm_climax!==undefined&&A_DATA.bgm_climax!==null)?A_DATA.bgm_climax:0;
+      aSubYInput.value=A_DATA.sub_y!==undefined?A_DATA.sub_y:50;
+      a_applySubY();
       aEffectType.value=A_DATA.effect_type||(A_DATA.montage?'montage':'bw');
       aOutroSecInput.value=A_DATA.outro_sec!==undefined?A_DATA.outro_sec:2.5;
       document.getElementById('a-silentNote').style.display=
@@ -951,6 +974,9 @@ function a_currentWordAt(t){
 }
 function a_renderVideoOverlay(){
   const t=av.currentTime||0;
+  // 실제 렌더와 동일하게: 효과 시점 이후엔 자막 미리보기도 안 뜸
+  const eff=parseFloat(aDropInput.value)||Infinity;
+  if(t>=eff){asubline.innerHTML='';return;}
   const w=a_currentWordAt(t);
   if(!w){asubline.innerHTML='';return;}
   const clean=w.w.toLowerCase().replace(/[.,!?]/g,'');
@@ -958,7 +984,9 @@ function a_renderVideoOverlay(){
   const isEmph=((A_DATA&&A_DATA.emphasis_words)||[]).includes(clean);
   const cls=(isConnector?'italic':'bold')+(isEmph?' emph':'');
   const text=isConnector?w.w.toLowerCase():w.w.toUpperCase();
-  asubline.innerHTML=`<span class="${cls}">${esc(text)}</span>`;
+  // 강조어는 실제 렌더처럼 크게(볼드 138% / 이탤릭 128%)
+  const scale=isEmph?(isConnector?1.28:1.38):1.0;
+  asubline.innerHTML=`<span class="${cls}" style="transform:scale(${scale});display:inline-block;">${esc(text)}</span>`;
 }
 av.addEventListener('timeupdate',()=>{
   if(!asc.matches(':active'))asc.value=av.currentTime;
@@ -972,6 +1000,8 @@ document.getElementById('a-jumpDrop').addEventListener('click',()=>{
 });
 aDropInput.addEventListener('input',()=>{if(A_DATA)A_DATA.effect_t=parseFloat(aDropInput.value)||0;});
 aBgmStartInput.addEventListener('input',()=>{if(A_DATA)A_DATA.bgm_start=parseFloat(aBgmStartInput.value)||0;});
+aBgmClimaxInput.addEventListener('input',()=>{if(A_DATA)A_DATA.bgm_climax=parseFloat(aBgmClimaxInput.value)||0;});
+aSubYInput.addEventListener('input',a_applySubY);
 aEffectType.addEventListener('change',()=>{if(A_DATA)A_DATA.effect_type=aEffectType.value;});
 aOutroSecInput.addEventListener('input',()=>{if(A_DATA)A_DATA.outro_sec=parseFloat(aOutroSecInput.value)||2.5;});
 
@@ -980,6 +1010,8 @@ function a_exportJSON(){
   A_DATA.words=A_WORDS.map(w=>({t:w.t,e:w.e,w:w.w}));
   A_DATA.effect_t=parseFloat(aDropInput.value)||0;
   A_DATA.bgm_start=parseFloat(aBgmStartInput.value)||0;
+  A_DATA.bgm_climax=parseFloat(aBgmClimaxInput.value)||0;
+  A_DATA.sub_y=parseFloat(aSubYInput.value)||50;
   A_DATA.effect_type=aEffectType.value;
   A_DATA.outro_sec=parseFloat(aOutroSecInput.value)||2.5;
   A_DATA.montage=(aEffectType.value==='montage');
