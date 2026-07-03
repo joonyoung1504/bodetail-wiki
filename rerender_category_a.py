@@ -34,13 +34,22 @@ def main():
     if not clip.exists():
         raise RuntimeError(f"{clip} 없음 — assets/clip.mp4가 커밋되어 있는지 확인")
 
-    # 구버전 direction_edit.json(footage_duration/effect_t 필드 없음, drop_at_rel/punchy만 있음) 호환
+    # 구버전 direction_edit.json 호환 (필드 없으면 합리적 기본값으로 추론)
     footage_dur = float(d.get("footage_duration", d.get("reel_duration", 20.0)))
     total_dur   = float(d.get("reel_duration", footage_dur))
     effect_t    = float(d.get("effect_t", d.get("drop_at_rel", footage_dur)))
     effect_type = d.get("effect_type", "montage" if d.get("montage") else "bw")
     outro_sec   = float(d.get("outro_sec", 2.5))
     bgm_start   = float(d.get("bgm_start", 0.0))
+    bgm_climax  = d.get("bgm_climax", None)
+    bgm_climax  = float(bgm_climax) if bgm_climax is not None else None
+    sub_y       = float(d.get("sub_y", 50))
+    broll_mode  = d.get("broll_mode", "montage")
+    cutaway_sec = float(d.get("cutaway_sec", 1.6))
+    cutaway_style = d.get("cutaway_style", "image")
+    intro_black = float(d.get("intro_black_sec", 0))
+    sub_mode    = d.get("sub_mode", "word")
+    sub_scale   = float(d.get("sub_scale", 1.0))
     montage     = bool(d.get("montage", False)) and effect_type=="montage"
     cuts        = d.get("cuts", [])
     emphasis    = d.get("emphasis_words", [])
@@ -58,24 +67,44 @@ def main():
     TMP.mkdir(parents=True, exist_ok=True)
 
     print(f"🎬 재렌더 시작 | 원본길이 {footage_dur:.1f}s | 총길이 {total_dur:.1f}s | "
-          f"클라이맥스 {effect_t:.1f}s | 효과 {effect_type} | 음성트랙 {'있음' if voice_present else '없음'} | "
-          f"이미지 {len(images)}장")
+          f"효과시점 {effect_t:.1f}s | 효과 {effect_type} | 음성트랙 {'있음' if voice_present else '없음'} | "
+          f"이미지 {len(images)}장 | 자막 y={sub_y:.0f}%")
 
     # AssemblyAI 형식(ms, 절대) 대신 words_to_relative가 기대하는 형식으로 맞춰
     # build_ass에 바로 넣을 수 있도록 clip_start=0, 단위를 ms로 되돌려 전달
     words_ms = [{"start": w["t"]*1000, "end": w["e"]*1000, "text": w["w"]} for w in words]
 
-    ass = gen.build_ass(words_ms, 0.0, footage_dur, emphasis, TMP/"subs.ass")
+    # 자막은 효과 시점 이후 안 나옴 (음성·자막 동반 컷오프 사양)
+    sub_end = None if not swell else effect_t
+    ass = gen.build_ass(words_ms, 0.0, footage_dur, emphasis, TMP/"subs.ass",
+                        sub_end=sub_end, sub_y=sub_y, sub_mode=sub_mode, sub_scale=sub_scale)
 
+    ib = intro_black if intro_black>0 else None
     if montage and images and len(cuts) >= 2:
-        pA = gen.make_vertical(clip, TMP/"partA.mp4", 0, effect_t)
+        pA = gen.make_vertical(clip, TMP/"partA.mp4", 0, effect_t, black_until=ib)
         pB = gen.build_montage(images, cuts, TMP/"partB.mp4", TMP/"segs")
         vo_footage = gen.concat_videos([pA, pB], TMP/"video_footage.mp4")
     elif effect_type=="bw":
-        vo_footage = gen.make_vertical(clip, TMP/"video_footage.mp4", 0, footage_dur, bw_from=effect_t)
+        vo_footage = gen.make_vertical(clip, TMP/"video_footage.mp4", 0, footage_dur, bw_from=effect_t, black_until=ib)
     else:
         # 몽타주 없음/그 외 → 전체 길이(footage_dur)로 구성 (일부만 자르면 영상이 잘리는 버그였음 — 수정됨)
-        vo_footage = gen.make_vertical(clip, TMP/"video_footage.mp4", 0, footage_dur)
+        vo_footage = gen.make_vertical(clip, TMP/"video_footage.mp4", 0, footage_dur, black_until=ib)
+
+    # 컷어웨이 재현: 에디터에서 수정된 강조어/자막 타이밍 기준으로 재계산 —
+    # 강조 체크박스를 바꾸면 컷어웨이 타이밍도 그에 맞춰 따라옴
+    if broll_mode=="cutaway":
+        wr=[{"t":w["t"],"e":w["e"],"w":w["w"]} for w in words if w["t"]>=(ib or 0)+0.3]
+        if cutaway_style=="blackword":
+            card=gen.build_black_card(TMP/"black_card.png")
+            cutaways=gen.cutaway_windows(wr,emphasis,effect_t,99,cutaway_sec,word_flash=True)
+            if cutaways:
+                print(f"  ⬛ 블랙 플래시 {len(cutaways)}개 재현")
+                vo_footage=gen.apply_cutaways(vo_footage,TMP/"video_cutaway.mp4",[str(card)],cutaways,footage_dur)
+        elif images:
+            cutaways=gen.cutaway_windows(wr,emphasis,effect_t,len(images),cutaway_sec)
+            if cutaways:
+                print(f"  🎞️ 컷어웨이 {len(cutaways)}개 재현")
+                vo_footage=gen.apply_cutaways(vo_footage,TMP/"video_cutaway.mp4",images,cutaways,footage_dur)
 
     if effect_type=="outro":
         outro_card = gen.build_outro_card(TMP/"outro.mp4", outro_sec)
@@ -85,7 +114,7 @@ def main():
 
     out = LATEST/"reel_final.mp4"
     gen.finalize(vo, clip, (bgm if bgm_present else None), ass, out,
-                 effect_t, total_dur, bgm_start,
+                 effect_t, total_dur, bgm_start, bgm_climax=bgm_climax,
                  voice_present=voice_present, swell=swell)
     print(f"✅ 재렌더 완료 → {out} ({out.stat().st_size/1024/1024:.1f}MB)")
 
