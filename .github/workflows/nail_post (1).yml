@@ -1,0 +1,64 @@
+name: 리버니 네일 데일리 게시물
+
+# 매일 아침 08:30 KST 자동 실행 (UTC 23:30 = KST 다음날 08:30)
+# + Actions 탭에서 수동 실행도 가능 ("리버니 네일 데일리 게시물" → Run workflow)
+# ※ GitHub cron은 몇 분 정도 지연될 수 있음(무료 러너 특성) — 보통 08:30~08:45 사이 도착
+on:
+  schedule:
+    - cron: '30 23 * * *'
+  workflow_dispatch:
+    inputs:
+      topic_override:
+        description: '주제 직접 지정 (비우면 오늘 날짜의 스케줄 주제 자동 선택)'
+        required: false
+        default: ''
+      skip_email:
+        description: '이메일 발송 생략 (테스트용): true / false'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 파이썬 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 한글 폰트 설치
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+          fc-cache -f
+
+      - name: 파이썬 라이브러리 설치
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pillow
+
+      - name: 게시물 생성 + 이메일 발송
+        env:
+          ANTHROPIC_API_KEY:  ${{ secrets.ANTROPIC_API_KEY }}   # ⚠️ 오타 시크릿(H 빠짐) 그대로 사용 — repo에 이미 등록된 값
+          GMAIL_ADDRESS:      ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO:            ${{ secrets.MAIL_TO }}
+          TOPIC_OVERRIDE:     ${{ github.event.inputs.topic_override }}
+          SKIP_EMAIL:         ${{ github.event.inputs.skip_email }}
+        run: |
+          python generate_nail_post.py
+
+      - name: 결과 커밋 & 푸시
+        run: |
+          git config user.name  "bodetail-bot"
+          git config user.email "bodetail-bot@users.noreply.github.com"
+          git add -A
+          git commit -m "🐰 리버니 네일 게시물 ($(date +%F))" || echo "변경 없음"
+          git push
