@@ -1,320 +1,578 @@
 # -*- coding: utf-8 -*-
 """
-리버니 네일룸(@libunny.nailroom) 데일리 게시물 생성기 v1
-─ bodetail 데일리 게시물 시스템과 같은 구조, 무드만 리버니(화사한 파스텔+토끼)로 전환 ─
+리버니 네일룸(@libunny.nailroom) 데일리 게시물 생성기 v2
+─ 레퍼런스(DRAW NAIL 감성) 기반 전면 재설계 ─
 
-매일: 주제 스케줄에서 오늘 주제 선택 → Claude가 콘텐츠 생성(실용 정보 의무)
-      → 파스텔 카드 5장(1080×1350) + 캡션 렌더 → posts_nail/latest/ 커밋
-      → 완성본을 이메일로 발송 (누나는 메일에서 이미지 저장 → 인스타 업로드만 하면 끝)
+무드: 얇은 라인 아트(아치 프레임·점선 박스·손그림 하트/리본/안개꽃),
+      자간 넓은 세리프 영문, 여백 많은 중앙 정렬, 웜 브라운 단색 + 파스텔.
+컨셉: 마스코트 토끼 '리버니'가 오늘의 네일 소식을 알려주는 형식.
 
-타겟: 네일에 관심 있는 잠재고객(송파/문정 지역 + 네일 관심사) → 팔로우 유도
+기능:
+ · 30일 주제 스케줄(topics_nail.json) — 소진되면 Claude가 다음 30일치 자동 생성
+ · 슬라이드 타입 3종: info(사진+정보) / tier(티어리스트) / product(제품 소개+참고가)
+ · 슬라이드별 어울리는 밝은 네일 사진 자동 검색(Pexels/Unsplash) + 파스텔 보정
+ · 마지막 장: 강한 CTA + 리버니 브랜드 카드로 마무리
+ · RERENDER=true → Claude 호출 없이 posts_nail/latest/content.json으로 재렌더
+   (HTML 에디터로 content.json 수정 후 재실행하는 워크플로)
+ · 완성본 이메일 발송(08:30 KST cron)
 """
-import os, sys, json, shutil, smtplib, datetime, random, re
+import os, sys, json, shutil, smtplib, datetime, random, re, math
 from pathlib import Path
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import requests
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageOps
 
 W, H = 1080, 1350
 OUT = Path("posts_nail/latest")
 ARCH = Path("posts_nail")/datetime.datetime.now().strftime("%Y-%m-%d")
+TOPICS_FILE = Path("topics_nail.json")
+ANCHOR = datetime.date(2026,7,1)   # 주제 배치 기준일 (30일마다 새 배치)
 
-# ── 리버니 팔레트 (피드 실물 무드 기반: 아이보리·연핑크·세이지·펄) ──
-CREAM   = (251, 247, 242)   # 바탕 아이보리
-PINK    = (247, 231, 229)   # 소프트 핑크
-SAGE    = (232, 237, 227)   # 세이지 그린
-PEARL   = (244, 242, 238)   # 펄 화이트
-BROWN   = (107, 93, 82)     # 본문 웜 브라운그레이
-ROSE    = (192, 138, 138)   # 포인트 로즈
-GOLD    = (196, 168, 130)   # 포인트 골드베이지
-GRAYPK  = (201, 191, 184)   # 토끼 몸통(크로셰 토끼 톤)
-INNER   = (238, 210, 208)   # 토끼 귀 안쪽
-BG_CYCLE = [CREAM, PINK, SAGE, PEARL, PINK]
+# ── 팔레트 (DRAW NAIL 계열: 크림 + 웜브라운 단색 + 파스텔 포인트) ──
+CREAM  = (248, 244, 238)
+PINKBG = (247, 236, 233)
+SAGEBG = (238, 241, 233)
+LINE   = (176, 156, 130)    # 라인 아트 브라운
+BROWN  = (94, 79, 65)       # 진한 텍스트
+SOFT   = (150, 132, 112)    # 보조 텍스트
+ROSE   = (191, 141, 141)
+GOLD   = (196, 168, 130)
+BUNNY  = (199, 189, 181)
+EAR    = (236, 213, 210)
+WHITE  = (255, 255, 255)
 
-ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY","").strip()   # 게시물용(정확한 철자)
+ANTHROPIC_KEY  = os.environ.get("ANTHROPIC_API_KEY","").strip()
 TOPIC_OVERRIDE = os.environ.get("TOPIC_OVERRIDE","").strip()
+RERENDER   = os.environ.get("RERENDER","").strip().lower() in ("1","true","yes")
 SKIP_EMAIL = os.environ.get("SKIP_EMAIL","").strip().lower() in ("1","true","yes")
 GMAIL_ADDR = os.environ.get("GMAIL_ADDRESS","").strip()
 GMAIL_PW   = os.environ.get("GMAIL_APP_PASSWORD","").strip()
 MAIL_TO    = os.environ.get("MAIL_TO","").strip() or GMAIL_ADDR
+PEXELS_KEY   = os.environ.get("PEXELS_API_KEY","").strip()
+UNSPLASH_KEY = os.environ.get("UNSPLASH_ACCESS_KEY","").strip()
+
+def run_ok(fn,*a,**k):
+    try: return fn(*a,**k)
+    except Exception as e:
+        print(f"  ⚠️ {fn.__name__} 실패: {e}"); return None
 
 # ══════════════════════════════════════════════
-# 주제 스케줄 (일자 % 30 순환 — 원하는 대로 문구 수정 가능)
-# 카테고리: 띠별/운세네일 · 관리꿀팁 · 케어템/영양제 · 디자인추천 · 퍼스널컬러 · 상황별 · 네일상식
+# 폰트 (세련된 조합: 세리프 한글 + Playfair 영문 + 나눔펜 손글씨)
 # ══════════════════════════════════════════════
-TOPICS = [
- "이번 달 띠별 행운 네일 컬러 추천 — 띠별로 좋은 기운을 주는 컬러와 그 의미",
- "젤네일 2주 더 오래 가게 하는 관리 꿀팁 5가지",
- "손톱 세로줄·갈라짐, 원인과 해결법 — 집에서 하는 케어 루틴",
- "물어뜯은 손톱도 예뻐지는 과정 — 손톱 모양 교정의 모든 것",
- "여름 물놀이에도 안 지워지는 네일 디자인 & 컬러 추천",
- "손톱 영양제 진짜 효과 있을까? 성분별(비오틴·콜라겐·케라틴) 정리",
- "퍼스널컬러 봄웜이 하면 예쁜 네일 컬러 5가지",
- "퍼스널컬러 여름쿨이 하면 예쁜 네일 컬러 5가지",
- "직장인을 위한 단정하지만 밋밋하지 않은 오피스 네일 추천",
- "젤네일 휴식기, 꼭 필요할까? 손톱 건강 팩트체크",
- "큐티클, 뜯지 말고 이렇게 — 집에서 하는 큐티클 케어 순서",
- "이번 주 별자리별 행운 네일 컬러",
- "손이 예뻐 보이는 네일 모양 고르는 법 (라운드·아몬드·스퀘어)",
- "짧은 손톱에 더 예쁜 디자인 모음 — 숏네일 추천",
- "네일샵 처음 가는 사람을 위한 예약~시술 과정 안내",
- "손 나이 -5살, 핸드크림 바르는 진짜 올바른 방법",
- "웨딩·상견례 등 중요한 날을 위한 온화한 네일 추천",
- "젤 제거 후 얇아진 손톱 회복시키는 법",
- "가을 뉴트럴 네일 컬러 미리보기 — 올해 유행 예측",
- "네일 오래 가는 사람들의 공통 습관 5가지",
- "손톱 건강에 좋은 음식 — 영양소별 정리",
- "퍼스널컬러 가을웜이 하면 예쁜 네일 컬러 5가지",
- "퍼스널컬러 겨울쿨이 하면 예쁜 네일 컬러 5가지",
- "이달의 탄생석 컬러 네일 — 의미와 어울리는 디자인",
- "패디큐어 시즌 준비 — 발 관리 순서와 꿀팁",
- "민감한 손톱을 위한 저자극 네일 케어 가이드",
- "네일 디자인 고를 때 피부톤별 피해야 할 컬러",
- "미니멀 네일 유행 — 원컬러를 고급스럽게 하는 법",
- "손톱 물어뜯는 습관 끊는 현실적인 방법",
- "시술 후 관리 안내 — 젤네일 첫 24시간이 중요한 이유",
-]
+FONT_DIRS=[str(Path.home()/".fonts"),"/usr/share/fonts/opentype/noto","/usr/share/fonts/truetype/nanum"]
+def _find(names):
+    for d in FONT_DIRS:
+        for n in names:
+            p=Path(d)/n
+            if p.exists(): return str(p)
+    return None
+F_SERIF_B=_find(["NotoSerifCJK-Bold.ttc","NotoSerifCJKkr-Bold.otf"]) or _find(["NotoSansCJK-Bold.ttc"])
+F_SERIF_R=_find(["NotoSerifCJK-Regular.ttc","NotoSerifCJKkr-Regular.otf"]) or _find(["NotoSansCJK-Regular.ttc"])
+F_PLAY   =_find(["PlayfairDisplay-Regular.ttf","PlayfairDisplay-Italic.ttf"])
+F_PEN    =_find(["NanumPenScript-Regular.ttf","NanumPen.ttf"])
 
-def today_topic():
-    if TOPIC_OVERRIDE: return TOPIC_OVERRIDE
-    return TOPICS[datetime.date.today().day % len(TOPICS)]
+def F(kind,size):
+    path={"kb":F_SERIF_B,"kr":F_SERIF_R,"en":F_PLAY or F_SERIF_R,"pen":F_PEN or F_SERIF_R}[kind]
+    try: return ImageFont.truetype(path,size)
+    except: return ImageFont.load_default()
 
-# ══════════════════════════════════════════════
-# STEP 1: Claude로 콘텐츠 생성
-# ══════════════════════════════════════════════
-def generate_content(topic):
-    today=datetime.date.today()
-    prompt=f"""너는 서울 송파/문정동의 프라이빗 1인 네일샵 '리버니 네일룸'(@libunny.nailroom)의
-인스타 콘텐츠 에디터야. 오늘({today.year}년 {today.month}월 {today.day}일) 카드뉴스 주제:
+EMOJI_RE=re.compile("["+"\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D"+"]+")
+def clean(t): return EMOJI_RE.sub("",str(t)).strip()
 
-"{topic}"
+def tw(d,t,f):
+    b=d.textbbox((0,0),t,font=f); return b[2]-b[0], b[3]-b[1]
 
-[브랜드 톤]
-- 다정하고 화사한 언니 톤. 과장·호들갑 금지, 이모지는 🤍🐰✨ 정도만 아주 절제해서.
-- 리버니 = 토끼 캐릭터의 아늑하고 사랑스러운 무드. 파스텔(아이보리·연핑크·세이지).
-
-[콘텐츠 원칙 — 반드시]
-- 읽는 사람이 '저장'하고 싶어질 실용 정보/팁이 카드마다 최소 1개씩 반드시 들어갈 것.
-- 뻔한 얘기 금지. 네일 아티스트만 아는 디테일을 한 스푼씩.
-- 띠별/별자리/탄생석 주제면: 항목별로 [컬러 이름 + 왜 좋은지 의미 + 어울리는 포인트] 구성.
-- 잠재고객이 팔로우할 이유(다음 콘텐츠 기대감)를 마지막 카드에 자연스럽게.
-
-순수 JSON만 출력:
-{{"title_line1":"표지 제목 윗줄(6자 내외)","title_line2":"표지 제목 아랫줄(8자 내외)",
-"hook_sub":"표지 부제 한 줄(15자 내외, 왜 봐야 하는지)",
-"slides":[
- {{"num":"01","heading":"소제목(10자 내외)","body":"본문 2~3문장. 줄바꿈은 \\n","tip":"한 줄 꿀팁(25자 내외)"}},
- {{"num":"02","heading":"...","body":"...","tip":"..."}},
- {{"num":"03","heading":"...","body":"...","tip":"..."}}
-],
-"cta_note":"마지막 카드용 한 줄(다음 콘텐츠 기대 문구, 20자 내외)",
-"caption":"인스타 캡션. 첫 줄 훅 → 내용 요약 2~3줄 → 저장/팔로우 유도 → 해시태그 15개(#송파네일 #문정동네일 #문정네일 #리버니네일룸 포함 + 주제 관련 + 잠재고객 검색어)"}}"""
-    r=requests.post("https://api.anthropic.com/v1/messages",
-        headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-        json={"model":"claude-sonnet-4-5","max_tokens":2500,
-              "messages":[{"role":"user","content":prompt}]},timeout=120)
-    if r.status_code!=200:
-        raise RuntimeError(f"Claude API 오류 {r.status_code}: {r.text[:300]}")
-    txt=r.json()["content"][0]["text"].strip()
-    txt=re.sub(r"^```(json)?|```$","",txt,flags=re.M).strip()
-    data=json.loads(txt[txt.find("{"):txt.rfind("}")+1])
-    print(f"  ✅ 콘텐츠 생성: {data['title_line1']} {data['title_line2']}")
-    return data
-
-# ══════════════════════════════════════════════
-# STEP 2: 카드 렌더 (파스텔 + 토끼 + 반짝이)
-# ══════════════════════════════════════════════
-def _font(bold, size):
-    cands = (["/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
-              "/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"] if bold else
-             ["/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-              "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc"])
-    for p in cands:
-        if Path(p).exists():
-            try: return ImageFont.truetype(p, size)
-            except: pass
-    return ImageFont.load_default()
-
-EMOJI_RE=re.compile("["
-    "\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D"
-    "]+")
-def clean(t):
-    """카드에 렌더되는 텍스트에서 이모지 제거 — Noto CJK엔 이모지 글리프가 없어 □로 깨짐.
-    (캡션은 인스타에서 정상 표시되므로 그대로 둠)"""
-    return EMOJI_RE.sub("",str(t)).strip()
-
-def draw_heart(d, cx, cy, s, color):
-    """이모지 대신 벡터 하트."""
-    r=s*0.30
-    d.ellipse([cx-2*r, cy-r, cx, cy+r], fill=color)
-    d.ellipse([cx, cy-r, cx+2*r, cy+r], fill=color)
-    d.polygon([(cx-2*r,cy+r*0.35),(cx+2*r,cy+r*0.35),(cx,cy+2.1*r)], fill=color)
-
-def _tw(d, txt, f):
-    b=d.textbbox((0,0),txt,font=f); return b[2]-b[0], b[3]-b[1]
-
-def draw_bunny(d, cx, cy, s=1.0, tone=GRAYPK):
-    """크로셰 토끼 느낌의 미니멀 토끼(머리+귀) — 리버니 시그니처."""
-    r=int(64*s)
-    # 귀 (바깥)
-    d.ellipse([cx-r*0.72-r*0.30, cy-r*2.05, cx-r*0.72+r*0.30, cy-r*0.45], fill=tone)
-    d.ellipse([cx+r*0.72-r*0.30, cy-r*2.05, cx+r*0.72+r*0.30, cy-r*0.45], fill=tone)
-    # 귀 안쪽
-    d.ellipse([cx-r*0.72-r*0.15, cy-r*1.82, cx-r*0.72+r*0.15, cy-r*0.62], fill=INNER)
-    d.ellipse([cx+r*0.72-r*0.15, cy-r*1.82, cx+r*0.72+r*0.15, cy-r*0.62], fill=INNER)
-    # 얼굴
-    d.ellipse([cx-r, cy-r*0.9, cx+r, cy+r*0.9], fill=tone)
-    # 눈·코
-    er=max(4,int(6*s))
-    d.ellipse([cx-r*0.38-er, cy-er, cx-r*0.38+er, cy+er], fill=(60,52,46))
-    d.ellipse([cx+r*0.38-er, cy-er, cx+r*0.38+er, cy+er], fill=(60,52,46))
-    d.ellipse([cx-5*s, cy+r*0.28-4*s, cx+5*s, cy+r*0.28+4*s], fill=INNER)
-
-def draw_sparkle(d, x, y, s, color=GOLD):
-    """네 갈래 반짝이 ✦"""
-    d.polygon([(x,y-s),(x+s*0.28,y-s*0.28),(x+s,y),(x+s*0.28,y+s*0.28),
-               (x,y+s),(x-s*0.28,y+s*0.28),(x-s,y),(x-s*0.28,y-s*0.28)],fill=color)
-
-def deco_common(d, seed):
-    random.seed(seed)
-    for _ in range(7):
-        x=random.randint(60,W-60); y=random.randint(50,H-50)
-        draw_sparkle(d,x,y,random.randint(7,14),
-                     random.choice([GOLD,(224,205,190),(230,218,206)]))
-
-def rounded(d, box, radius, fill, outline=None, width=3):
-    d.rounded_rectangle(box, radius=radius, fill=fill, outline=outline, width=width)
-
-def wrap_kr(d, text, f, max_w):
+def wrap_kr(d,text,f,max_w):
     lines=[]
     for raw in str(text).split("\n"):
         cur=""
         for ch in raw:
-            if _tw(d,cur+ch,f)[0]>max_w and cur and ch not in ".,!?~…)”\u0027":
+            if tw(d,cur+ch,f)[0]>max_w and cur and ch not in ".,!?~…)”'":
                 lines.append(cur); cur=ch
             else: cur+=ch
         lines.append(cur)
-    return lines
+    # 2자 이하 고아 줄("요." 등)은 앞 줄에 흡수
+    merged=[]
+    for l in lines:
+        if merged and 0<len(l.strip())<=2:
+            merged[-1]+=l
+        else:
+            merged.append(l)
+    return merged
 
+def tracked(d,x,y,text,f,fill,track=14,center_w=None):
+    """자간 넓은 영문 (DRAW NAIL 로고 감성). center_w 주면 그 폭 기준 중앙정렬."""
+    total=sum(tw(d,ch,f)[0]+track for ch in text)-track
+    cx = x if center_w is None else x+(center_w-total)/2
+    for ch in text:
+        d.text((cx,y),ch,font=f,fill=fill)
+        cx+=tw(d,ch,f)[0]+track
+    return total
+
+# ══════════════════════════════════════════════
+# 라인 아트 요소 (레퍼런스 손그림 감성)
+# ══════════════════════════════════════════════
+def dashed_line(d,x1,y1,x2,y2,dash=14,gap=10,fill=LINE,width=2):
+    L=math.hypot(x2-x1,y2-y1)
+    if L==0: return
+    ux,uy=(x2-x1)/L,(y2-y1)/L; t=0
+    while t<L:
+        e=min(t+dash,L)
+        d.line([x1+ux*t,y1+uy*t,x1+ux*e,y1+uy*e],fill=fill,width=width)
+        t=e+gap
+
+def dashed_round_box(d,box,r=56,fill=LINE,width=2,dash=14,gap=10):
+    """점선 라운드 사각형 (레퍼런스 이미지2의 그 박스)."""
+    x1,y1,x2,y2=box
+    dashed_line(d,x1+r,y1,x2-r,y1,dash,gap,fill,width)
+    dashed_line(d,x1+r,y2,x2-r,y2,dash,gap,fill,width)
+    dashed_line(d,x1,y1+r,x1,y2-r,dash,gap,fill,width)
+    dashed_line(d,x2,y1+r,x2,y2-r,dash,gap,fill,width)
+    for (cx,cy,a0,a1) in [(x1+r,y1+r,180,270),(x2-r,y1+r,270,360),(x2-r,y2-r,0,90),(x1+r,y2-r,90,180)]:
+        steps=7
+        for i in range(steps):
+            if i%2==0:
+                d.arc([cx-r,cy-r,cx+r,cy+r],a0+(a1-a0)*i/steps,a0+(a1-a0)*(i+0.7)/steps,fill=fill,width=width)
+
+def divider_dot(d,cx,y,half=120,fill=LINE):
+    d.line([cx-half,y,cx-14,y],fill=fill,width=2)
+    d.ellipse([cx-5,y-5,cx+5,y+5],fill=fill)
+    d.line([cx+14,y,cx+half,y],fill=fill,width=2)
+
+def heart_line(d,cx,cy,s,fill=LINE,width=3):
+    """손그림 하트(라인)."""
+    pts=[]
+    for i in range(0,201):
+        t=math.pi*i/100
+        x=16*math.sin(t)**3
+        y=13*math.cos(t)-5*math.cos(2*t)-2*math.cos(3*t)-math.cos(4*t)
+        pts.append((cx+x*s/16,cy-y*s/16))
+    d.line(pts,fill=fill,width=width,joint="curve")
+
+def ribbon_bow(d,cx,cy,s=1.0,fill=LINE,width=3):
+    """리본 매듭(라인) — 레퍼런스 이미지2 상단 그 리본."""
+    r=int(34*s)
+    d.ellipse([cx-2*r,cy-r,cx-2,cy+r],outline=fill,width=width)
+    d.ellipse([cx+2,cy-r,cx+2*r,cy+r],outline=fill,width=width)
+    d.line([cx-2,cy,cx-r*1.1,cy+r*1.7],fill=fill,width=width)
+    d.line([cx+2,cy,cx+r*1.1,cy+r*1.7],fill=fill,width=width)
+    d.ellipse([cx-7,cy-7,cx+7,cy+7],fill=CREAM,outline=fill,width=width)
+
+def babys_breath(d,x0,y0,s=1.0,fill=(196,182,160)):
+    """안개꽃 가지 라인아트 (레퍼런스 이미지1 좌하단)."""
+    random.seed(7)
+    for stem in range(3):
+        pts=[(x0+stem*26*s, y0)]
+        for i in range(1,9):
+            pts.append((x0+stem*26*s+math.sin(i*0.9+stem)*22*s, y0-i*38*s))
+        d.line(pts,fill=fill,width=2,joint="curve")
+        for (px,py) in pts[2:]:
+            for _ in range(2):
+                fx=px+random.randint(-16,16); fy=py+random.randint(-12,12)
+                d.ellipse([fx-4,fy-4,fx+4,fy+4],outline=fill,width=2)
+
+def sparkle(d,x,y,s,fill=GOLD):
+    d.line([x-s,y,x+s,y],fill=fill,width=2); d.line([x,y-s,x,y+s],fill=fill,width=2)
+    d.line([x-s*0.5,y-s*0.5,x+s*0.5,y+s*0.5],fill=fill,width=1)
+    d.line([x-s*0.5,y+s*0.5,x+s*0.5,y-s*0.5],fill=fill,width=1)
+
+def bunny(d,cx,cy,s=1.0):
+    """리버니 마스코트 — 둥근 크로셰 토끼."""
+    r=int(60*s)
+    for sx in (-1,1):
+        d.ellipse([cx+sx*r*0.62-r*0.26,cy-r*2.0,cx+sx*r*0.62+r*0.26,cy-r*0.5],fill=BUNNY)
+        d.ellipse([cx+sx*r*0.62-r*0.13,cy-r*1.78,cx+sx*r*0.62+r*0.13,cy-r*0.68],fill=EAR)
+    d.ellipse([cx-r,cy-r*0.88,cx+r,cy+r*0.88],fill=BUNNY)
+    er=max(4,int(5.5*s))
+    for sx in (-1,1):
+        d.ellipse([cx+sx*r*0.36-er,cy-er,cx+sx*r*0.36+er,cy+er],fill=(66,58,52))
+    d.ellipse([cx-4.5*s,cy+r*0.26-3.5*s,cx+4.5*s,cy+r*0.26+3.5*s],fill=(226,178,175))
+
+def speech_bubble(d,cx,y,text,f,pad=26):
+    """리버니 말풍선 — '오늘도 리버니가 알려줄게요' 컨셉."""
+    t=clean(text); w,h=tw(d,t,f)
+    x1,y1,x2,y2=cx-w/2-pad,y,cx+w/2+pad,y+h+pad*1.4
+    d.rounded_rectangle([x1,y1,x2,y2],radius=int((y2-y1)/2),fill=WHITE,outline=LINE,width=2)
+    d.polygon([(cx-10,y1+2),(cx+10,y1+2),(cx,y1-14)],fill=WHITE)
+    d.line([(cx-10,y1),(cx,y1-14)],fill=LINE,width=2); d.line([(cx+10,y1),(cx,y1-14)],fill=LINE,width=2)
+    d.text((cx-w/2,y+pad*0.62),t,font=f,fill=BROWN)
+    return y2
+
+# ══════════════════════════════════════════════
+# 사진: 밝고 화사한 후보 선택 + 파스텔 보정 + 라운드 패널
+# ══════════════════════════════════════════════
+def _brightness(p):
+    try:
+        import numpy as np
+        a=__import__("numpy").array(Image.open(p).convert("L").resize((64,64)),dtype=float)
+        return float(a.mean())
+    except Exception: return 150.0
+
+def fetch_photo(query, save):
+    q=clean(query) or "pastel pink manicure nails"
+    if not any(k in q.lower() for k in ("nail","manicure","hand")): q+=" nails"
+    cand=[]
+    if UNSPLASH_KEY:
+        try:
+            r=requests.get("https://api.unsplash.com/search/photos",
+                headers={"Authorization":f"Client-ID {UNSPLASH_KEY}"},
+                params={"query":q,"per_page":4,"content_filter":"high"},timeout=10)
+            cand+=[x["urls"]["regular"] for x in r.json().get("results",[])[:4]]
+        except: pass
+    if PEXELS_KEY:
+        try:
+            r=requests.get("https://api.pexels.com/v1/search",headers={"Authorization":PEXELS_KEY},
+                params={"query":q,"per_page":4},timeout=10)
+            cand+=[x["src"]["large"] for x in r.json().get("photos",[])[:4]]
+        except: pass
+    best=None; best_score=-1
+    for j,u in enumerate(cand[:6]):
+        try:
+            tmp=str(save)+f".c{j}"
+            Path(tmp).write_bytes(requests.get(u,timeout=20).content)
+            b=_brightness(tmp)
+            score=-abs(b-185)   # 밝고 화사한 것(185 부근) 선호 — bodetail과 정반대
+            if score>best_score: best_score=score; best=tmp
+        except: continue
+    if best is None: return False
+    shutil.move(best,str(save))
+    for j in range(6):
+        t=str(save)+f".c{j}"
+        if Path(t).exists(): Path(t).unlink()
+    # 파스텔 보정: 살짝 밝게 + 채도 낮춰 크림톤
+    try:
+        im=Image.open(save).convert("RGB")
+        im=ImageEnhance.Brightness(im).enhance(1.05)
+        im=ImageEnhance.Color(im).enhance(0.88)
+        overlay=Image.new("RGB",im.size,(255,244,238))
+        im=Image.blend(im,overlay,0.07)
+        im.save(save,quality=92)
+    except Exception as e: print(f"  ⚠️ 보정 생략: {e}")
+    return True
+
+def paste_photo_panel(img, d, photo_path, box, r=36):
+    x1,y1,x2,y2=box; bw,bh=int(x2-x1),int(y2-y1)
+    ph=ImageOps.fit(Image.open(photo_path).convert("RGB"),(bw,bh))
+    mask=Image.new("L",(bw,bh),0)
+    ImageDraw.Draw(mask).rounded_rectangle([0,0,bw,bh],radius=r,fill=255)
+    img.paste(ph,(int(x1),int(y1)),mask)
+    d.rounded_rectangle(box,radius=r,outline=LINE,width=2)
+
+# ══════════════════════════════════════════════
+# 30일 주제: 자동 순환 + 소진 시 Claude가 다음 배치 생성
+# ══════════════════════════════════════════════
+FALLBACK_TOPICS=[
+ "모르면 손해보는 손톱 영양제 티어리스트 — S부터 B까지 솔직 정리|tier",
+ "이번 달 띠별 행운 네일 컬러 — 좋은 기운을 부르는 조합|info",
+ "아는 사람만 아는 젤네일 2주 더 오래가는 습관|info",
+ "네일 아티스트가 진짜 쓰는 큐티클 오일 소개 — 참고가 포함|product",
+ "손톱 세로줄·갈라짐 원인과 집에서 하는 해결 루틴|info",
+ "퍼스널컬러 여름쿨이 하면 손이 하얘 보이는 컬러 5|info",
+ "물어뜯은 손톱 교정 전후 — 어떻게 달라질까|info",
+ "여름 물놀이에도 안 지워지는 컬러·디자인 추천|info",
+ "핸드크림 티어리스트 — 흡수력·향·가성비로 나눈 솔직 등급|tier",
+ "직장인 오피스 네일 — 단정한데 밋밋하지 않게|info",
+ "젤네일 휴식기 팩트체크 — 꼭 필요할까|info",
+ "이번 주 별자리별 행운 네일 컬러|info",
+ "손이 예뻐 보이는 네일 모양 고르는 법|info",
+ "짧은 손톱에 더 예쁜 숏네일 디자인 모음|info",
+ "네일샵 처음 가는 사람을 위한 예약→시술 안내|info",
+ "손 나이 -5살 만드는 핸드크림 바르는 순서|info",
+ "웨딩·상견례를 위한 온화한 네일 추천|info",
+ "젤 제거 후 얇아진 손톱 회복시키는 법|info",
+ "가을 뉴트럴 컬러 미리보기 — 올해 유행 예측|info",
+ "네일 오래가는 사람들의 공통 습관 5|info",
+ "손톱에 좋은 음식 티어리스트 — 영양소 기준 등급|tier",
+ "퍼스널컬러 봄웜 필수 네일 컬러 5|info",
+ "탑코트 하나로 달라지는 광 — 추천 제품과 참고가|product",
+ "이달의 탄생석 컬러 네일과 그 의미|info",
+ "패디 시즌 — 발 관리 순서와 꿀팁|info",
+ "민감한 손톱을 위한 저자극 케어 가이드|info",
+ "피부톤별 피해야 할 네일 컬러|info",
+ "미니멀 원컬러를 고급스럽게 하는 법|info",
+ "손톱 물어뜯는 습관 끊는 현실적인 방법|info",
+ "젤네일 첫 24시간이 중요한 이유 — 시술 후 관리|info",
+]
+
+def load_or_make_topics():
+    today=datetime.date.today()
+    idx=(today-ANCHOR).days
+    batch=idx//30; within=idx%30
+    data=None
+    if TOPICS_FILE.exists():
+        try: data=json.loads(TOPICS_FILE.read_text(encoding="utf-8"))
+        except: data=None
+    if data is None or int(data.get("batch",-1))!=batch:
+        prev=(data or {}).get("topics",[])
+        topics=run_ok(generate_topic_batch,batch,prev) or FALLBACK_TOPICS
+        data={"batch":batch,"generated":str(today),"topics":topics}
+        TOPICS_FILE.write_text(json.dumps(data,ensure_ascii=False,indent=1),encoding="utf-8")
+        print(f"  🗓️ 새 30일 주제 배치 #{batch} 생성·저장")
+    t=data["topics"][within%len(data["topics"])]
+    if "|" in t: topic,ttype=t.rsplit("|",1)
+    else: topic,ttype=t,"info"
+    return topic.strip(), ttype.strip()
+
+def generate_topic_batch(batch, prev):
+    prompt=f"""서울 송파/문정 1인 네일샵 '리버니 네일룸' 인스타 카드뉴스의 다음 30일 주제를 만들어.
+직전 배치와 겹치지 않게: {json.dumps(prev[:30],ensure_ascii=False)}
+
+규칙:
+- 잠재고객(네일에 관심 있는 20~40대 여성)이 저장/팔로우하게 만드는 주제만.
+- 제목은 후킹형으로 — '모르면 손해보는', '아는 사람만 아는', '~하면 큰일나는' 같은 클릭 유도 어법을 30개 중 8개 이상에 섞어.
+- 구성 비율: 티어리스트/순위(한국인 취향 저격) 4개 이상, 제품 소개(참고가 포함) 3개 이상,
+  띠별/별자리/탄생석 운세 네일 3개 이상, 관리/케어 팁, 디자인 추천, 네일 상식 골고루.
+- 각 줄 형식: "주제문|타입"  (타입은 info / tier / product 중 하나)
+순수 JSON 배열만 출력: ["주제|info", "주제|tier", ...] 정확히 30개."""
+    r=requests.post("https://api.anthropic.com/v1/messages",
+        headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
+        json={"model":"claude-sonnet-4-5","max_tokens":2200,"messages":[{"role":"user","content":prompt}]},timeout=120)
+    txt=r.json()["content"][0]["text"]
+    arr=json.loads(txt[txt.find("["):txt.rfind("]")+1])
+    return arr[:30] if len(arr)>=25 else None
+
+# ══════════════════════════════════════════════
+# 콘텐츠 생성
+# ══════════════════════════════════════════════
+def generate_content(topic, ttype):
+    today=datetime.date.today()
+    type_rule={
+     "info":"""slides 3개, 각각 {"type":"info","heading":"소제목(12자 내)","body":"핵심만 2~3문장(짧게, 줄바꿈 \\n)","tip":"리버니 한 줄 팁(22자 내)","img_query":"이 슬라이드에 어울리는 밝고 화사한 사진 영어 검색어 (예: 'soft pink gel nails manicure')"}""",
+     "tier":"""slides는 [1] {"type":"tier","heading":"티어 정리","tiers":[{"grade":"S","items":"항목들(쉼표구분 2~3개)","note":"왜 S인지 한 줄"},{"grade":"A",...},{"grade":"B",...}],"img_query":"..."} 와
+[2],[3] {"type":"info",...} (S티어 상세/고르는 기준 등)로 구성. 등급은 솔직하고 근거 있게.""",
+     "product":"""slides는 [1] {"type":"product","heading":"제품명","product":{"name":"제품명","price":"참고가 (예: 1만원대 중반)","pros":"장점 한 줄","cons":"아쉬운 점 한 줄(솔직하게)"},"body":"어떤 사람에게 맞는지 2문장","img_query":"제품/사용 장면 영어 검색어"} 와
+[2],[3] {"type":"info",...} (사용법/궁합 팁)으로 구성. 가격은 '참고가'로 대략 범위만 — 단정 금지."""}
+    prompt=f"""너는 송파/문정 프라이빗 1인 네일샵 '리버니 네일룸'(@libunny.nailroom)의 콘텐츠 에디터.
+마스코트 토끼 '리버니'가 팔로워에게 오늘의 네일 정보를 다정하게 알려주는 카드뉴스야.
+오늘({today.month}월 {today.day}일) 주제: "{topic}"
+
+[톤] 다정+화사, 호들갑 금지, 이모지 금지(디자인에서 처리함). 문장은 짧게 — 가독성 최우선.
+[원칙] 카드마다 '저장할 가치'가 있는 구체 정보 1개 이상. 뻔한 말 금지, 아티스트만 아는 디테일.
+[표지 훅] title은 후킹형 — 주제가 이미 후킹형이면 살리고, 아니면 '모르면 손해보는/아는 사람만 아는/
+저장 필수' 류의 어법으로 강화. 단, 과장 광고 금지(팩트 기반).
+
+{type_rule.get(ttype,type_rule["info"])}
+
+순수 JSON만:
+{{"cover":{{"kicker":"티저 한 줄(예: 모르면 손해보는) 8자 내","title1":"제목 윗줄(7자 내)","title2":"제목 아랫줄(9자 내)","sub":"부제(16자 내, 뭘 얻어가는지)","bubble":"리버니 말풍선(14자 내, 예: 오늘은 이거 알려줄게요)"}},
+"slides":[...위 규칙대로 3개...],
+"last":{{"next_tease":"다음 콘텐츠 예고(18자 내)"}},
+"caption":"인스타 캡션 — 첫 줄 훅 / 요약 2줄 / '저장해두고 네일 고를 때 꺼내보세요' 류 CTA / 해시태그 15개(#송파네일 #문정동네일 #문정네일 #리버니네일룸 필수 포함)"}}"""
+    r=requests.post("https://api.anthropic.com/v1/messages",
+        headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
+        json={"model":"claude-sonnet-4-5","max_tokens":2800,"messages":[{"role":"user","content":prompt}]},timeout=120)
+    if r.status_code!=200: raise RuntimeError(f"Claude API {r.status_code}: {r.text[:200]}")
+    txt=r.json()["content"][0]["text"]
+    data=json.loads(txt[txt.find("{"):txt.rfind("}")+1])
+    print(f"  ✅ 콘텐츠: {data['cover']['title1']} {data['cover']['title2']}")
+    return data
+
+# ══════════════════════════════════════════════
+# 렌더 — 표지
+# ══════════════════════════════════════════════
 def render_cover(data, path, date):
     img=Image.new("RGB",(W,H),CREAM); d=ImageDraw.Draw(img)
-    deco_common(d, 11)
-    # 상단 라벨
-    f_eyebrow=_font(False,34)
-    lbl="LIBUNNY NAIL · 리버니 네일룸"
-    tw,_= _tw(d,lbl,f_eyebrow)
-    rounded(d,[W/2-tw/2-34,110,W/2+tw/2+34,178],34,PINK)
-    d.text((W/2-tw/2,126),lbl,font=f_eyebrow,fill=ROSE)
-    # 날짜
-    f_date=_font(False,30)
-    ds=f"{date.year}년 {date.month}월 {date.day}일"
-    dw,_=_tw(d,ds,f_date); d.text((W/2-dw/2,214),ds,font=f_date,fill=GOLD)
-    # 제목
-    f_t=_font(True,118)
-    for i,line in enumerate([data["title_line1"],data["title_line2"]]):
-        if not line: continue
-        tw,_=_tw(d,line,f_t)
-        d.text((W/2-tw/2,330+i*150),clean(line),font=f_t,fill=BROWN)
-    # 부제 박스
-    f_s=_font(False,42)
-    sub=clean(data.get("hook_sub",""))
-    sw,_=_tw(d,sub,f_s)
-    rounded(d,[W/2-sw/2-44,680,W/2+sw/2+44,764],42,SAGE)
-    d.text((W/2-sw/2,698),sub,font=f_s,fill=BROWN)
-    # 토끼
-    draw_bunny(d, W/2, 1010, s=1.5)
-    # 하단 안내
-    f_b=_font(False,34)
-    tip="저장해두고 천천히 보세요"
-    bw,_=_tw(d,tip,f_b); d.text((W/2-bw/2,H-140),tip,font=f_b,fill=ROSE)
-    draw_heart(d, W/2+bw/2+34, H-122, 24, ROSE)
-    img.save(path,quality=95)
-
-def render_slide(sl, idx, path):
-    bg=BG_CYCLE[idx%len(BG_CYCLE)]
-    img=Image.new("RGB",(W,H),bg); d=ImageDraw.Draw(img)
-    deco_common(d, 20+idx)
-    # 번호 뱃지
-    f_num=_font(True,54)
-    rounded(d,[80,96,244,196],50,(255,255,255))
-    nw,_=_tw(d,sl["num"],f_num); d.text((162-nw/2,116),sl["num"],font=f_num,fill=ROSE)
-    # 미니 토끼 우상단
-    draw_bunny(d, W-150, 190, s=0.62)
-    # 소제목
-    f_h=_font(True,72)
-    for i,ln in enumerate(wrap_kr(d,clean(sl["heading"]),f_h,W-200)[:2]):
-        d.text((90,270+i*92),ln,font=f_h,fill=BROWN)
-    # 구분선(점선 느낌)
-    for x in range(90,W-90,26):
-        d.ellipse([x,470,x+7,477],fill=GOLD)
-    # 본문 (흰 카드 위)
-    f_b=_font(False,44)
-    body_lines=wrap_kr(d,clean(sl["body"]),f_b,W-260)[:9]
-    card_h=len(body_lines)*66+90
-    rounded(d,[80,520,W-80,520+card_h],36,(255,255,255))
-    for i,ln in enumerate(body_lines):
-        d.text((130,566+i*66),ln,font=f_b,fill=BROWN)
-    # 팁 박스
-    tip=clean(sl.get("tip",""))
-    if tip:
-        f_tip=_font(True,40)
-        y0=520+card_h+46
-        tip_lines=wrap_kr(d,"tip.  "+clean(tip),f_tip,W-300)[:2]
-        th=len(tip_lines)*58+56
-        rounded(d,[80,y0,W-80,y0+th],32,PINK if bg!=PINK else SAGE)
-        for i,ln in enumerate(tip_lines):
-            d.text((130,y0+28+i*58),ln,font=f_tip,fill=ROSE)
-    # 하단 핸들
-    f_f=_font(False,30)
-    hd="@libunny.nailroom"
-    hw,_=_tw(d,hd,f_f); d.text((W/2-hw/2,H-96),hd,font=f_f,fill=GOLD)
-    img.save(path,quality=95)
-
-def render_last(data, path):
-    img=Image.new("RGB",(W,H),PINK); d=ImageDraw.Draw(img)
-    deco_common(d, 99)
-    draw_bunny(d, W/2, 400, s=2.0)
-    f_t=_font(True,84)
-    t="리버니 네일룸"
-    tw,_=_tw(d,t,f_t); d.text((W/2-tw/2,560),t,font=f_t,fill=BROWN)
-    f_s=_font(False,42)
-    lines=["송파 · 문정동 프라이빗 1인샵",
-           "첫 방문 EVENT 진행 중",
-           "예약·문의는 프로필 링크로"]
+    c=data["cover"]
+    # 아치 프레임 (레퍼런스 이미지1)
+    m=64
+    d.arc([m,m,W-m,m+640],180,360,fill=LINE,width=3)
+    d.line([m,m+320,m,H-m],fill=LINE,width=3)
+    d.line([W-m,m+320,W-m,H-m],fill=LINE,width=3)
+    d.line([m,H-m,W-m,H-m],fill=LINE,width=3)
+    # 로고 (자간 세리프)
+    tracked(d,0,150,"LIBUNNY NAIL",F("en",46),BROWN,track=16,center_w=W)
+    divider_dot(d,W/2,236,60)
+    # 킥커(후킹 티저)
+    f_k=F("pen",58)
+    kick=clean(c.get("kicker",""))
+    if kick:
+        kw,_=tw(d,kick,f_k); d.text((W/2-kw/2,300),kick,font=f_k,fill=ROSE)
+    # 제목 (세리프 볼드, 뒤에 스와시 하이라이트)
+    f_t=F("kb",112)
+    lines=[clean(c.get("title1","")),clean(c.get("title2",""))]
+    y=396
     for i,ln in enumerate(lines):
-        lw,_=_tw(d,ln,f_s); d.text((W/2-lw/2,700+i*76),ln,font=f_s,fill=BROWN)
-    # CTA 노트
-    note=clean(data.get("cta_note",""))
-    if note:
-        f_n=_font(True,44)
-        nw,_=_tw(d,note,f_n)
-        rounded(d,[W/2-nw/2-46,1010,W/2+nw/2+46,1104],44,(255,255,255))
-        d.text((W/2-nw/2,1032),note,font=f_n,fill=ROSE)
-    f_h=_font(True,48)
-    hd="@libunny.nailroom  팔로우"
-    hw,_=_tw(d,hd,f_h); d.text((W/2-hw/2,1170),hd,font=f_h,fill=ROSE)
-    draw_heart(d, W/2+hw/2+42, 1200, 30, ROSE)
+        if not ln: continue
+        lw,lh=tw(d,ln,f_t)
+        if i==len([x for x in lines if x])-1:
+            d.rounded_rectangle([W/2-lw/2-14,y+66,W/2+lw/2+14,y+118],radius=24,fill=(233,222,206))
+        d.text((W/2-lw/2,y),ln,font=f_t,fill=BROWN)
+        y+=150
+    heart_line(d,W/2+tw(d,lines[0] or " ",f_t)[0]/2+70,410,42,fill=LINE,width=3)
+    # 부제
+    divider_dot(d,W/2,y+40,150)
+    f_s=F("kr",44)
+    sub=clean(c.get("sub",""))
+    sw,_=tw(d,sub,f_s); d.text((W/2-sw/2,y+76),sub,font=f_s,fill=SOFT)
+    # 리버니 + 말풍선
+    bunny(d,W/2,y+330,s=1.15)
+    speech_bubble(d,W/2,y+430,c.get("bubble","오늘도 리버니가 알려줄게요"),F("pen",46))
+    # 안개꽃 + 반짝이
+    babys_breath(d,120,H-110,1.0)
+    sparkle(d,W-170,300,12); sparkle(d,150,470,9); sparkle(d,W-140,H-220,10)
+    # 하단
+    f_f=F("kr",30)
+    ft=f"{date.month}월 {date.day}일 · 저장해두고 천천히 보세요"
+    fw,_=tw(d,ft,f_f); d.text((W/2-fw/2,H-130),ft,font=f_f,fill=SOFT)
     img.save(path,quality=95)
 
 # ══════════════════════════════════════════════
-# STEP 3: 이메일 발송
+# 렌더 — 본문 (info / tier / product)
+# ══════════════════════════════════════════════
+def slide_frame(img,d,idx):
+    """공통: 점선 박스 + 리본 + 로고 + 페이지 표기 + 토끼."""
+    ribbon_bow(d,W/2,120,0.9)
+    tracked(d,0,178,"LIBUNNY NAIL",F("en",30),SOFT,track=10,center_w=W)
+    dashed_round_box(d,[70,240,W-70,H-150],r=60)
+    f_no=F("en",34)
+    d.text((96,H-128),f"no.{idx+1}",font=f_no,fill=SOFT)
+    hd="@libunny.nailroom"; f_h=F("en",28)
+    hw,_=tw(d,hd,f_h); d.text((W-96-hw,H-126),hd,font=f_h,fill=SOFT)
+    bunny(d,W-150,262,s=0.5)
+
+def head_block(d,heading,y=316):
+    f_h=F("kb",64)
+    ln=clean(heading); hw,_=tw(d,ln,f_h)
+    d.text((W/2-hw/2,y),ln,font=f_h,fill=BROWN)
+    divider_dot(d,W/2,y+104,170)
+    return y+150
+
+def tip_block(d,tip,y):
+    t=clean(tip)
+    if not t: return y
+    f_p=F("pen",52)
+    txt="리버니 팁 · "+t
+    pw,_=tw(d,txt,f_p)
+    d.text((W/2-pw/2,y),txt,font=f_p,fill=ROSE)
+    return y+80
+
+def render_info(sl, idx, path, photo):
+    bg=[CREAM,PINKBG,SAGEBG][idx%3]
+    img=Image.new("RGB",(W,H),bg); d=ImageDraw.Draw(img)
+    slide_frame(img,d,idx)
+    y=head_block(d,sl.get("heading",""))
+    if photo:
+        paste_photo_panel(img,d,photo,[210,y,W-210,y+370]); y+=406
+        max_body=4
+    else:
+        y+=20; max_body=7
+    f_b=F("kr",42)
+    for ln in wrap_kr(d,clean(sl.get("body","")),f_b,W-330)[:max_body]:
+        lw,_=tw(d,ln,f_b); d.text((W/2-lw/2,y),ln,font=f_b,fill=BROWN); y+=62
+    # 팁은 박스 안 고정 슬롯 (넘침 방지)
+    tip_y=H-262
+    dashed_line(d,W/2-140,tip_y-30,W/2+140,tip_y-30)
+    tip_block(d,sl.get("tip",""),tip_y)
+    sparkle(d,150,320,9); sparkle(d,W-160,H-260,10)
+    img.save(path,quality=95)
+
+def render_tier(sl, idx, path, photo):
+    img=Image.new("RGB",(W,H),CREAM); d=ImageDraw.Draw(img)
+    slide_frame(img,d,idx)
+    y=head_block(d,sl.get("heading","티어 정리"))
+    grade_col={"S":ROSE,"A":GOLD,"B":SOFT}
+    f_g=F("en",56); f_i=F("kb",42); f_n=F("kr",34)
+    for t in (sl.get("tiers") or [])[:3]:
+        g=str(t.get("grade","?")).upper()[:1]
+        col=grade_col.get(g,SOFT)
+        d.ellipse([130,y,214,y+84],outline=col,width=4)
+        gw,_=tw(d,g,f_g); d.text((172-gw/2,y+10),g,font=f_g,fill=col)
+        items=clean(t.get("items",""))
+        for i,ln in enumerate(wrap_kr(d,items,f_i,W-420)[:2]):
+            d.text((250,y+2+i*54),ln,font=f_i,fill=BROWN)
+        note=clean(t.get("note",""))
+        ny=y+ (58 if len(items)<=18 else 110)
+        for ln in wrap_kr(d,note,f_n,W-420)[:2]:
+            d.text((250,ny),ln,font=f_n,fill=SOFT); ny+=44
+        y=max(ny,y+96)+40
+        dashed_line(d,130,y-22,W-130,y-22,dash=8,gap=10)
+    tip_block(d,sl.get("tip","등급은 리버니 사용 기준이에요"),min(y+6,H-230))
+    img.save(path,quality=95)
+
+def render_product(sl, idx, path, photo):
+    img=Image.new("RGB",(W,H),PINKBG); d=ImageDraw.Draw(img)
+    slide_frame(img,d,idx)
+    y=head_block(d,sl.get("heading",""))
+    pr=sl.get("product",{}) or {}
+    if photo:
+        paste_photo_panel(img,d,photo,[250,y,W-250,y+380]); y+=414
+    f_pr=F("kb",46)
+    price=clean(pr.get("price",""))
+    if price:
+        pw,_=tw(d,"참고가  "+price,f_pr)
+        d.rounded_rectangle([W/2-pw/2-30,y,W/2+pw/2+30,y+78],radius=39,fill=WHITE,outline=LINE,width=2)
+        d.text((W/2-pw/2,y+12),"참고가  "+price,font=f_pr,fill=BROWN); y+=104
+    f_b=F("kr",40)
+    for ln in wrap_kr(d,clean(sl.get("body","")),f_b,W-320)[:4]:
+        lw,_=tw(d,ln,f_b); d.text((W/2-lw/2,y),ln,font=f_b,fill=BROWN); y+=58
+    y+=16
+    f_pc=F("kr",36)
+    for label,key,col in [("좋아요","pros",ROSE),("아쉬워요","cons",SOFT)]:
+        v=clean(pr.get(key,""))
+        if not v: continue
+        d.text((170,y),f"· {label} ",font=F("kb",36),fill=col)
+        lw,_=tw(d,f"· {label} ",F("kb",36))
+        for i,ln in enumerate(wrap_kr(d,v,f_pc,W-360-lw)[:2]):
+            d.text((170+lw,y+i*50),ln,font=f_pc,fill=BROWN)
+        y+=58
+    img.save(path,quality=95)
+
+# ══════════════════════════════════════════════
+# 렌더 — 마지막 장 (브랜드 카드 + 강한 CTA)
+# ══════════════════════════════════════════════
+def render_last(data, path):
+    img=Image.new("RGB",(W,H),PINKBG); d=ImageDraw.Draw(img)
+    m=64
+    d.rounded_rectangle([m,m,W-m,H-m],radius=54,outline=LINE,width=3)
+    bunny(d,W/2,430,s=1.9)
+    tracked(d,0,600,"LIBUNNY NAIL",F("en",52),BROWN,track=18,center_w=W)
+    f_kr=F("kb",64)
+    t="리버니 네일룸"; kw_,_=tw(d,t,f_kr); d.text((W/2-kw_/2,676),t,font=f_kr,fill=BROWN)
+    divider_dot(d,W/2,790,150)
+    # 강한 CTA
+    f_q=F("kr",46)
+    q="당신에게 가장 잘 어울리는 네일을"
+    qw,_=tw(d,q,f_q); d.text((W/2-qw/2,836),q,font=f_q,fill=BROWN)
+    q2="만나고 싶다면?"
+    q2w,_=tw(d,q2,f_q); d.text((W/2-q2w/2,900),q2,font=f_q,fill=BROWN)
+    f_big=F("kb",76)
+    big="리버니네일"
+    bw_,_=tw(d,big,f_big)
+    d.rounded_rectangle([W/2-bw_/2-46,980,W/2+bw_/2+46,1096],radius=58,fill=WHITE,outline=LINE,width=3)
+    d.text((W/2-bw_/2,996),big,font=f_big,fill=ROSE)
+    f_i=F("kr",34)
+    info="송파·문정 프라이빗 1인샵 · 예약은 프로필 링크"
+    iw,_=tw(d,info,f_i); d.text((W/2-iw/2,1130),info,font=f_i,fill=SOFT)
+    tease=clean((data.get("last") or {}).get("next_tease",""))
+    if tease:
+        f_t2=F("pen",48)
+        tt="다음 이야기 · "+tease
+        tw2,_=tw(d,tt,f_t2); d.text((W/2-tw2/2,1196),tt,font=f_t2,fill=ROSE)
+    heart_line(d,W/2,1284,30,fill=ROSE,width=3)
+    sparkle(d,190,240,11); sparkle(d,W-180,320,9); sparkle(d,W-220,1180,10)
+    img.save(path,quality=95)
+
+# ══════════════════════════════════════════════
+# 이메일
 # ══════════════════════════════════════════════
 def send_email(files, caption, topic):
     if SKIP_EMAIL:
         print("  ✉️ SKIP_EMAIL=true → 발송 생략"); return
     if not (GMAIL_ADDR and GMAIL_PW and MAIL_TO):
-        print("  ⚠️ GMAIL_ADDRESS / GMAIL_APP_PASSWORD / MAIL_TO 시크릿이 없어 이메일 생략"); return
+        print("  ⚠️ 이메일 시크릿 미설정 → 발송 생략"); return
     today=datetime.date.today()
     msg=MIMEMultipart()
     msg["Subject"]=f"🐰 리버니 오늘의 게시물 ({today.month}/{today.day}) — {topic[:24]}"
     msg["From"]=GMAIL_ADDR; msg["To"]=MAIL_TO
     body=("리버니 네일룸 오늘의 카드뉴스가 완성됐어요!\n\n"
-          "① 첨부된 이미지 5장을 저장하세요 (01→05 순서)\n"
-          "② 아래 캡션을 복사해서 인스타에 붙여넣으세요\n\n"
+          "① 첨부 이미지 5장을 순서대로 저장 (01→05)\n"
+          "② 아래 캡션 복사 → 인스타 붙여넣기\n\n"
           "──────── 캡션 (복사용) ────────\n\n"+caption+
-          "\n\n────────────────────────\n(자동 발송 · bodetail automation)")
+          "\n\n────────────────────────\n"
+          "수정하고 싶으면: repo의 posts_nail/latest/content.json을 에디터(tools/nail_post_editor.html)로 열어 고치고\n"
+          "Actions에서 rerender=true로 재실행하면 새 버전이 다시 도착해요.")
     msg.attach(MIMEText(body,"plain","utf-8"))
     for f in files:
         with open(f,"rb") as fp:
@@ -324,30 +582,60 @@ def send_email(files, caption, topic):
     with smtplib.SMTP_SSL("smtp.gmail.com",465,timeout=30) as s:
         s.login(GMAIL_ADDR,GMAIL_PW)
         s.sendmail(GMAIL_ADDR,[m.strip() for m in MAIL_TO.split(",")],msg.as_string())
-    print(f"  ✉️ 이메일 발송 완료 → {MAIL_TO}")
+    print(f"  ✉️ 발송 완료 → {MAIL_TO}")
 
 # ══════════════════════════════════════════════
 def main():
-    topic=today_topic()
-    print(f"🐰 리버니 데일리 게시물 | 주제: {topic}")
-    if not ANTHROPIC_KEY:
-        print("❌ ANTHROPIC_API_KEY 시크릿 없음"); sys.exit(1)
-    data=generate_content(topic)
-    if OUT.exists(): shutil.rmtree(OUT)
-    OUT.mkdir(parents=True,exist_ok=True)
     today=datetime.date.today()
+    if RERENDER:
+        cj=OUT/"content.json"
+        if not cj.exists():
+            print("❌ 재렌더 모드인데 posts_nail/latest/content.json이 없음"); sys.exit(1)
+        data=json.loads(cj.read_text(encoding="utf-8"))
+        topic=data.get("_topic","(재렌더)")
+        print(f"🔁 재렌더 모드 — content.json 기반")
+    else:
+        if not ANTHROPIC_KEY:
+            print("❌ ANTHROPIC_API_KEY(오타 시크릿 ANTROPIC_API_KEY로 주입) 없음"); sys.exit(1)
+        topic,ttype = (TOPIC_OVERRIDE,"info") if TOPIC_OVERRIDE else load_or_make_topics()
+        print(f"🐰 리버니 데일리 | 주제: {topic} ({ttype})")
+        data=generate_content(topic,ttype)
+        data["_topic"]=topic
+    # 기존 이미지 캐시 유지(재렌더 시 사진 재검색 안 함)
+    photo_cache={}
+    if RERENDER and (OUT/"assets").exists():
+        for p in (OUT/"assets").glob("photo_*.jpg"): photo_cache[p.stem]=p
+    tmp=Path("._nail_tmp"); 
+    if tmp.exists(): shutil.rmtree(tmp)
+    tmp.mkdir(); (tmp/"assets").mkdir()
     files=[]
-    p=OUT/"01_cover.png"; render_cover(data,p,today); files.append(p)
-    for i,sl in enumerate(data.get("slides",[])[:3]):
-        p=OUT/f"{i+2:02d}_slide.png"; render_slide(sl,i,p); files.append(p)
-    p=OUT/"05_last.png"; render_last(data,p); files.append(p)
+    p=tmp/"01_cover.png"; render_cover(data,p,today); files.append(p)
+    for i,sl in enumerate((data.get("slides") or [])[:3]):
+        photo=None
+        q=sl.get("img_query","")
+        key=f"photo_{i}"
+        if key in photo_cache:
+            photo=tmp/"assets"/f"{key}.jpg"; shutil.copy(photo_cache[key],photo)
+        elif q and sl.get("type","info")!="tier":
+            cand=tmp/"assets"/f"{key}.jpg"
+            if run_ok(fetch_photo,q,cand): photo=cand
+        p=tmp/f"{i+2:02d}_slide.png"
+        t=sl.get("type","info")
+        if t=="tier": render_tier(sl,i,p,photo)
+        elif t=="product": render_product(sl,i,p,photo)
+        else: render_info(sl,i,p,photo)
+        files.append(p)
+    p=tmp/"05_last.png"; render_last(data,p); files.append(p)
     caption=data.get("caption","")
-    (OUT/"caption.txt").write_text(caption,encoding="utf-8")
-    (OUT/"content.json").write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
+    (tmp/"caption.txt").write_text(caption,encoding="utf-8")
+    (tmp/"content.json").write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
+    if OUT.exists(): shutil.rmtree(OUT)
+    shutil.move(str(tmp),str(OUT))
+    files=[OUT/f.name for f in files]
     ARCH.mkdir(parents=True,exist_ok=True)
-    for f in files+[OUT/"caption.txt"]:
+    for f in list(files)+[OUT/"caption.txt"]:
         shutil.copy(f,ARCH/Path(f).name)
-    print(f"  ✅ 카드 {len(files)}장 + 캡션 → {OUT}")
+    print(f"  ✅ 카드 {len(files)}장 → {OUT}")
     send_email([str(f) for f in files],caption,topic)
     print("🎉 완료!")
 
