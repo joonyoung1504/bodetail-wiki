@@ -44,8 +44,6 @@ RW, RH, FPS = 1080, 1920, 30
 N_IMGS = 7
 
 # ── advanced_opts 파싱 ──
-# GitHub Actions workflow_dispatch 입력 한도(10개) 때문에 세부 옵션은
-# 한 칸에 "key=value; key=value" 형식으로 몰아서 받음. 개별 env가 있으면 그것도 인정.
 _ADV={}
 for _pair in os.environ.get("ADVANCED_OPTS","").split(";"):
     if "=" in _pair:
@@ -65,6 +63,7 @@ EFFECT_TYPE     = os.environ.get("EFFECT_TYPE","montage").strip().lower()  # mon
 OUTRO_SEC       = float(_opt("outro_sec","OUTRO_SEC","2.5"))
 NO_VOICE_ENV    = os.environ.get("NO_VOICE","").strip().lower() in ("1","true","yes")
 CLIP_START_ENV  = _opt("clip_start_sec","CLIP_START_SEC","")
+
 # ── 스타일 변수 (레퍼런스 릴스 재현용) ──
 AUDIO_MODE      = _opt("audio_mode","AUDIO_MODE","swell").lower()  # swell(명대사 후 점프) | mix(계속 섞임)
 SUB_Y           = float(_opt("sub_y","SUB_Y","50"))                # 자막 세로 위치(화면 높이 %)
@@ -77,6 +76,7 @@ CUTAWAY_STYLE   = _opt("cutaway_style","CUTAWAY_STYLE","image").lower()  # image
 INTRO_BLACK_SEC = float(_opt("intro_black_sec","INTRO_BLACK_SEC","0"))  # 첫 N초 잉크블랙+타이포 인트로(0=끔)
 SUB_MODE        = _opt("sub_mode","SUB_MODE","word").lower()       # word(한 단어씩) | phrase(구절 단위+키워드 강조)
 SUB_SCALE       = float(_opt("sub_scale","SUB_SCALE","1.0"))       # 자막 크기 배율(0.5=절반, 소형 자막 스타일)
+
 if EFFECT_TYPE not in ("montage","bw","outro"):
     EFFECT_TYPE="montage"
 if AUDIO_MODE not in ("swell","mix"):
@@ -218,10 +218,6 @@ def transcribe(video_path, force_lang=None):
 # STEP 2: 핵심구간 + 드롭시점 + 자막
 # ══════════════════════════════════════════════════
 def build_sents(words):
-    """대본을 문장 단위로 묶음. 문장부호/12단어뿐 아니라 '말 사이 공백(pause)'
-    으로도 끊어서, "I don't give a fuck" 같은 짧고 강렬한 한 줄이 앞뒤 말에
-    뭉개지지 않고 독립된 문장으로 Claude에게 보이도록 함(연설에서 임팩트 있는
-    말 뒤엔 대개 숨 고르는 pause가 옴 — 그 지점을 문장 경계로 활용)."""
     s=[]; buf=[]; st=None; prev_end=None
     for w in words:
         t=w["text"]; ws=w["start"]/1000
@@ -238,15 +234,13 @@ def build_sents(words):
     if buf and st: s.append({"start":round(st,2),"end":round(words[-1]["end"]/1000,2),"text":" ".join(buf)})
     return s
 
-MIN_WORDS_PER_20S = 4   # 20초당 이 단어수 미만이면 '내레이션 없음'으로 간주
+MIN_WORDS_PER_20S = 4
 
 def heuristic_direction(total_dur, clip_start_override=None):
-    """음성이 없거나(NO_VOICE) 감지된 단어가 거의 없을 때 쓰는 대체 로직.
-    Claude 호출 없이 구간만 정함 — 전체 영상 그대로 쓰고 드롭/자막 개념 없음."""
     if clip_start_override is not None:
         cs = max(0.0, min(clip_start_override, max(0.0, total_dur-1)))
     else:
-        cs = max(0.0, (total_dur-TARGET_DURATION)/2)  # 중앙 구간(인트로/아웃트로 배제)
+        cs = max(0.0, (total_dur-TARGET_DURATION)/2)
     ce = min(cs+TARGET_DURATION, total_dur)
     print(f"  🔇 무음/내레이션 없음 모드 → 구간 {cs:.1f}~{ce:.1f} 그대로 사용 (드롭·자막 없음)")
     return {
@@ -265,10 +259,6 @@ def generate_direction(transcript, total_dur):
         return heuristic_direction(total_dur)
     is_en=transcript.get("language_code","en")!="ko"
     sents=build_sents(words)
-    # 예전엔 문장이 600개 넘으면 등간격으로 솎아내서(stride sampling) 대본 대부분을
-    # 버렸음 — 이러면 정확히 원하는 임팩트 한 줄이 Claude 눈에 아예 안 보일 수 있음.
-    # Sonnet 컨텍스트는 충분히 크므로(문장당 ~30~50토큰) 왠만한 인터뷰 전체를
-    # 그대로 다 넣어도 안전함. 정말 극단적으로 긴 경우(3시간+)에만 안내만 출력.
     MAX_SENTS = 4000
     if len(sents) > MAX_SENTS:
         print(f"  ⚠️ 문장 {len(sents)}개 — 매우 긴 원본. 앞부분 {MAX_SENTS}개만 사용(전체를 넣기엔 너무 김)")
@@ -341,16 +331,14 @@ broll_keywords는 정확히 {N_IMGS}개, 모두 "man/male/men" 포함 + 무드�
     if "content" not in body: raise RuntimeError(f"Claude 형식오류: {json.dumps(body)[:400]}")
     raw = body["content"][0]["text"].strip()
 
-# '{' 부터 '}' 까지의 구간만 추출하는 안전한 방식 적용
-match = re.search(r'\{.*\}', raw, re.DOTALL)
-if match:
-    raw = match.group(0)
-else:
-    # 혹시 모를 대비용 (기존 로직 유지)
-    raw = re.sub(r'^```json\s*', '', raw)
-    raw = re.sub(r'\s*```$', '', raw)
+    match = re.search(r'\{.*\}', raw, re.DOTALL)
+    if match:
+        raw = match.group(0)
+    else:
+        raw = re.sub(r'^```json\s*', '', raw)
+        raw = re.sub(r'\s*```$', '', raw)
 
-data = json.loads(raw)
+    data = json.loads(raw)
     def f(x,d):
         try: return float(x)
         except (TypeError,ValueError): return d
@@ -423,9 +411,6 @@ def download_images(keywords):
 # STEP 5: 박자 + 드롭 탐지
 # ══════════════════════════════════════════════════
 def analyze_beats(bgm,dur,offset=0.0):
-    """offset: 트랙에서 분석을 시작할 지점(초). 하이라이트 점프 구조에선
-    bgm_climax를 넣어서 '하이라이트 구간의 박자'를 얻음 — 몽타주 컷이
-    실제로 들리는 그 드럼 비트에 맞아야 하니까."""
     print(f"\n🥁 STEP 5: 박자 분석 (트랙 {offset:.1f}초부터)...")
     try:
         import librosa, numpy as np
@@ -440,9 +425,6 @@ def analyze_beats(bgm,dur,offset=0.0):
         return [round(i*0.45,3) for i in range(1,int(dur/0.45))]
 
 def resolve_bgm_start(bgm):
-    """BGM 트랙에서 '어디서부터' 잘라 쓸지 결정.
-    이 지점부터 릴스 길이만큼 그대로 트림해서 영상 처음(0초)부터 씀.
-    (영상의 감정 피크와 정렬시키는 게 아니라, 순수하게 '이 구간을 쓴다'는 선택)"""
     if BGM_START_ENV:
         try:
             v=max(0.0,float(BGM_START_ENV))
@@ -464,10 +446,6 @@ def resolve_bgm_start(bgm):
         print(f"  ⚠️ 자동탐지 실패({e}) → 0초부터"); return 0.0
 
 def resolve_bgm_climax(bgm, bgm_start):
-    """BGM 트랙에서 '하이라이트(드롭) 구간이 시작되는 지점'이 트랙 기준 몇 초인지 결정.
-    이 지점은 effect_t(연설의 명대사가 끝나는 시점)에 맞춰 '점프 목적지'로 쓰임 —
-    즉 명대사가 끝나는 순간 BGM이 이 지점으로 건너뛰며 크게 터짐.
-    bgm_start(인트로 구간 시작점)와 완전히 독립. 반환값은 트랙 기준 절대 초."""
     if BGM_CLIMAX_ENV:
         try:
             v=max(0.0,float(BGM_CLIMAX_ENV))
@@ -492,13 +470,8 @@ def resolve_bgm_climax(bgm, bgm_start):
         return fallback
 
 # ══════════════════════════════════════════════════
-# STEP 6: 영어 원문 단어싱크 자막 (한 단어씩 화면 중앙에 크게)
+# STEP 6: 영어 원문 단어싱크 자막
 # ══════════════════════════════════════════════════
-# 화자가 그 단어를 말하는 '실제 타임스탬프'(AssemblyAI)에 맞춰
-# 한 단어만 화면 정중앙에 크게 떴다가 다음 단어로 교체됨 (LOOKING → because 식).
-# 핵심 단어는 Anton 볼드 대문자, 연결어(because/and/so 등)는 Playfair Display
-# 이탤릭 소문자 — 바이럴 릴스 특유의 '폰트 교차' 스타일. 강조어는 골드.
-
 CONNECTOR_WORDS = {
     "because","and","but","so","if","when","while","since","as","that",
     "which","who","the","of","to","is","was","are","were","be","been",
@@ -511,8 +484,6 @@ def ts(s):
     return f"{h}:{m:02d}:{sec:02d}.{cs:02d}"
 
 def words_to_relative(words, clip_start, clip_dur):
-    """AssemblyAI 절대(ms) 단어 리스트를 클립 기준 상대(초)로 변환+필터링.
-    build_ass()와 편집용 JSON 저장(render()) 양쪽에서 공용으로 씀."""
     W=[]
     for w in words:
         s=w.get("start",0)/1000-clip_start; e=w.get("end",0)/1000-clip_start
@@ -524,11 +495,6 @@ def words_to_relative(words, clip_start, clip_dur):
 
 def build_ass(words, clip_start, clip_dur, emphasis, out, sub_end=None, sub_y=50,
               sub_mode="word", sub_scale=1.0):
-    """sub_end: 그 시점 이후 자막 미생성(하이라이트 컷오프). sub_y: 세로 위치 %.
-    sub_mode='word'  : 한 단어씩 교체(퐁크 스타일).
-    sub_mode='phrase': 구절 단위로 여러 단어를 한 화면에(레퍼런스 r2/r4/r5 스타일) —
-                       구절 안 강조어만 골드+확대로 튀게.
-    sub_scale: 폰트 크기 배율(r3/r5의 소형 자막 재현용, 예: 0.5)."""
     print(f"\n📝 STEP 6: 자막 생성 ({sub_mode} 모드, 크기 x{sub_scale})...")
     GOLD="&H004A84B0&"; WHITE="&H00FFFFFF&"
     sub_limit = clip_dur if sub_end is None else min(sub_end, clip_dur)
@@ -557,7 +523,6 @@ Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
     ev=[]
 
     if sub_mode=="phrase":
-        # 구절 그룹핑: 문장부호로 끝나거나, 다음 단어까지 0.7초+ 쉬거나, 5단어 차면 끊음
         groups=[]; cur=[]
         for i,x in enumerate(W):
             cur.append(x)
@@ -613,9 +578,6 @@ Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
 # STEP 7: 렌더 (검증된 명령들)
 # ══════════════════════════════════════════════════
 def make_vertical(clip,out,t_start,t_dur,bw_from=None,black_until=None):
-    """bw_from: 그 시점부터 화면 흑백 전환(효과타입 'bw').
-    black_until: 첫 N초 동안 화면을 잉크블랙으로 덮음 — 자막은 finalize에서
-    나중에 얹히므로 '검은 화면 + 단어 타이포'인트로가 됨(레퍼런스 릴스 v2 스타일)."""
     vf=("[0:v]split=2[a][b];"
         f"[b]scale={RW}:{RH}:force_original_aspect_ratio=increase,crop={RW}:{RH},gblur=sigma=28,eq=brightness=-0.12:saturation=0.85[bg];"
         f"[a]scale={RW}:{RH}:force_original_aspect_ratio=decrease[fg];"
@@ -631,11 +593,6 @@ def make_vertical(clip,out,t_start,t_dur,bw_from=None,black_until=None):
     return out
 
 def cutaway_windows(words_rel, emphasis, limit_t, n_imgs, sec, word_flash=False):
-    """강조어(emphasis) 타임스탬프 기준 컷어웨이 창 계산.
-    반환: [(시작초, 끝초), ...] — 서로 겹치지 않게, limit_t(효과 시점) 전까지만.
-    word_flash=True(blackword 스타일): 창 길이를 그 단어의 발화 길이에 맞춤 —
-    단어가 들리는 딱 그 순간만 검은 화면+타이포가 '번쩍'(레퍼런스 r1 기법).
-    False(image 스타일): sec 길이만큼 B롤 이미지 유지(레퍼런스 v1/v2 기법)."""
     emph={str(e).lower().strip(".,!?") for e in (emphasis or [])}
     wins=[]; last_end=-1.0
     for x in words_rel:
@@ -643,26 +600,22 @@ def cutaway_windows(words_rel, emphasis, limit_t, n_imgs, sec, word_flash=False)
         clean=str(x["w"]).lower().strip(".,!?")
         if clean not in emph: continue
         s=max(0.0,x["t"]-0.05)
-        if s<last_end+0.4: continue          # 직전 컷어웨이와 너무 붙으면 스킵
+        if s<last_end+0.4: continue
         if word_flash:
             e=min(x["e"]+0.18, limit_t-0.1)
             if e-s<0.15: continue
         else:
             e=min(s+sec, limit_t-0.1)
-            if e-s<0.5: continue              # 너무 짧으면 의미 없음
+            if e-s<0.5: continue
         wins.append((round(s,3),round(e,3))); last_end=e
     return wins
 
 def build_black_card(out):
-    """blackword 컷어웨이용 잉크블랙 카드 — 자막 레이어가 위에 얹히므로
-    '검은 화면 + 단어 타이포 번쩍'이 됨."""
     run(["ffmpeg","-y","-f","lavfi","-i",f"color=c=0x0C0C0C:size={RW}x{RH}:duration=0.1:rate={FPS}",
         "-frames:v","1",str(out)],"build_black_card")
     return out
 
 def apply_cutaways(video_in, out, images, windows, total_dur):
-    """말하는 도중 키워드 순간마다 B롤 이미지를 풀스크린으로 덮음.
-    자막(ass)은 finalize에서 이 위에 얹히므로 이미지 위에도 자막이 계속 보임."""
     if not windows or not images:
         shutil.copy(video_in,out); return out
     inputs=["-i",str(video_in)]
@@ -716,13 +669,10 @@ def concat_videos(parts,out):
     return out
 
 def _dt_escape(s):
-    """ffmpeg drawtext 필터용 텍스트 이스케이프 (콜론/백슬래시/작은따옴표/%)."""
     return (str(s).replace("\\","\\\\\\\\").replace(":", "\\:")
             .replace("'", "\\'").replace("%","\\%"))
 
 def build_outro_card(out, duration):
-    """효과타입 'outro' 전용: 잉크블랙 배경 + bodetail 워드마크 + 태그라인.
-    BGM 크레센도가 이 카드 구간까지 이어지면서 완결감을 줌."""
     vf=(
         f"drawtext=font='Anton':text='{_dt_escape('BODETAIL')}':fontsize=124:"
         f"fontcolor=0xEDE6D8:x=(w-text_w)/2:y=(h/2)-150,"
@@ -738,22 +688,12 @@ def build_outro_card(out, duration):
     return out
 
 def finalize(video_only,clip,bgm,ass,out,effect_t,dur,bgm_start,bgm_climax=None,voice_present=True,swell=True):
-    """오디오 믹스 v9 — '명대사 끝 → 다음 순간 BGM 하이라이트 점프' 구조.
-      voice_present+bgm+swell  : [effect_t 전] 음성 크게(1.25배)+BGM 인트로 구간(bgm_start~) 작게.
-                                  [effect_t]  음성 0.25초 만에 완전히 꺼짐 + BGM이 트랙의
-                                  하이라이트 지점(bgm_climax)으로 '점프'하며 크게 터짐.
-                                  → 인트로 구간과 하이라이트 구간을 각각 정확히 존중.
-      voice_present+bgm+!swell : 점프 없이 목소리+BGM(bgm_start~) 고정비율로 계속 섞임
-      voice_present+!bgm       : 클립 자체 오디오만
-      !voice_present+bgm       : 무음 영상 — BGM(bgm_start~)만 처음부터 끝까지 고정 볼륨
-      !voice_present+!bgm      : 둘 다 없음 — 무음 트랙 생성(인스타는 오디오 트랙 필요)
-    dur은 아웃트로 효과 사용 시 아웃트로 카드까지 포함한 '총 길이'."""
-    V_BOOST   = 1.25          # 초반 음성 부스트(잘 안 들린다는 피드백 반영)
-    V_FADE    = 0.25          # effect_t에서 음성이 꺼지는 페이드 길이
-    QUIET     = 0.13          # 인트로 BGM(음성 아래 깔림)
-    HI_START  = 0.30          # 하이라이트 점프 직후 시작 볼륨
-    LOUD      = 0.55          # 하이라이트 최종 볼륨(음성이 없으니 크게)
-    RAMP      = 0.6           # 점프 후 LOUD까지 램프(빠르게 확 커짐)
+    V_BOOST   = 1.25
+    V_FADE    = 0.25
+    QUIET     = 0.13
+    HI_START  = 0.30
+    LOUD      = 0.55
+    RAMP      = 0.6
     if bgm_climax is None: bgm_climax = bgm_start
     ae=str(ass).replace("\\","/").replace(":","\\:")
     inputs=["-i",str(video_only)]; idx=1
@@ -762,10 +702,8 @@ def finalize(video_only,clip,bgm,ass,out,effect_t,dur,bgm_start,bgm_climax=None,
         inputs+=["-i",str(clip)]; clip_idx=idx; idx+=1
     bgmA_idx=bgmB_idx=None
     if bgm and swell and voice_present:
-        # 세그먼트 A: 인트로 구간 (bgm_start부터 effect_t 길이만큼)
         inputs+=["-ss",f"{max(0.0,bgm_start):.3f}","-t",f"{effect_t:.3f}","-i",str(bgm)]
         bgmA_idx=idx; idx+=1
-        # 세그먼트 B: 하이라이트 구간 (bgm_climax부터 끝까지, 루프로 길이 보장)
         inputs+=["-stream_loop","-1","-ss",f"{max(0.0,bgm_climax):.3f}","-i",str(bgm)]
         bgmB_idx=idx; idx+=1
     elif bgm:
@@ -777,22 +715,17 @@ def finalize(video_only,clip,bgm,ass,out,effect_t,dur,bgm_start,bgm_climax=None,
         null_idx=idx; idx+=1
 
     fc=[f"[0:v]ass='{ae}'[vout]"]
-    # eval=frame 필수: 없으면 ffmpeg가 volume 표현식을 처음 한 번만 계산해서
-    # 시간에 따라 값이 절대 안 바뀜(예전 실제 버그).
     if voice_present and bgm and swell:
         vfade_end=effect_t+V_FADE
         fc.append(
-            # 음성: 크게 들리다가 effect_t에서 빠르게 완전 소멸 (하이라이트 구간에선 침묵)
             f"[{clip_idx}:a]volume='if(lt(t,{effect_t:.3f}),{V_BOOST},"
             f"if(lt(t,{vfade_end:.3f}),{V_BOOST}*(1-(t-{effect_t:.3f})/{V_FADE}),0))':eval=frame[oa];"
-            # BGM 세그A(인트로): 작게. 길이가 정확히 effect_t라 concat 경계=점프 시점
             f"[{bgmA_idx}:a]volume={QUIET},aresample=48000[ba];"
-            # BGM 세그B(하이라이트): 점프 직후 0.3→0.55로 빠르게 확 커짐 (t는 세그B 자체 기준 0부터)
             f"[{bgmB_idx}:a]volume='if(lt(t,{RAMP}),{HI_START}+t/{RAMP}*({LOUD}-{HI_START}),{LOUD})':eval=frame,aresample=48000[bb];"
             f"[ba][bb]concat=n=2:v=0:a=1[bl];"
             f"[oa][bl]amix=inputs=2:duration=first:normalize=0,alimiter=limit=0.95[aout]")
         amap=["-map","[aout]"]
-    elif voice_present and bgm and not swell:
+    elif voice_present wagons and not swell:
         fc.append(f"[{clip_idx}:a]volume=1.1[oa];[{bgmA_idx}:a]volume=0.25[bl];"
                    "[oa][bl]amix=inputs=2:duration=first:normalize=0,alimiter=limit=0.95[aout]")
         amap=["-map","[aout]"]
@@ -814,10 +747,6 @@ def save_edit_bundle(clip,bgm,bgm_start,valid_images,words,emphasis,clip_start,f
                       effect_t,cuts,montage,voice_present,swell,effect_type,outro_sec,
                       bgm_climax=None,sub_y=50,broll_mode="montage",cutaway_sec=1.6,intro_black_sec=0,
                       sub_mode="word",sub_scale=1.0,cutaway_style="image"):
-    """에디터(bodetail_editor.html)에서 이미지 교체 등 재편집이 가능하도록
-    소스 클립/BGM/이미지/자막데이터를 reels/latest_a/assets/ 에 통째로 남김.
-    이걸로 rerender_category_a.py가 유튜브 재다운로드·AssemblyAI·Claude 호출 없이
-    ffmpeg만으로 빠르게 재렌더할 수 있음."""
     assets=LATEST/"assets"; imgdir=assets/"images"
     assets.mkdir(parents=True,exist_ok=True); imgdir.mkdir(parents=True,exist_ok=True)
     for old in imgdir.glob("*"): old.unlink()
@@ -831,10 +760,10 @@ def save_edit_bundle(clip,bgm,bgm_start,valid_images,words,emphasis,clip_start,f
     if bgm:
         shutil.copy(bgm, assets/"bgm_used.mp3"); bgm_saved=True
     edit=dict(
-        footage_duration=round(footage_dur,3),   # 소스 클립 구간 길이(아웃트로 제외)
-        reel_duration=round(total_dur,3),        # 최종 총 길이(아웃트로 effect_type이면 +outro_sec)
-        effect_t=round(effect_t,3),              # 클라이맥스(효과 트리거) 시점 — footage 기준 상대초
-        effect_type=effect_type,                 # montage | bw | outro
+        footage_duration=round(footage_dur,3),
+        reel_duration=round(total_dur,3),
+        effect_t=round(effect_t,3),
+        effect_type=effect_type,
         outro_sec=round(outro_sec,3),
         bgm_start=round(bgm_start,3) if bgm else 0.0,
         bgm_climax=round(bgm_climax,3) if (bgm and bgm_climax is not None) else None,
@@ -859,17 +788,13 @@ def save_edit_bundle(clip,bgm,bgm_start,valid_images,words,emphasis,clip_start,f
 
 def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,effect_t_raw,
            silent=False,effect_type="montage",bgm_climax=None,sub_y=50):
-    """beats: '하이라이트 구간 기준 상대초' 리스트 (analyze_beats(offset=bgm_climax) 결과).
-    effect_t_raw: 연설의 명대사가 끝나는 시점(클립 기준 초) — 여기서 효과가 터짐."""
     print(f"\n🎬 STEP 7: 합성 (효과타입: {effect_type})...")
     valid=[p for p in imgs if p and Path(p).exists()]
     voice_present=has_audio(clip)
 
     if silent:
-        # 무음/내레이션 없는 영상: 효과 개념 없음, BGM 고정 볼륨.
         eff=dur; montage=False; bw=False; outro=False; swell=False
     else:
-        # 효과 시점 = 명대사가 끝나는 순간(연설 기준). BGM은 이 순간 하이라이트로 점프.
         eff=max(1.0,min(effect_t_raw,dur-1.0)) if dur>2 else effect_t_raw
         montage=(effect_type=="montage" and len(valid)>=2 and bool(bgm))
         bw=(effect_type=="bw")
@@ -878,8 +803,6 @@ def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,effect_t_
     print(f"  효과 시점(명대사 끝) {eff:.1f}초 | 효과 {'몽타주' if montage else ('흑백' if bw else ('아웃트로' if outro else '없음'))} | "
           f"음성트랙 {'있음' if voice_present else '없음'} | B롤 {len(valid)}장")
 
-    # 자막: swell(점프) 모드에선 효과 시점 이후 음성과 함께 완전히 사라짐.
-    # mix 모드는 음성이 계속 나오므로 자막도 끝까지 유지.
     sub_end = eff if (not silent and swell) else None
     ass=build_ass(words,clip_start,dur,emphasis,ASSETS/"subs.ass",sub_end=sub_end,sub_y=sub_y,
                   sub_mode=SUB_MODE,sub_scale=SUB_SCALE)
@@ -887,7 +810,6 @@ def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,effect_t_
     cuts=[]
     if montage:
         pA=make_vertical(clip,ASSETS/"partA.mp4",0,eff,black_until=ib)
-        # beats는 이미 하이라이트 구간 기준 상대초 (0=효과 시점=점프 순간)
         pb=[round(b,3) for b in beats if 0<b<(dur-eff)]
         cuts=[0.0]+[pb[i] for i in range(len(pb)) if i%BEATS_PER_CUT==0]
         cuts=[c for c in cuts if 0<=c<(dur-eff)]
@@ -898,19 +820,16 @@ def render(clip,dur,clip_start,beats,imgs,words,emphasis,bgm,bgm_start,effect_t_
         pB=build_montage(valid,cuts,ASSETS/"partB.mp4",ASSETS/"segs")
         vo_footage=concat_videos([pA,pB],ASSETS/"video_footage.mp4")
     elif bw:
-        # 효과 시점 이후 화면이 흑백으로 전환(자막 색은 별도 레이어라 영향 없음)
         vo_footage=make_vertical(clip,ASSETS/"video_footage.mp4",0,dur,bw_from=eff,black_until=ib)
     else:
         vo_footage=make_vertical(clip,ASSETS/"video_footage.mp4",0,dur,black_until=ib)
 
-    # 컷어웨이 모드: 말하는 도중 강조어 순간마다 B롤/블랙카드 삽입 (레퍼런스 v1/v2/r1 기법)
     cutaways=[]
     if BROLL_MODE=="cutaway" and not silent:
         words_rel=words_to_relative(words,clip_start,dur)
-        start_from = (ib or 0)+0.3   # 블랙 인트로 중엔 컷어웨이 안 함
+        start_from = (ib or 0)+0.3
         wr=[x for x in words_rel if x["t"]>=start_from]
         if CUTAWAY_STYLE=="blackword":
-            # 블랙 플래시: 검은 카드 + 자막 레이어가 위에 얹혀 '단어 번쩍' 효과
             card=build_black_card(ASSETS/"black_card.png")
             cutaways=cutaway_windows(wr,emphasis,eff,99,CUTAWAY_SEC,word_flash=True)
             if cutaways:
@@ -985,7 +904,6 @@ def main():
     total_dur=get_duration(video)
     print(f"📏 원본 {total_dur:.0f}초")
 
-    # BGM
     bgm_url=BGM_URL_INPUT
     buf=INBOX/"bgm_url.txt"
     if not bgm_url and buf.exists(): bgm_url=buf.read_text().strip().splitlines()[0].strip()
@@ -1012,26 +930,22 @@ def main():
     clip,dur=extract_clip(video,cs,ce)
     if BROLL_KEYWORDS:
         user_kws=[k.strip() for k in BROLL_KEYWORDS.split(",") if k.strip()]
-        # 개수가 모자라면 순환해서 N_IMGS개 채움
         kws=[user_kws[i%len(user_kws)] for i in range(N_IMGS)] if user_kws else direction.get("broll_keywords",[])
         print(f"  🖼️ 이미지 검색어(사용자 지정): {user_kws}")
     else:
         kws=direction.get("broll_keywords",[])
     imgs = [] if silent else download_images(kws)
-    # ── 타이밍 구조 ──
-    # effect_t = 연설의 명대사가 끝나는 시점(클립 기준 초). 여기서:
-    #   음성·자막이 꺼지고, BGM이 트랙의 하이라이트 지점(bgm_climax)으로 점프하며 커지고,
-    #   선택한 효과(몽타주/흑백/아웃트로)가 시작됨.
+
     effect_t = dur if silent else (max(1.0,min(drop_at-cs,dur-1.0)) if dur>2 else (drop_at-cs))
     if bgm and not silent:
         bgm_start=resolve_bgm_start(bgm)
         bgm_climax=resolve_bgm_climax(bgm,bgm_start)
-        # 몽타주 컷은 '하이라이트 구간의 박자'에 맞아야 함 → climax offset부터 분석
         beats=analyze_beats(bgm,dur-effect_t+2,offset=bgm_climax)
     elif bgm and silent:
         bgm_start=resolve_bgm_start(bgm); bgm_climax=None; beats=[]
     else:
         bgm_start=0.0; bgm_climax=None; beats=[]
+
     final=render(clip,dur,cs,beats,imgs,words,
                  direction.get("emphasis_words",[]),bgm,bgm_start,effect_t,
                  silent=silent,effect_type=EFFECT_TYPE,bgm_climax=bgm_climax,sub_y=SUB_Y)
