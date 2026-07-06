@@ -16,7 +16,7 @@
    (HTML 에디터로 content.json 수정 후 재실행하는 워크플로)
  · 완성본 이메일 발송(08:30 KST cron)
 """
-import os, sys, json, shutil, smtplib, datetime, random, re, math
+import os, sys, json, shutil, smtplib, datetime, random, re, math, time
 from pathlib import Path
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -24,7 +24,7 @@ from email.mime.image import MIMEImage
 import requests
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageOps
 
-W, H = 1080, 1350
+W, H = 1080, 1440
 OUT = Path("posts_nail/latest")
 ARCH = Path("posts_nail")/datetime.datetime.now().strftime("%Y-%m-%d")
 TOPICS_FILE = Path("topics_nail.json")
@@ -80,6 +80,49 @@ def F(kind,size):
 
 EMOJI_RE=re.compile("["+"\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D"+"]+")
 def clean(t): return EMOJI_RE.sub("",str(t)).strip()
+
+# ══════════════════════════════════════════════
+# 주제별 필수 피사체 규칙 (bodetail의 generate_daily_post.py SUBJECT_RULES를
+# 네일 도메인에 맞게 이식) — Claude가 만든 img_query가 부정확하거나 너무 일반적일 때
+# (예: "product flatlay"만 검색하면 책상 모서리·머그컵 같은 무관한 사진이 나옴)
+# 헤딩/본문에 등장하는 한국어 키워드를 감지해 훨씬 구체적인 영어 검색어로 강제 교체.
+# 리스트 위쪽일수록 우선순위 높음 — 먼저 매치되는 규칙을 사용.
+# ══════════════════════════════════════════════
+NAIL_SUBJECT_RULES = [
+    ({"큐티클오일","큐티클 오일","cuticle oil"},
+     ["cuticle oil bottle nail care closeup","cuticle oil pen nail treatment","hands cuticle care oil closeup"]),
+    ({"큐티클","cuticle"},
+     ["cuticle care hands closeup pastel","nail cuticle pusher tool","manicure cuticle care closeup"]),
+    ({"네일파일","줄","파일","file","buffer","광내기"},
+     ["nail file tool manicure","glass nail file closeup pastel","nail buffer manicure tool"]),
+    ({"핸드크림","hand cream","로션","moisturizer","보습"},
+     ["hand cream tube pastel","woman applying hand cream","hand lotion bottle skincare"]),
+    ({"탑코트","topcoat","top coat","광택","코팅"},
+     ["clear top coat nail polish bottle","nail polish top coat closeup","glossy nail polish bottle"]),
+    ({"글루","네일글루","glue","접착"},
+     ["nail glue bottle small","nail repair glue closeup"]),
+    ({"영양제","비오틴","콜라겐","케라틴","biotin","collagen","keratin","vitamin"},
+     ["vitamin supplement bottle pastel","biotin capsules bottle closeup","collagen powder jar pastel"]),
+    ({"큐티클니퍼","니퍼","가위","cutter","nipper"},
+     ["nail cuticle nipper tool","manicure scissor tool closeup"]),
+    ({"젤네일","gel nail","젤","gel polish"},
+     ["gel nail polish bottle pastel","glossy gel manicure hands"]),
+    ({"패디","페디","pedicure","발톱","foot"},
+     ["pedicure feet care pastel","foot cream closeup pastel"]),
+    ({"네일아트","디자인","design","포인트"},
+     ["pastel manicure nail art closeup","soft pink gel nails hands"]),
+    ({"손톱","nail","nails","매니큐어","manicure"},
+     ["soft pastel manicure hands closeup","pastel gel nails hand closeup"]),
+]
+
+def subject_override(text: str):
+    """텍스트 안 키워드를 규칙과 매칭해 강제 검색어 반환. 매치 없으면 None(=Claude img_query 그대로 사용)."""
+    low = text.lower()
+    for keywords, queries in NAIL_SUBJECT_RULES:
+        if any(k.lower() in low for k in keywords):
+            return queries
+    return None
+
 
 def tw(d,t,f):
     b=d.textbbox((0,0),t,font=f); return b[2]-b[0], b[3]-b[1]
@@ -263,17 +306,21 @@ def _search_once(q):
     """한 검색어로 Unsplash+Pexels 후보 URL 수집. 실패 이유를 반드시 로그로 남김
     (예전엔 except: pass로 조용히 삼켜져서 '사진이 하나도 안 붙는' 원인을 알 수 없었음).
     orientation=portrait, content_filter 등은 bodetail의 검증된 사진 파이프라인
-    (generate_daily_post.py)에서 가져온 설정 — 실전에서 사진이 잘 붙는 것으로 확인된 조합."""
+    (generate_daily_post.py)에서 가져온 설정 — 실전에서 사진이 잘 붙는 것으로 확인된 조합.
+    per_page는 카테고리 A/B 릴스와 같은 API 키를 공유하는 걸 감안해 절제된 수치로 유지."""
     cand=[]
     if UNSPLASH_KEY:
         try:
             r=requests.get("https://api.unsplash.com/search/photos",
                 headers={"Authorization":f"Client-ID {UNSPLASH_KEY}"},
-                params={"query":q,"per_page":12,"orientation":"portrait","content_filter":"high"},timeout=12)
+                params={"query":q,"per_page":8,"orientation":"portrait","content_filter":"high"},timeout=12)
             if r.status_code==200:
                 res=r.json().get("results",[])
-                cand+=[x["urls"]["regular"] for x in res[:12] if x.get("urls",{}).get("regular")]
+                cand+=[x["urls"]["regular"] for x in res[:8] if x.get("urls",{}).get("regular")]
                 print(f"    · Unsplash '{q}' → {len(res)}건")
+            elif r.status_code in (403,429):
+                print(f"    ⚠️ Unsplash 요청 한도 초과({r.status_code}) — 릴스(카테고리 A/B)와 키를 공유 중이면 "
+                      f"시간당 한도가 이미 소진됐을 수 있음")
             else:
                 print(f"    ⚠️ Unsplash 응답 {r.status_code}: {r.text[:150]}")
         except Exception as e:
@@ -282,53 +329,56 @@ def _search_once(q):
         try:
             r=requests.get("https://api.pexels.com/v1/search",
                 headers={"Authorization":PEXELS_KEY},
-                params={"query":q,"per_page":15,"orientation":"portrait","size":"large"},timeout=12)
+                params={"query":q,"per_page":10,"orientation":"portrait","size":"large"},timeout=12)
             if r.status_code==200:
                 res=r.json().get("photos",[])
-                cand+=[x["src"]["large2x"] for x in res[:15] if x.get("src",{}).get("large2x")]
+                cand+=[x["src"]["large2x"] for x in res[:10] if x.get("src",{}).get("large2x")]
                 print(f"    · Pexels '{q}' → {len(res)}건")
+            elif r.status_code in (403,429):
+                print(f"    ⚠️ Pexels 요청 한도 초과({r.status_code}) — 릴스(카테고리 A/B)와 키를 공유 중이면 "
+                      f"시간당 한도가 이미 소진됐을 수 있음")
             else:
                 print(f"    ⚠️ Pexels 응답 {r.status_code}: {r.text[:150]}")
         except Exception as e:
             print(f"    ⚠️ Pexels 요청 실패: {e}")
     return cand
 
-def fetch_photo(query, save, fallback=None):
+def fetch_photo(queries, save):
+    """queries: 검색어 리스트(우선순위 순). 앞에서부터 시도해 결과 있는 첫 검색어를 사용
+    (bodetail의 image_queries 순차 시도 패턴과 동일) — subject_override로 강제된 구체적
+    검색어를 최우선으로 넣고, 그 다음 Claude의 img_query, 마지막에 범용 폴백 순으로 전달됨."""
     if not UNSPLASH_KEY and not PEXELS_KEY:
         print("  ⚠️ PEXELS_API_KEY / UNSPLASH_ACCESS_KEY 둘 다 없음 — 사진 생략")
         return False
-    q=clean(query) or (fallback or "pastel manicure nails")
-    cand=_search_once(q)
-    if not cand and fallback and fallback!=q:
-        print(f"    · 0건 → 폴백 검색어 재시도: '{fallback}'")
-        cand=_search_once(fallback)
+    if isinstance(queries,str): queries=[queries]
+    queries=[clean(q) for q in queries if clean(q)] or ["pastel manicure nails"]
+    cand=[]; used_q=None
+    for q in queries:
+        cand=_search_once(q)
+        if cand: used_q=q; break
     if not cand:
-        print("    · 0건 → 최종 폴백: 'pastel nails'")
-        cand=_search_once("pastel nails")
-    if not cand:
-        print("  ⚠️ 이미지 후보 0건 — 사진 없이 진행")
+        print("  ⚠️ 모든 검색어에서 후보 0건 — 사진 없이 진행(레이트리밋이면 위 경고 참고)")
         return False
     import io
     best_im=None; best_score=-1
-    for j,u in enumerate(cand[:14]):
+    for j,u in enumerate(cand[:8]):   # 다운로드 수를 줄여 API 다운로드 부담/시간 절약
         try:
             resp=requests.get(u,timeout=20,headers={"User-Agent":"Mozilla/5.0"})
             if resp.status_code!=200 or len(resp.content)<3000:
                 continue
             try:
-                im=Image.open(io.BytesIO(resp.content)).convert("RGB")  # 메모리에서 바로 검증+로드
+                im=Image.open(io.BytesIO(resp.content)).convert("RGB")
             except Exception:
                 continue
             import numpy as np
             b=float(np.array(im.resize((48,48)).convert("L")).mean())
-            score=-abs(b-185)   # 밝고 화사한 것(185 부근) 선호
+            score=-abs(b-185)
             if score>best_score: best_score=score; best_im=im
         except Exception as e:
             print(f"    ⚠️ 다운로드 실패({j}): {e}")
     if best_im is None:
         print("  ⚠️ 후보는 있었으나 전부 다운로드/검증 실패 — 사진 없이 진행")
         return False
-    # 파스텔 보정: 살짝 밝게 + 채도 낮춰 크림톤 (메모리 → 최종 저장, 임시파일 없음)
     try:
         im=ImageEnhance.Brightness(best_im).enhance(1.05)
         im=ImageEnhance.Color(im).enhance(0.88)
@@ -337,7 +387,7 @@ def fetch_photo(query, save, fallback=None):
         im.save(save,quality=92)
     except Exception as e:
         print(f"  ⚠️ 보정 생략: {e}"); best_im.save(save,quality=92)
-    print(f"  🖼️ 사진 확보 완료 ({q})")
+    print(f"  🖼️ 사진 확보 완료 (검색어: '{used_q}')")
     return True
 
 def paste_photo_panel(img, d, photo_path, box, r=36):
@@ -744,22 +794,31 @@ def main():
     tmp.mkdir(); (tmp/"assets").mkdir()
     files=[]
     p=tmp/"01_cover.png"; render_cover(data,p,today); files.append(p)
-    FALLBACK_Q={"info":"pastel manicure nails close up","product":"nail care product flatlay pastel"}
+    FALLBACK_Q={"info":"pastel manicure nails close up","product":"nail care product flatlay pastel nails"}
     print(f"  🔑 사진 API 키 상태 — PEXELS_API_KEY: {'있음(' + str(len(PEXELS_KEY)) + '자)' if PEXELS_KEY else '❌ 없음'} / "
           f"UNSPLASH_ACCESS_KEY: {'있음(' + str(len(UNSPLASH_KEY)) + '자)' if UNSPLASH_KEY else '❌ 없음'}")
     for i,sl in enumerate((data.get("slides") or [])[:3]):
         photo=None
         t=sl.get("type","info")
-        q=(sl.get("img_query") or "").strip()
+        pr=sl.get("product",{}) or {}
+        # 이 슬라이드의 주제 텍스트(제목+제품명+본문)에서 키워드 매칭 → 구체적 검색어 강제
+        subject_text=" ".join([sl.get("heading",""),pr.get("name",""),
+                                " ".join(sl.get("body",[])) if isinstance(sl.get("body"),list) else str(sl.get("body","")),
+                                sl.get("img_query","")])
+        forced=subject_override(subject_text)
+        claude_q=(sl.get("img_query") or "").strip()
         fb=FALLBACK_Q.get(t)
+        queries=(forced or [])+([claude_q] if claude_q else [])+([fb] if fb else [])
         key=f"photo_{i}"
         if key in photo_cache:
             photo=tmp/"assets"/f"{key}.jpg"; shutil.copy(photo_cache[key],photo)
             print(f"  🖼️ 슬라이드{i+1}: 캐시된 사진 재사용")
-        elif t!="tier" and (q or fb):
-            print(f"  🔎 슬라이드{i+1} 사진 검색 ({t}) — '{q or fb}'")
+        elif t!="tier" and queries:
+            if forced: print(f"    → 주제 키워드 매칭: '{forced[0]}' 우선 검색")
+            print(f"  🔎 슬라이드{i+1} 사진 검색 ({t}) — 후보 {len(queries)}개: {queries}")
             cand=tmp/"assets"/f"{key}.jpg"
-            if run_ok(fetch_photo,q,cand,fb): photo=cand
+            if run_ok(fetch_photo,queries,cand): photo=cand
+            time.sleep(1.2)   # API 요청 사이 짧은 간격 — 버스트 레이트리밋 방지
         p=tmp/f"{i+2:02d}_slide.png"
         if t=="tier": render_tier(sl,i,p,photo)
         elif t=="product": render_product(sl,i,p,photo)
