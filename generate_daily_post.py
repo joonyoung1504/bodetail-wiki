@@ -1,643 +1,779 @@
+# -*- coding: utf-8 -*-
 """
-generate_daily_post.py  — bodetail 일일 게시물 완전 자동화 v7
-=====================================================================
-이미지 우선순위:
-  1순위: Unsplash API  (에디토리얼 감도 높음)
-  2순위: Pexels API    (보조)
-  → 둘 다 결과 있으면 Unsplash 우선 선택
-  3순위: posts/images/manual/슬라이드번호_*.jpg (직접 넣은 수동 사진)
-  4순위: 검정 배경
-=====================================================================
-"""
+리버니 네일룸(@libunny.nailroom) 데일리 게시물 생성기 v2
+─ 레퍼런스(DRAW NAIL 감성) 기반 전면 재설계 ─
 
-import os, json, re, requests, io
+무드: 얇은 라인 아트(아치 프레임·점선 박스·손그림 하트/리본/안개꽃),
+      자간 넓은 세리프 영문, 여백 많은 중앙 정렬, 웜 브라운 단색 + 파스텔.
+컨셉: 마스코트 토끼 '리버니'가 오늘의 네일 소식을 알려주는 형식.
+
+기능:
+ · 30일 주제 스케줄(topics_nail.json) — 소진되면 Claude가 다음 30일치 자동 생성
+ · 슬라이드 타입 3종: info(사진+정보) / tier(티어리스트) / product(제품 소개+참고가)
+ · 슬라이드별 어울리는 밝은 네일 사진 자동 검색(Pexels/Unsplash) + 파스텔 보정
+ · 마지막 장: 강한 CTA + 리버니 브랜드 카드로 마무리
+ · RERENDER=true → Claude 호출 없이 posts_nail/latest/content.json으로 재렌더
+   (HTML 에디터로 content.json 수정 후 재실행하는 워크플로)
+ · 완성본 이메일 발송(08:30 KST cron)
+"""
+import os, sys, json, shutil, smtplib, datetime, random, re, math
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
-import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+import requests
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageOps
 
-# ══════════════════════════════════════════════════════════════
-# 1. 설정
-# ══════════════════════════════════════════════════════════════
-KST   = timezone(timedelta(hours=9))
-TODAY = datetime.now(KST)
-DATE  = TODAY.strftime("%Y-%m-%d")
-W, H  = 1080, 1440
+W, H = 1080, 1350
+OUT = Path("posts_nail/latest")
+ARCH = Path("posts_nail")/datetime.datetime.now().strftime("%Y-%m-%d")
+TOPICS_FILE = Path("topics_nail.json")
+ANCHOR = datetime.date(2026,7,1)   # 주제 배치 기준일 (30일마다 새 배치)
 
-DARK=(8,6,4); INK=(12,12,12); GOLD=(176,132,74); GOLD_BRIGHT=(200,154,92)
-CREAM=(237,230,216); WHITE=(245,244,240); BODY_LIGHT=(226,221,210)
-GOLD_D=(100,72,35)
+# ── 팔레트 (DRAW NAIL 계열: 크림 + 웜브라운 단색 + 파스텔 포인트) ──
+CREAM  = (248, 244, 238)
+PINKBG = (247, 236, 233)
+SAGEBG = (238, 241, 233)
+LINE   = (176, 156, 130)    # 라인 아트 브라운
+BROWN  = (94, 79, 65)       # 진한 텍스트
+SOFT   = (150, 132, 112)    # 보조 텍스트
+ROSE   = (191, 141, 141)
+GOLD   = (196, 168, 130)
+BUNNY  = (199, 189, 181)
+EAR    = (236, 213, 210)
+WHITE  = (255, 255, 255)
 
-SANS_BLK  = "/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc"
-SANS_BOLD = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
-SANS_MED  = "/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc"
-SANS_REG  = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
-SANS_LT   = "/usr/share/fonts/opentype/noto/NotoSansCJK-Light.ttc"
-SERIF     = "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc"
-SERIF_B   = "/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"
+ANTHROPIC_KEY  = os.environ.get("ANTHROPIC_API_KEY","").strip()
+TOPIC_OVERRIDE = os.environ.get("TOPIC_OVERRIDE","").strip()
+RERENDER   = os.environ.get("RERENDER","").strip().lower() in ("1","true","yes")
+SKIP_EMAIL = os.environ.get("SKIP_EMAIL","").strip().lower() in ("1","true","yes")
+GMAIL_ADDR = os.environ.get("GMAIL_ADDRESS","").strip()
+GMAIL_PW   = os.environ.get("GMAIL_APP_PASSWORD","").strip()
+MAIL_TO    = os.environ.get("MAIL_TO","").strip() or GMAIL_ADDR
+PEXELS_KEY   = os.environ.get("PEXELS_API_KEY","").strip()
+UNSPLASH_KEY = os.environ.get("UNSPLASH_ACCESS_KEY","").strip()
 
-def fnt(p, s): return ImageFont.truetype(p, s)
-def tw(d, t, f): b=d.textbbox((0,0),t,font=f); return b[2]-b[0]
-def th(d, t, f): b=d.textbbox((0,0),t,font=f); return b[3]-b[1]
+def run_ok(fn,*a,**k):
+    try: return fn(*a,**k)
+    except Exception as e:
+        print(f"  ⚠️ {fn.__name__} 실패: {e}"); return None
 
-MAR_X, MAR_Y = 84, 92
+# ══════════════════════════════════════════════
+# 폰트 (세련된 조합: 세리프 한글 + Playfair 영문 + 나눔펜 손글씨)
+# ══════════════════════════════════════════════
+FONT_DIRS=[str(Path.home()/".fonts"),"/usr/share/fonts/opentype/noto","/usr/share/fonts/truetype/nanum"]
+def _find(names):
+    for d in FONT_DIRS:
+        for n in names:
+            p=Path(d)/n
+            if p.exists(): return str(p)
+    return None
+F_SERIF_B=_find(["NotoSerifCJK-Bold.ttc","NotoSerifCJKkr-Bold.otf"]) or _find(["NotoSansCJK-Bold.ttc"])
+F_SERIF_R=_find(["NotoSerifCJK-Regular.ttc","NotoSerifCJKkr-Regular.otf"]) or _find(["NotoSansCJK-Regular.ttc"])
+F_PLAY   =_find(["PlayfairDisplay-Regular.ttf","PlayfairDisplay-Italic.ttf"])
+F_PEN    =_find(["NanumPenScript-Regular.ttf","NanumPen.ttf"])
 
-MANUAL_DIR = Path("posts/images/manual")
-MANUAL_DIR.mkdir(parents=True, exist_ok=True)
+def F(kind,size):
+    path={"kb":F_SERIF_B,"kr":F_SERIF_R,"en":F_PLAY or F_SERIF_R,"pen":F_PEN or F_SERIF_R}[kind]
+    try: return ImageFont.truetype(path,size)
+    except: return ImageFont.load_default()
 
-# ══════════════════════════════════════════════════════════════
-# 1-B. 주제별 필수 피사체 규칙
-# ══════════════════════════════════════════════════════════════
-SUBJECT_RULES = [
-    ({"립밤","lip balm","입술","립","립케어","balm","건조","갈라진","입꼬리"},
-     ["man face closeup dark moody","male jawline portrait dark editorial","men face skin dark cinematic"]),
-    ({"손톱","nail","nails","손끝","길이","3mm","2mm","파일"},
-     ["man clean trimmed nails closeup dark","male hand nails grooming moody","men hands fingers closeup dark"]),
-    ({"큐티클","cuticle","큐티클 정리","밀기"},
-     ["man cuticle care hands closeup dark","male hands grooming detail moody","men hands care closeup dark"]),
-    ({"핸드크림","hand cream","핸드 크림","moisturizer","보습","핸드 로션"},
-     ["man applying hand cream dark moody","male hands moisturizer luxury dark","men hand lotion applying closeup"]),
-    ({"향수","cologne","perfume","fragrance","냄새","향"},
-     ["men cologne bottle dark cinematic","man perfume luxury dark moody","male fragrance bottle editorial dark"]),
-    ({"면도","shaving","髭","수염","shave"},
-     ["man shaving dark editorial","male razor shaving moody","men grooming shave dark cinematic"]),
-    ({"피부","스킨케어","세럼","에센스","토너","로션","skin","toner"},
-     ["man skincare serum dark moody","male face skin closeup editorial","men skincare routine dark cinematic"]),
-    ({"시계","watch","wristwatch"},
-     ["man wristwatch dark cinematic","male luxury watch moody","men watch leather dark editorial"]),
-    ({"슈트","suit","재킷","jacket","넥타이","tie"},
-     ["man suit dark editorial","male formal suit moody cinematic","men jacket dark professional"]),
-    ({"헤어","머리","hair","두피","샴푸"},
-     ["man hair dark editorial moody","male hairstyle dark cinematic","men hair grooming dark"]),
-    ({"눈","다크서클","부기","아이크림","eye"},
-     ["man face closeup eyes dark moody","male dark circles eye care","men face skin closeup editorial"]),
-    ({"신발","shoes","구두","leather"},
-     ["man leather shoes dark cinematic","male dress shoes dark moody","men footwear editorial dark"]),
-    ({"치아","양치","구강","치실","whitening","치약"},
-     ["man portrait dark moody closeup","male face editorial dark","men grooming bathroom dark"]),
-    ({"눈썹","눈매","브로우","brow","eyebrow"},
-     ["man eyes closeup dark moody","male face portrait dark editorial","men eyebrow grooming closeup"]),
-    ({"귀","목","neck","ear","턱"},
-     ["man neck jawline dark cinematic","male portrait side dark moody","men profile face dark editorial"]),
-    ({"코","콧볼","T존","모공","pore","블랙헤드"},
-     ["man face skin pores closeup dark","male nose skin closeup moody","men face editorial dark cinematic"]),
-    ({"수면","피로","잠","sleep"},
-     ["man tired face dark moody","male face closeup dark editorial","men morning routine dark cinematic"]),
-    ({"운동","gym","헬스","근육","workout","body","몸"},
-     ["man gym workout dark moody","male fitness body dark cinematic","men training dark editorial"]),
-    ({"식단","단백질","음식","food","meal","diet"},
-     ["man meal prep dark moody","male healthy food dark cinematic","men nutrition dark editorial"]),
+EMOJI_RE=re.compile("["+"\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D"+"]+")
+def clean(t): return EMOJI_RE.sub("",str(t)).strip()
+
+def tw(d,t,f):
+    b=d.textbbox((0,0),t,font=f); return b[2]-b[0], b[3]-b[1]
+
+def wrap_kr(d,text,f,max_w):
+    lines=[]
+    for raw in str(text).split("\n"):
+        cur=""
+        for ch in raw:
+            if tw(d,cur+ch,f)[0]>max_w and cur and ch not in ".,!?~…)”'":
+                lines.append(cur); cur=ch
+            else: cur+=ch
+        lines.append(cur)
+    # 2자 이하 고아 줄("요." 등)은 앞 줄에 흡수
+    merged=[]
+    for l in lines:
+        if merged and 0<len(l.strip())<=2:
+            merged[-1]+=l
+        else:
+            merged.append(l)
+    return merged
+
+def tracked(d,x,y,text,f,fill,track=14,center_w=None):
+    """자간 넓은 영문 (DRAW NAIL 로고 감성). center_w 주면 그 폭 기준 중앙정렬."""
+    total=sum(tw(d,ch,f)[0]+track for ch in text)-track
+    cx = x if center_w is None else x+(center_w-total)/2
+    for ch in text:
+        d.text((cx,y),ch,font=f,fill=fill)
+        cx+=tw(d,ch,f)[0]+track
+    return total
+
+# ══════════════════════════════════════════════
+# 라인 아트 요소 (레퍼런스 손그림 감성)
+# ══════════════════════════════════════════════
+def dashed_line(d,x1,y1,x2,y2,dash=14,gap=10,fill=LINE,width=2):
+    L=math.hypot(x2-x1,y2-y1)
+    if L==0: return
+    ux,uy=(x2-x1)/L,(y2-y1)/L; t=0
+    while t<L:
+        e=min(t+dash,L)
+        d.line([x1+ux*t,y1+uy*t,x1+ux*e,y1+uy*e],fill=fill,width=width)
+        t=e+gap
+
+def dashed_round_box(d,box,r=56,fill=LINE,width=2,dash=14,gap=10):
+    """점선 라운드 사각형 (레퍼런스 이미지2의 그 박스)."""
+    x1,y1,x2,y2=box
+    dashed_line(d,x1+r,y1,x2-r,y1,dash,gap,fill,width)
+    dashed_line(d,x1+r,y2,x2-r,y2,dash,gap,fill,width)
+    dashed_line(d,x1,y1+r,x1,y2-r,dash,gap,fill,width)
+    dashed_line(d,x2,y1+r,x2,y2-r,dash,gap,fill,width)
+    for (cx,cy,a0,a1) in [(x1+r,y1+r,180,270),(x2-r,y1+r,270,360),(x2-r,y2-r,0,90),(x1+r,y2-r,90,180)]:
+        steps=7
+        for i in range(steps):
+            if i%2==0:
+                d.arc([cx-r,cy-r,cx+r,cy+r],a0+(a1-a0)*i/steps,a0+(a1-a0)*(i+0.7)/steps,fill=fill,width=width)
+
+def divider_dot(d,cx,y,half=120,fill=LINE):
+    d.line([cx-half,y,cx-14,y],fill=fill,width=2)
+    d.ellipse([cx-5,y-5,cx+5,y+5],fill=fill)
+    d.line([cx+14,y,cx+half,y],fill=fill,width=2)
+
+def heart_line(d,cx,cy,s,fill=LINE,width=3):
+    """손그림 하트(라인)."""
+    pts=[]
+    for i in range(0,201):
+        t=math.pi*i/100
+        x=16*math.sin(t)**3
+        y=13*math.cos(t)-5*math.cos(2*t)-2*math.cos(3*t)-math.cos(4*t)
+        pts.append((cx+x*s/16,cy-y*s/16))
+    d.line(pts,fill=fill,width=width,joint="curve")
+
+def ribbon_bow(d,cx,cy,s=1.0,fill=LINE,width=3):
+    """리본 매듭(라인) — 레퍼런스 이미지2 상단 그 리본."""
+    r=int(34*s)
+    d.ellipse([cx-2*r,cy-r,cx-2,cy+r],outline=fill,width=width)
+    d.ellipse([cx+2,cy-r,cx+2*r,cy+r],outline=fill,width=width)
+    d.line([cx-2,cy,cx-r*1.1,cy+r*1.7],fill=fill,width=width)
+    d.line([cx+2,cy,cx+r*1.1,cy+r*1.7],fill=fill,width=width)
+    d.ellipse([cx-7,cy-7,cx+7,cy+7],fill=CREAM,outline=fill,width=width)
+
+def babys_breath(d,x0,y0,s=1.0,fill=(196,182,160)):
+    """안개꽃 가지 라인아트 (레퍼런스 이미지1 좌하단)."""
+    random.seed(7)
+    for stem in range(3):
+        pts=[(x0+stem*26*s, y0)]
+        for i in range(1,9):
+            pts.append((x0+stem*26*s+math.sin(i*0.9+stem)*22*s, y0-i*38*s))
+        d.line(pts,fill=fill,width=2,joint="curve")
+        for (px,py) in pts[2:]:
+            for _ in range(2):
+                fx=px+random.randint(-16,16); fy=py+random.randint(-12,12)
+                d.ellipse([fx-4,fy-4,fx+4,fy+4],outline=fill,width=2)
+
+def sparkle(d,x,y,s,fill=GOLD):
+    d.line([x-s,y,x+s,y],fill=fill,width=2); d.line([x,y-s,x,y+s],fill=fill,width=2)
+    d.line([x-s*0.5,y-s*0.5,x+s*0.5,y+s*0.5],fill=fill,width=1)
+    d.line([x-s*0.5,y+s*0.5,x+s*0.5,y-s*0.5],fill=fill,width=1)
+
+FACE_WHITE = (253, 251, 247)   # 흰색 얼굴/몸
+EAR_PINK   = (240, 200, 199)   # 귀(바깥) — 분홍
+EAR_INNER  = (222, 163, 161)   # 귀 안쪽 — 진한 분홍
+NOSE_PINK  = (224, 140, 138)   # 코 — 분홍
+OUTLINE    = (176, 156, 130)   # 라인아트 브라운(LINE과 동일 톤) — 흰 얼굴이 배경에 묻히지 않도록 얇은 윤곽선
+
+def _bunny_raw(dd, cx, cy, r):
+    """리버니 원본 드로잉 (4배 해상도 캔버스에 그려질 좌표 기준).
+    흰색 얼굴 + 분홍 귀·코 + 검은 눈동자. 흰 얼굴이 크림/핑크 배경에 묻히지 않도록
+    얇은 라인아트 톤 윤곽선을 둘러 시인성을 확보(브랜드의 손그림 라인아트와도 통일감)."""
+    ow = max(2, int(r*0.045))  # 윤곽선 두께(슈퍼샘플 좌표 기준)
+    # 귀 (바깥 분홍 + 안쪽 진분홍 + 윤곽선)
+    for sx in (-1, 1):
+        ex = cx + sx*r*0.56
+        dd.ellipse([ex-r*0.30, cy-r*2.18, ex+r*0.30, cy-r*0.30], fill=EAR_PINK, outline=OUTLINE, width=ow)
+        dd.ellipse([ex-r*0.16, cy-r*1.92, ex+r*0.16, cy-r*0.52], fill=EAR_INNER)
+    # 머리 (흰색 + 윤곽선)
+    dd.ellipse([cx-r, cy-r*0.98, cx+r, cy+r*1.02], fill=FACE_WHITE, outline=OUTLINE, width=ow)
+    # 볼터치
+    for sx in (-1, 1):
+        bx, by = cx+sx*r*0.60, cy+r*0.30
+        dd.ellipse([bx-r*0.17, by-r*0.11, bx+r*0.17, by+r*0.11], fill=(245, 210, 206))
+    # 눈 (동그랗고 큼직 + 캐치라이트로 생기, 검은색)
+    er = r*0.125
+    for sx in (-1, 1):
+        ex, ey = cx+sx*r*0.35, cy-r*0.02
+        dd.ellipse([ex-er, ey-er*1.2, ex+er, ey+er*1.2], fill=(30, 28, 26))
+        dd.ellipse([ex-er*0.15, ey-er*1.0, ex+er*0.55, ey-er*0.35], fill=(255, 255, 255))
+    # 코 (작은 하트, 분홍)
+    nr = r*0.075; ny = cy+r*0.24
+    dd.ellipse([cx-nr*1.5, ny-nr*0.5, cx, ny+nr*0.6], fill=NOSE_PINK)
+    dd.ellipse([cx, ny-nr*0.5, cx+nr*1.5, ny+nr*0.6], fill=NOSE_PINK)
+    dd.polygon([(cx-nr*1.4, ny+nr*0.15), (cx+nr*1.4, ny+nr*0.15), (cx, ny+nr*1.7)], fill=NOSE_PINK)
+    # 입 (부드러운 w자 곡선)
+    mw = r*0.15
+    dd.arc([cx-mw, ny+nr, cx, ny+nr+mw*0.85], 15, 165, fill=(190, 168, 156), width=max(2, int(r*0.028)))
+    dd.arc([cx, ny+nr, cx+mw, ny+nr+mw*0.85], 15, 165, fill=(190, 168, 156), width=max(2, int(r*0.028)))
+
+_BUNNY_CACHE = {}
+def bunny(img, cx, cy, s=1.0):
+    """리버니 마스코트 — 4배 슈퍼샘플링 후 축소해 가장자리를 매끈하게(앤티앨리어싱).
+    img: 마스코트를 붙여넣을 PIL Image (Draw 객체가 아니라 Image 자체를 넘길 것)."""
+    r = max(8, int(60*s))
+    key = r
+    if key not in _BUNNY_CACHE:
+        SS = 4
+        cw, ch = int(r*4.6), int(r*5.3)
+        canvas = Image.new("RGBA", (cw*SS, ch*SS), (0, 0, 0, 0))
+        dd = ImageDraw.Draw(canvas)
+        hcx, hcy = cw*SS//2, int(ch*SS*0.55)
+        _bunny_raw(dd, hcx, hcy, r*SS)
+        small = canvas.resize((cw, ch), Image.LANCZOS)
+        _BUNNY_CACHE[key] = (small, cw, ch)
+    small, cw, ch = _BUNNY_CACHE[key]
+    img.paste(small, (int(cx-cw/2), int(cy-ch*0.55)), small)
+
+def speech_bubble(d,cx,y,text,f,pad=26):
+    """리버니 말풍선 — '오늘도 리버니가 알려줄게요' 컨셉."""
+    t=clean(text); w,h=tw(d,t,f)
+    x1,y1,x2,y2=cx-w/2-pad,y,cx+w/2+pad,y+h+pad*1.4
+    d.rounded_rectangle([x1,y1,x2,y2],radius=int((y2-y1)/2),fill=WHITE,outline=LINE,width=2)
+    d.polygon([(cx-10,y1+2),(cx+10,y1+2),(cx,y1-14)],fill=WHITE)
+    d.line([(cx-10,y1),(cx,y1-14)],fill=LINE,width=2); d.line([(cx+10,y1),(cx,y1-14)],fill=LINE,width=2)
+    d.text((cx-w/2,y+pad*0.62),t,font=f,fill=BROWN)
+    return y2
+
+# ══════════════════════════════════════════════
+# 사진: 밝고 화사한 후보 선택 + 파스텔 보정 + 라운드 패널
+# ══════════════════════════════════════════════
+def _brightness(p):
+    try:
+        import numpy as np
+        a=__import__("numpy").array(Image.open(p).convert("L").resize((64,64)),dtype=float)
+        return float(a.mean())
+    except Exception: return 150.0
+
+def _search_once(q):
+    """한 검색어로 Unsplash+Pexels 후보 URL 수집. 실패 이유를 반드시 로그로 남김
+    (예전엔 except: pass로 조용히 삼켜져서 '사진이 하나도 안 붙는' 원인을 알 수 없었음).
+    orientation=portrait, content_filter 등은 bodetail의 검증된 사진 파이프라인
+    (generate_daily_post.py)에서 가져온 설정 — 실전에서 사진이 잘 붙는 것으로 확인된 조합."""
+    cand=[]
+    if UNSPLASH_KEY:
+        try:
+            r=requests.get("https://api.unsplash.com/search/photos",
+                headers={"Authorization":f"Client-ID {UNSPLASH_KEY}"},
+                params={"query":q,"per_page":12,"orientation":"portrait","content_filter":"high"},timeout=12)
+            if r.status_code==200:
+                res=r.json().get("results",[])
+                cand+=[x["urls"]["regular"] for x in res[:12] if x.get("urls",{}).get("regular")]
+                print(f"    · Unsplash '{q}' → {len(res)}건")
+            else:
+                print(f"    ⚠️ Unsplash 응답 {r.status_code}: {r.text[:150]}")
+        except Exception as e:
+            print(f"    ⚠️ Unsplash 요청 실패: {e}")
+    if PEXELS_KEY:
+        try:
+            r=requests.get("https://api.pexels.com/v1/search",
+                headers={"Authorization":PEXELS_KEY},
+                params={"query":q,"per_page":15,"orientation":"portrait","size":"large"},timeout=12)
+            if r.status_code==200:
+                res=r.json().get("photos",[])
+                cand+=[x["src"]["large2x"] for x in res[:15] if x.get("src",{}).get("large2x")]
+                print(f"    · Pexels '{q}' → {len(res)}건")
+            else:
+                print(f"    ⚠️ Pexels 응답 {r.status_code}: {r.text[:150]}")
+        except Exception as e:
+            print(f"    ⚠️ Pexels 요청 실패: {e}")
+    return cand
+
+def fetch_photo(query, save, fallback=None):
+    if not UNSPLASH_KEY and not PEXELS_KEY:
+        print("  ⚠️ PEXELS_API_KEY / UNSPLASH_ACCESS_KEY 둘 다 없음 — 사진 생략")
+        return False
+    q=clean(query) or (fallback or "pastel manicure nails")
+    cand=_search_once(q)
+    if not cand and fallback and fallback!=q:
+        print(f"    · 0건 → 폴백 검색어 재시도: '{fallback}'")
+        cand=_search_once(fallback)
+    if not cand:
+        print("    · 0건 → 최종 폴백: 'pastel nails'")
+        cand=_search_once("pastel nails")
+    if not cand:
+        print("  ⚠️ 이미지 후보 0건 — 사진 없이 진행")
+        return False
+    best=None; best_score=-1
+    for j,u in enumerate(cand[:14]):
+        try:
+            resp=requests.get(u,timeout=20,headers={"User-Agent":"Mozilla/5.0"})
+            if resp.status_code!=200 or len(resp.content)<3000:
+                continue
+            tmp=str(save)+f".c{j}"
+            Path(tmp).write_bytes(resp.content)
+            try:
+                Image.open(tmp).verify()   # 손상/HTML 에러페이지가 아닌 진짜 이미지인지 확인
+            except Exception:
+                Path(tmp).unlink(missing_ok=True); continue
+            b=_brightness(tmp)
+            score=-abs(b-185)   # 밝고 화사한 것(185 부근) 선호 — bodetail과 정반대
+            if score>best_score: best_score=score; best=tmp
+        except Exception as e:
+            print(f"    ⚠️ 다운로드 실패({j}): {e}")
+    if best is None:
+        print("  ⚠️ 후보는 있었으나 전부 다운로드/검증 실패 — 사진 없이 진행")
+        return False
+    shutil.move(best,str(save))
+    for j in range(14):
+        t=str(save)+f".c{j}"
+        if Path(t).exists(): Path(t).unlink()
+    # 파스텔 보정: 살짝 밝게 + 채도 낮춰 크림톤
+    try:
+        im=Image.open(save).convert("RGB")
+        im=ImageEnhance.Brightness(im).enhance(1.05)
+        im=ImageEnhance.Color(im).enhance(0.88)
+        overlay=Image.new("RGB",im.size,(255,244,238))
+        im=Image.blend(im,overlay,0.07)
+        im.save(save,quality=92)
+    except Exception as e: print(f"  ⚠️ 보정 생략: {e}")
+    print(f"  🖼️ 사진 확보 완료 ({q})")
+    return True
+
+def paste_photo_panel(img, d, photo_path, box, r=36):
+    x1,y1,x2,y2=box; bw,bh=int(x2-x1),int(y2-y1)
+    ph=ImageOps.fit(Image.open(photo_path).convert("RGB"),(bw,bh))
+    mask=Image.new("L",(bw,bh),0)
+    ImageDraw.Draw(mask).rounded_rectangle([0,0,bw,bh],radius=r,fill=255)
+    img.paste(ph,(int(x1),int(y1)),mask)
+    d.rounded_rectangle(box,radius=r,outline=LINE,width=2)
+
+# ══════════════════════════════════════════════
+# 30일 주제: 자동 순환 + 소진 시 Claude가 다음 배치 생성
+# ══════════════════════════════════════════════
+FALLBACK_TOPICS=[
+ "모르면 손해보는 손톱 영양제 티어리스트 — S부터 B까지 솔직 정리|tier",
+ "이번 달 띠별 행운 네일 컬러 — 좋은 기운을 부르는 조합|info",
+ "아는 사람만 아는 젤네일 2주 더 오래가는 습관|info",
+ "네일 아티스트가 진짜 쓰는 큐티클 오일 소개 — 참고가 포함|product",
+ "손톱 세로줄·갈라짐 원인과 집에서 하는 해결 루틴|info",
+ "퍼스널컬러 여름쿨이 하면 손이 하얘 보이는 컬러 5|info",
+ "물어뜯은 손톱 교정 전후 — 어떻게 달라질까|info",
+ "여름 물놀이에도 안 지워지는 컬러·디자인 추천|info",
+ "핸드크림 티어리스트 — 흡수력·향·가성비로 나눈 솔직 등급|tier",
+ "직장인 오피스 네일 — 단정한데 밋밋하지 않게|info",
+ "젤네일 휴식기 팩트체크 — 꼭 필요할까|info",
+ "이번 주 별자리별 행운 네일 컬러|info",
+ "손이 예뻐 보이는 네일 모양 고르는 법|info",
+ "짧은 손톱에 더 예쁜 숏네일 디자인 모음|info",
+ "네일샵 처음 가는 사람을 위한 예약→시술 안내|info",
+ "손 나이 -5살 만드는 핸드크림 바르는 순서|info",
+ "웨딩·상견례를 위한 온화한 네일 추천|info",
+ "젤 제거 후 얇아진 손톱 회복시키는 법|info",
+ "가을 뉴트럴 컬러 미리보기 — 올해 유행 예측|info",
+ "네일 오래가는 사람들의 공통 습관 5|info",
+ "손톱에 좋은 음식 티어리스트 — 영양소 기준 등급|tier",
+ "퍼스널컬러 봄웜 필수 네일 컬러 5|info",
+ "탑코트 하나로 달라지는 광 — 추천 제품과 참고가|product",
+ "이달의 탄생석 컬러 네일과 그 의미|info",
+ "패디 시즌 — 발 관리 순서와 꿀팁|info",
+ "민감한 손톱을 위한 저자극 케어 가이드|info",
+ "피부톤별 피해야 할 네일 컬러|info",
+ "미니멀 원컬러를 고급스럽게 하는 법|info",
+ "손톱 물어뜯는 습관 끊는 현실적인 방법|info",
+ "젤네일 첫 24시간이 중요한 이유 — 시술 후 관리|info",
 ]
 
-def subject_override(slide: dict) -> list | None:
-    text = " ".join([
-        slide.get("subhead",""),
-        " ".join(slide.get("body",[])),
-        slide.get("caption",""),
-    ]).lower()
-    for keywords, queries in SUBJECT_RULES:
-        if any(k.lower() in text for k in keywords):
-            return queries
-    return None
+def load_or_make_topics():
+    today=datetime.date.today()
+    idx=(today-ANCHOR).days
+    batch=idx//30; within=idx%30
+    data=None
+    if TOPICS_FILE.exists():
+        try: data=json.loads(TOPICS_FILE.read_text(encoding="utf-8"))
+        except: data=None
+    if data is None or int(data.get("batch",-1))!=batch:
+        prev=(data or {}).get("topics",[])
+        topics=run_ok(generate_topic_batch,batch,prev) or FALLBACK_TOPICS
+        data={"batch":batch,"generated":str(today),"topics":topics}
+        TOPICS_FILE.write_text(json.dumps(data,ensure_ascii=False,indent=1),encoding="utf-8")
+        print(f"  🗓️ 새 30일 주제 배치 #{batch} 생성·저장")
+    t=data["topics"][within%len(data["topics"])]
+    if "|" in t: topic,ttype=t.rsplit("|",1)
+    else: topic,ttype=t,"info"
+    return topic.strip(), ttype.strip()
 
-# ══════════════════════════════════════════════════════════════
-# 2. 주제 로드
-# ══════════════════════════════════════════════════════════════
-day_override = os.environ.get("DAY_OVERRIDE", "").strip()
-with open("content/topics_30.json", "r", encoding="utf-8") as f:
-    schedule = json.load(f)
+def generate_topic_batch(batch, prev):
+    prompt=f"""서울 송파/문정 1인 네일샵 '리버니 네일룸' 인스타 카드뉴스의 다음 30일 주제를 만들어.
+직전 배치와 겹치지 않게: {json.dumps(prev[:30],ensure_ascii=False)}
 
-if day_override:
-    day_num = int(day_override)
-else:
-    start_date = datetime(2026, 9, 15, tzinfo=KST)
-    elapsed = max(0, (TODAY - start_date).days)
-    day_num = (elapsed % 30) + 1
+규칙:
+- 잠재고객(네일에 관심 있는 20~40대 여성)이 저장/팔로우하게 만드는 주제만.
+- 제목은 후킹형으로 — '모르면 손해보는', '아는 사람만 아는', '~하면 큰일나는' 같은 클릭 유도 어법을 30개 중 8개 이상에 섞어.
+- 구성 비율: 티어리스트/순위(한국인 취향 저격) 4개 이상, 제품 소개(참고가 포함) 3개 이상,
+  띠별/별자리/탄생석 운세 네일 3개 이상, 관리/케어 팁, 디자인 추천, 네일 상식 골고루.
+- 각 줄 형식: "주제문|타입"  (타입은 info / tier / product 중 하나)
+순수 JSON 배열만 출력: ["주제|info", "주제|tier", ...] 정확히 30개."""
+    r=requests.post("https://api.anthropic.com/v1/messages",
+        headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
+        json={"model":"claude-sonnet-4-5","max_tokens":2200,"messages":[{"role":"user","content":prompt}]},timeout=120)
+    txt=r.json()["content"][0]["text"]
+    arr=json.loads(txt[txt.find("["):txt.rfind("]")+1])
+    return arr[:30] if len(arr)>=25 else None
 
-topic = next((t for t in schedule["topics"] if t["day"] == day_num), schedule["topics"][0])
+# ══════════════════════════════════════════════
+# 콘텐츠 생성
+# ══════════════════════════════════════════════
+def generate_content(topic, ttype):
+    today=datetime.date.today()
+    type_rule={
+     "info":"""slides 3개, 각각 {"type":"info","heading":"소제목(9자 내)","body":"1~2문장, 한 문장당 18자 내외로 짧게 끊어써(줄바꿈 \\n으로 문장 구분)","tip":"리버니 한 줄 팁(16자 내)","img_query":"이 슬라이드에 어울리는 밝고 화사한 사진 영어 검색어 3~5단어 (예: 'soft pink gel nails manicure')"}""",
+     "tier":"""slides는 [1] {"type":"tier","heading":"티어 정리(8자 내)","tiers":[{"grade":"S","items":"항목들(쉼표구분 2개, 짧게)","note":"이유 한 줄(14자 내)"},{"grade":"A",...},{"grade":"B",...}],"img_query":"..."} 와
+[2],[3] {"type":"info",...} (S티어 상세/고르는 기준 등, body는 1~2문장 짧게)로 구성. 등급은 솔직하고 근거 있게.""",
+     "product":"""slides는 [1] {"type":"product","heading":"제품명(10자 내)","product":{"name":"제품명","price":"참고가 (예: 1만원대 중반)","pros":"장점 한 줄(16자 내)","cons":"아쉬운 점 한 줄(16자 내, 솔직하게)"},"body":"어떤 사람에게 맞는지 1문장(20자 내)","img_query":"제품/사용 장면 영어 검색어 3~5단어"} 와
+[2],[3] {"type":"info",...} (사용법/궁합 팁, body는 1~2문장 짧게)으로 구성. 가격은 '참고가'로 대략 범위만 — 단정 금지."""}
+    prompt=f"""너는 송파/문정 프라이빗 1인 네일샵 '리버니 네일룸'(@libunny.nailroom)의 콘텐츠 에디터.
+마스코트 토끼 '리버니'가 팔로워에게 오늘의 네일 정보를 다정하게 알려주는 카드뉴스야.
+오늘({today.month}월 {today.day}일) 주제: "{topic}"
 
-SECTION_KO = {
-    "WHY":"오늘의 디테일","DETAIL":"오늘의 디테일","ROUTINE":"오늘의 루틴",
-    "PICK":"오늘의 PICK","KNOW":"오늘의 지식","STYLE":"오늘의 스타일",
-    "BODY":"오늘의 컨디션","SCENE":"오늘의 준비"
-}
-SECTION_BADGE = {
-    "WHY":"DETAIL INDEX","DETAIL":"DETAIL INDEX","ROUTINE":"ROUTINE INDEX",
-    "PICK":"CURATION","KNOW":"KNOWLEDGE","STYLE":"STYLE NOTE",
-    "BODY":"CONDITION","SCENE":"FOR THE MOMENT"
-}
-sec_code = topic.get("section","DETAIL")
-topic["section_label_ko"] = SECTION_KO.get(sec_code, "오늘의 디테일")
-same_sec = [t for t in schedule["topics"] if t.get("section")==sec_code and t["day"]<=day_num]
-topic["vol_no"] = f"VOL.{len(same_sec):02d}"
-is_pick = (sec_code == "PICK")
+[톤] 다정+화사, 호들갑 금지, 이모지 금지(디자인에서 처리함).
+[글자 수 — 반드시 지킬 것] 이 카드뉴스는 모바일 세로 카드라 글자가 많으면 안 읽혀.
+모든 문장은 최대한 짧게. 위에 명시된 글자 수 제한을 절대 넘기지 마.
+1문장 = 1의미 단위로 끊고, 접속사·수식어를 과감히 생략해.
+[원칙] 카드마다 '저장할 가치'가 있는 구체 정보 1개 이상. 뻔한 말 금지, 아티스트만 아는 디테일을
+아주 짧은 문장으로. 길게 설명하지 말고 핵심만.
+[표지 훅] title은 후킹형 — 주제가 이미 후킹형이면 살리고, 아니면 '모르면 손해보는/아는 사람만 아는/
+저장 필수' 류의 어법으로 강화. 단, 과장 광고 금지(팩트 기반).
 
-print(f"📅 {DATE} | DAY {day_num} | [{sec_code}] {topic['title_main']}")
-OUT = Path(f"posts/{DATE}_day{day_num:02d}")
-OUT.mkdir(parents=True, exist_ok=True)
+{type_rule.get(ttype,type_rule["info"])}
 
-# ══════════════════════════════════════════════════════════════
-# 3. Claude API
-# ══════════════════════════════════════════════════════════════
-import anthropic
+순수 JSON만:
+{{"cover":{{"kicker":"티저 한 줄(예: 모르면 손해보는) 8자 내","title1":"제목 윗줄(7자 내)","title2":"제목 아랫줄(8자 내)","sub":"부제(14자 내, 뭘 얻어가는지)","bubble":"리버니 말풍선(12자 내, 예: 오늘은 이거 알려줄게요)"}},
+"slides":[...위 규칙대로 3개...],
+"last":{{"next_tease":"다음 콘텐츠 예고(16자 내)"}},
+"caption":"인스타 캡션 — 첫 줄 훅 / 요약 2줄 / '저장해두고 네일 고를 때 꺼내보세요' 류 CTA / 해시태그 15개(#송파네일 #문정동네일 #문정네일 #리버니네일룸 필수 포함)"}}"""
+    r=requests.post("https://api.anthropic.com/v1/messages",
+        headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
+        json={"model":"claude-sonnet-4-5","max_tokens":2800,"messages":[{"role":"user","content":prompt}]},timeout=120)
+    if r.status_code!=200: raise RuntimeError(f"Claude API {r.status_code}: {r.text[:200]}")
+    txt=r.json()["content"][0]["text"]
+    data=json.loads(txt[txt.find("{"):txt.rfind("}")+1])
+    print(f"  ✅ 콘텐츠: {data['cover']['title1']} {data['cover']['title2']}")
+    return data
 
-def load_md(f):
-    p = Path(f)
-    return p.read_text("utf-8") if p.exists() else f"[{f} 없음]"
+# ══════════════════════════════════════════════
+# 렌더 — 표지
+# ══════════════════════════════════════════════
+def render_cover(data, path, date):
+    img=Image.new("RGB",(W,H),CREAM); d=ImageDraw.Draw(img)
+    c=data["cover"]
+    # 아치 프레임 (레퍼런스 이미지1)
+    m=64
+    d.arc([m,m,W-m,m+640],180,360,fill=LINE,width=3)
+    d.line([m,m+320,m,H-m],fill=LINE,width=3)
+    d.line([W-m,m+320,W-m,H-m],fill=LINE,width=3)
+    d.line([m,H-m,W-m,H-m],fill=LINE,width=3)
+    # 로고 (자간 세리프)
+    tracked(d,0,150,"LIBUNNY NAIL",F("en",46),BROWN,track=16,center_w=W)
+    divider_dot(d,W/2,236,60)
+    # 킥커(후킹 티저)
+    f_k=F("pen",58)
+    kick=clean(c.get("kicker",""))
+    if kick:
+        kw,_=tw(d,kick,f_k); d.text((W/2-kw/2,300),kick,font=f_k,fill=ROSE)
+    # 제목 (세리프 볼드, 뒤에 스와시 하이라이트)
+    f_t=F("kb",112)
+    lines=[clean(c.get("title1","")),clean(c.get("title2",""))]
+    y=396
+    for i,ln in enumerate(lines):
+        if not ln: continue
+        lw,lh=tw(d,ln,f_t)
+        if i==len([x for x in lines if x])-1:
+            d.rounded_rectangle([W/2-lw/2-14,y+66,W/2+lw/2+14,y+118],radius=24,fill=(233,222,206))
+        d.text((W/2-lw/2,y),ln,font=f_t,fill=BROWN)
+        y+=150
+    heart_line(d,W/2+tw(d,lines[0] or " ",f_t)[0]/2+70,410,42,fill=LINE,width=3)
+    # 부제
+    divider_dot(d,W/2,y+40,150)
+    f_s=F("kr",44)
+    sub=clean(c.get("sub",""))
+    sw,_=tw(d,sub,f_s); d.text((W/2-sw/2,y+76),sub,font=f_s,fill=SOFT)
+    # 리버니 + 말풍선
+    bunny(img,W/2,y+330,s=1.15)
+    speech_bubble(d,W/2,y+430,c.get("bubble","오늘도 리버니가 알려줄게요"),F("pen",46))
+    # 안개꽃 + 반짝이
+    babys_breath(d,120,H-110,1.0)
+    sparkle(d,W-170,300,12); sparkle(d,150,470,9); sparkle(d,W-140,H-220,10)
+    # 하단
+    f_f=F("kr",30)
+    ft=f"{date.month}월 {date.day}일 · 저장해두고 천천히 보세요"
+    fw,_=tw(d,ft,f_f); d.text((W/2-fw/2,H-130),ft,font=f_f,fill=SOFT)
+    img.save(path,quality=95)
 
-design_md = load_md("brand/DESIGN-bodetail-B-realphoto.md")
-voice_md  = load_md("brand/voice_guide.md")
-client    = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+# ══════════════════════════════════════════════
+# 렌더 — 본문 (info / tier / product)
+# ══════════════════════════════════════════════
+def slide_frame(img,d,idx):
+    """공통: 점선 박스 + 리본 + 로고 + 페이지 표기 + 토끼."""
+    ribbon_bow(d,W/2,120,0.9)
+    tracked(d,0,178,"LIBUNNY NAIL",F("en",30),SOFT,track=10,center_w=W)
+    dashed_round_box(d,[70,240,W-70,H-150],r=60)
+    f_no=F("en",34)
+    d.text((96,H-128),f"no.{idx+1}",font=f_no,fill=SOFT)
+    hd="@libunny.nailroom"; f_h=F("en",28)
+    hw,_=tw(d,hd,f_h); d.text((W-96-hw,H-126),hd,font=f_h,fill=SOFT)
+    bunny(img,W-150,262,s=0.5)
 
-SYSTEM = f"""너는 bodetail 인스타그램 콘텐츠 매니저야.
-다음 디자인 시스템과 보이스 가이드를 따라 오늘의 게시물 콘텐츠를 JSON으로만 출력해.
-절대 JSON 외 텍스트 없이 순수 JSON만.
-[DESIGN]{design_md[:3000]}
-[VOICE]{voice_md[:2000]}
-"""
+def head_block(d,heading,y=316):
+    f_h=F("kb",64)
+    ln=clean(heading); hw,_=tw(d,ln,f_h)
+    d.text((W/2-hw/2,y),ln,font=f_h,fill=BROWN)
+    divider_dot(d,W/2,y+104,170)
+    return y+150
 
-PICK_USER = f"""오늘은 제품 추천(PICK) 게시물이야. JSON으로 만들어줘.
-주제: {topic['title_main']} / 섹션: PICK
-★ 추천 제품은 실제 존재하는 남성 그루밍 제품. 가격대 현실적(2만~15만원).
-JSON:
-{{"section_label":"오늘의 PICK","vol":"VOL.01","slides":[
-  {{"slide_num":1,"type":"cover","headline_sub":"에디터 한줄","headline_main":["제목1","제목2"],"headline_serif":"이달의 추천 N선","image_queries":["men grooming product dark moody","male skincare luxury dark","men cologne bottle cinematic"]}},
-  {{"slide_num":2,"type":"pick","number":"01","product_name":"제품명(브랜드 포함)","price":"가격대","stars":4,"one_line":"한줄픽(15자이내)","body":["포인트1","포인트2"],"caption":"핵심 선언.","image_queries":["men face cream luxury dark","male skincare product moody","men grooming cream dark"]}}
-],"caption_full":"캡션","hashtags":"#bodetail #남자그루밍 ..."}}"""
+def tip_block(d,tip,y):
+    t=clean(tip)
+    if not t: return y
+    f_p=F("pen",52)
+    txt="리버니 팁 · "+t
+    pw,_=tw(d,txt,f_p)
+    d.text((W/2-pw/2,y),txt,font=f_p,fill=ROSE)
+    return y+80
 
-CONTENT_USER = f"""오늘 게시물을 JSON으로 만들어줘.
-주제: {topic['title_main']} / 섹션: {topic['section']} / 후킹: {topic['hook_type']} / 슬라이드: {topic['num_slides']}
-★ 제목: 선언적·묵직하게. 숫자 포함. 커버 headline_main 한줄 8자이내.
-★ 본문: 독자가 얻어가는 구체 팁. 추상 동기부여 금지. 25자이내.
-★ image_queries: man/male/men 필수. 여성·네일아트·반지·꽃 금지. dark/moody 필수.
-JSON:
-{{"section_label":"섹션라벨","vol":"VOL.01","slides":[
-  {{"slide_num":1,"type":"cover","headline_sub":"맥락한줄","headline_main":["묵직한","제목"],"headline_serif":"구체약속","image_queries":["man dark studio portrait","male editorial dark","men moody portrait"]}},
-  {{"slide_num":2,"type":"content","number":"01","subhead":"핵심팁제목","body":["내용1","내용2"],"caption":"핵심선언.","image_queries":["man hands dark closeup","male grooming moody","men hands editorial"]}}
-],"caption_full":"캡션 (첫줄 후킹·저장유도·요약·@bodetail_official)","hashtags":"#bodetail #남자그루밍 ..."}}"""
+def render_info(sl, idx, path, photo):
+    bg=[CREAM,PINKBG,SAGEBG][idx%3]
+    img=Image.new("RGB",(W,H),bg); d=ImageDraw.Draw(img)
+    slide_frame(img,d,idx)
+    zone_top=head_block(d,sl.get("heading",""))
+    tip_y=H-256
+    zone_bottom=tip_y-30
+    PHOTO_H=380
+    max_body=3 if photo else 5
+    f_b=F("kr",44)
+    body_lines=wrap_kr(d,clean(sl.get("body","")),f_b,W-340)[:max_body]
+    # 세로 중앙정렬: 사진+본문 전체 높이를 먼저 재고, 남는 여백을 위아래로 균등 배분
+    # (예전엔 zone_top에서 바로 시작 → 아래쪽에 큰 빈 공간이 남는 버그였음)
+    photo_h = (PHOTO_H+50) if photo else 0
+    body_h = len(body_lines)*66
+    total_h = photo_h+body_h
+    zone_h = zone_bottom-zone_top
+    y = zone_top+max(16,(zone_h-total_h)/2)
+    if photo:
+        paste_photo_panel(img,d,photo,[210,y,W-210,y+PHOTO_H]); y+=PHOTO_H+50
+    for ln in body_lines:
+        lw,_=tw(d,ln,f_b); d.text((W/2-lw/2,y),ln,font=f_b,fill=BROWN); y+=66
+    # 팁은 박스 안 고정 슬롯 (항상 하단에 일정하게)
+    dashed_line(d,W/2-140,tip_y-30,W/2+140,tip_y-30)
+    tip_block(d,sl.get("tip",""),tip_y)
+    sparkle(d,150,320,9); sparkle(d,W-160,H-260,10)
+    img.save(path,quality=95)
 
-print("🤖 Claude 콘텐츠 생성 중...")
-msg = client.messages.create(
-    model="claude-sonnet-4-6", max_tokens=4096,
-    system=SYSTEM,
-    messages=[{"role":"user","content": PICK_USER if is_pick else CONTENT_USER}]
-)
-raw = msg.content[0].text.strip()
-raw = re.sub(r'^```json\s*','',raw); raw = re.sub(r'\s*```$','',raw)
-content = json.loads(raw)
-content["section_label"] = topic["section_label_ko"]
-content["vol"] = topic["vol_no"]
-print("✅ 콘텐츠 생성 완료")
-(OUT/"caption.txt").write_text(f"{content['caption_full']}\n\n{content['hashtags']}", encoding="utf-8")
+def render_tier(sl, idx, path, photo):
+    img=Image.new("RGB",(W,H),CREAM); d=ImageDraw.Draw(img)
+    slide_frame(img,d,idx)
+    zone_top=head_block(d,sl.get("heading","티어 정리"))
+    tip_y=H-232
+    zone_bottom=tip_y-30
+    grade_col={"S":ROSE,"A":GOLD,"B":SOFT}
+    f_g=F("en",50); f_i=F("kb",38); f_n=F("kr",30)
+    tiers=(sl.get("tiers") or [])[:3]
+    # 1단계: 각 행 높이를 먼저 측정
+    rows=[]
+    for t in tiers:
+        g=str(t.get("grade","?")).upper()[:1]
+        item_lines=wrap_kr(d,clean(t.get("items","")),f_i,W-380)[:2]
+        note_lines=wrap_kr(d,clean(t.get("note","")),f_n,W-380)[:2]
+        row_h=max(84,2+len(item_lines)*48+8+len(note_lines)*40)
+        rows.append((g,item_lines,note_lines,row_h))
+    total_h=sum(r[3] for r in rows)+30*max(0,len(rows)-1)
+    zone_h=zone_bottom-zone_top
+    y=zone_top+max(16,(zone_h-total_h)/2)
+    # 2단계: 중앙정렬된 시작점부터 그리기
+    for ri,(g,item_lines,note_lines,row_h) in enumerate(rows):
+        col=grade_col.get(g,SOFT)
+        row_top=y
+        d.ellipse([130,y,206,y+76],outline=col,width=4)
+        gw,_=tw(d,g,f_g); d.text((168-gw/2,y+8),g,font=f_g,fill=col)
+        for i,ln in enumerate(item_lines):
+            d.text((236,y+2+i*48),ln,font=f_i,fill=BROWN)
+        note_y=y+2+len(item_lines)*48+8
+        for i,ln in enumerate(note_lines):
+            d.text((236,note_y+i*40),ln,font=f_n,fill=SOFT)
+        y=row_top+row_h+30
+        if ri<len(rows)-1:
+            dashed_line(d,130,y-15,W-130,y-15,dash=8,gap=10)
+    tip_y=H-232
+    dashed_line(d,W/2-140,tip_y-30,W/2+140,tip_y-30)
+    tip_block(d,sl.get("tip","등급은 리버니 사용 기준이에요"),tip_y)
+    img.save(path,quality=95)
 
-# ══════════════════════════════════════════════════════════════
-# 4. 이미지 소스: Unsplash(1) → Pexels(2) → 수동(3) → 검정(4)
-# ══════════════════════════════════════════════════════════════
-PEXELS_KEY   = os.environ.get("PEXELS_API_KEY","")
-UNSPLASH_KEY = os.environ.get("UNSPLASH_ACCESS_KEY","")
-USED_FILE    = Path("content/used_photos.json")
+def render_product(sl, idx, path, photo):
+    img=Image.new("RGB",(W,H),PINKBG); d=ImageDraw.Draw(img)
+    slide_frame(img,d,idx)
+    zone_top=head_block(d,sl.get("heading",""))
+    zone_bottom=H-150-40   # product 슬라이드엔 별도 tip 존이 없어 박스 하단까지 사용
+    pr=sl.get("product",{}) or {}
+    price=clean(pr.get("price",""))
+    f_pr=F("kb",46); f_b=F("kr",40); f_pc=F("kr",34); f_lab=F("kb",34)
+    PHOTO_H=340
+    body_lines=wrap_kr(d,clean(sl.get("body","")),f_b,W-320)[:4]
+    rows=[]
+    for label,key,col in [("좋아요","pros",ROSE),("아쉬워요","cons",SOFT)]:
+        v=clean(pr.get(key,""))
+        if not v: continue
+        lab=f"· {label}  "
+        lw,_=tw(d,lab,f_lab)
+        lines=wrap_kr(d,v,f_pc,W-360-lw)[:2]
+        rows.append((lab,lw,lines,col))
+    # 1단계: 전체 블록 높이 측정(사진+가격뱃지+본문+장단점)
+    photo_h=(PHOTO_H+34) if photo else 0
+    price_h=104 if price else 0
+    body_h=(len(body_lines)*58+16) if body_lines else 0
+    procon_h=sum(max(46,46*len(lines))+20 for _,_,lines,_ in rows)
+    total_h=photo_h+price_h+body_h+procon_h
+    zone_h=zone_bottom-zone_top
+    y=zone_top+max(16,(zone_h-total_h)/2)
+    # 2단계: 중앙정렬된 시작점부터 그리기
+    if photo:
+        paste_photo_panel(img,d,photo,[250,y,W-250,y+PHOTO_H]); y+=PHOTO_H+34
+    if price:
+        pw,_=tw(d,"참고가  "+price,f_pr)
+        d.rounded_rectangle([W/2-pw/2-30,y,W/2+pw/2+30,y+78],radius=39,fill=WHITE,outline=LINE,width=2)
+        d.text((W/2-pw/2,y+12),"참고가  "+price,font=f_pr,fill=BROWN); y+=104
+    for ln in body_lines:
+        lw,_=tw(d,ln,f_b); d.text((W/2-lw/2,y),ln,font=f_b,fill=BROWN); y+=58
+    if body_lines: y+=16
+    for lab,lw,lines,col in rows:
+        d.text((170,y),lab,font=f_lab,fill=col)
+        for i,ln in enumerate(lines):
+            d.text((170+lw,y+i*46),ln,font=f_pc,fill=BROWN)
+        y+=max(46,46*len(lines))+20
+    img.save(path,quality=95)
 
-FEMALE_WORDS = {
-    "woman","women","female","girl","girls","ladies","lady",
-    "nail","nails","ring","rings","flower","flowers","floral",
-    "feminine","pink","makeup","cosmetic","cosmetics","beauty",
-    "lip","lips","lipstick","lipgloss","lipbalm",
-    "blush","mascara","eyeliner","foundation"
-}
+# ══════════════════════════════════════════════
+# 렌더 — 마지막 장 (브랜드 카드 + 강한 CTA)
+# ══════════════════════════════════════════════
+def render_last(data, path):
+    img=Image.new("RGB",(W,H),PINKBG); d=ImageDraw.Draw(img)
+    m=64
+    d.rounded_rectangle([m,m,W-m,H-m],radius=54,outline=LINE,width=3)
+    bunny(img,W/2,430,s=1.9)
+    tracked(d,0,600,"LIBUNNY NAIL",F("en",52),BROWN,track=18,center_w=W)
+    f_kr=F("kb",64)
+    t="리버니 네일룸"; kw_,_=tw(d,t,f_kr); d.text((W/2-kw_/2,676),t,font=f_kr,fill=BROWN)
+    divider_dot(d,W/2,790,150)
+    # 강한 CTA
+    f_q=F("kr",46)
+    q="당신에게 가장 잘 어울리는 네일을"
+    qw,_=tw(d,q,f_q); d.text((W/2-qw/2,836),q,font=f_q,fill=BROWN)
+    q2="만나고 싶다면?"
+    q2w,_=tw(d,q2,f_q); d.text((W/2-q2w/2,900),q2,font=f_q,fill=BROWN)
+    f_big=F("kb",76)
+    big="리버니네일"
+    bw_,_=tw(d,big,f_big)
+    d.rounded_rectangle([W/2-bw_/2-46,980,W/2+bw_/2+46,1096],radius=58,fill=WHITE,outline=LINE,width=3)
+    d.text((W/2-bw_/2,996),big,font=f_big,fill=ROSE)
+    f_i=F("kr",34)
+    info="송파·문정 프라이빗 1인샵 · 예약은 프로필 링크"
+    iw,_=tw(d,info,f_i); d.text((W/2-iw/2,1130),info,font=f_i,fill=SOFT)
+    tease=clean((data.get("last") or {}).get("next_tease",""))
+    if tease:
+        f_t2=F("pen",48)
+        tt="다음 이야기 · "+tease
+        tw2,_=tw(d,tt,f_t2); d.text((W/2-tw2/2,1196),tt,font=f_t2,fill=ROSE)
+    heart_line(d,W/2,1284,30,fill=ROSE,width=3)
+    sparkle(d,190,240,11); sparkle(d,W-180,320,9); sparkle(d,W-220,1180,10)
+    img.save(path,quality=95)
 
-def sanitize_query(q: str) -> str:
-    words = q.lower().split()
-    words = [w for w in words if w not in FEMALE_WORDS]
-    if not any(w in {"man","male","men"} for w in words):
-        words = ["man"] + words
-    if not any(w in {"dark","moody","cinematic","editorial","noir"} for w in words):
-        words += ["dark"]
-    return " ".join(words[:6])
+# ══════════════════════════════════════════════
+# 이메일
+# ══════════════════════════════════════════════
+def send_email(files, caption, topic):
+    if SKIP_EMAIL:
+        print("  ✉️ SKIP_EMAIL=true → 발송 생략"); return
+    if not (GMAIL_ADDR and GMAIL_PW and MAIL_TO):
+        print("  ⚠️ 이메일 시크릿 미설정 → 발송 생략"); return
+    today=datetime.date.today()
+    msg=MIMEMultipart()
+    msg["Subject"]=f"🐰 리버니 오늘의 게시물 ({today.month}/{today.day}) — {topic[:24]}"
+    msg["From"]=GMAIL_ADDR; msg["To"]=MAIL_TO
+    body=("리버니 네일룸 오늘의 카드뉴스가 완성됐어요!\n\n"
+          "① 첨부 이미지 5장을 순서대로 저장 (01→05)\n"
+          "② 아래 캡션 복사 → 인스타 붙여넣기\n\n"
+          "──────── 캡션 (복사용) ────────\n\n"+caption+
+          "\n\n────────────────────────\n"
+          "수정하고 싶으면: repo의 posts_nail/latest/content.json을 에디터(tools/nail_post_editor.html)로 열어 고치고\n"
+          "Actions에서 rerender=true로 재실행하면 새 버전이 다시 도착해요.")
+    msg.attach(MIMEText(body,"plain","utf-8"))
+    for f in files:
+        with open(f,"rb") as fp:
+            part=MIMEImage(fp.read())
+            part.add_header("Content-Disposition","attachment",filename=Path(f).name)
+            msg.attach(part)
+    with smtplib.SMTP_SSL("smtp.gmail.com",465,timeout=30) as s:
+        s.login(GMAIL_ADDR,GMAIL_PW)
+        s.sendmail(GMAIL_ADDR,[m.strip() for m in MAIL_TO.split(",")],msg.as_string())
+    print(f"  ✉️ 발송 완료 → {MAIL_TO}")
 
-def load_used():
-    if USED_FILE.exists():
-        try: return json.loads(USED_FILE.read_text("utf-8"))
-        except: return []
-    return []
-
-def save_used(lst):
-    USED_FILE.parent.mkdir(parents=True, exist_ok=True)
-    USED_FILE.write_text(json.dumps(lst[-300:], ensure_ascii=False), encoding="utf-8")
-
-used_history = load_used()
-recent_used  = set(used_history)
-session_used = []
-
-# ── Unsplash 검색 ──
-def search_unsplash(query: str) -> list:
-    """returns list of (id, url)"""
-    if not UNSPLASH_KEY: return []
-    q = sanitize_query(query)
-    try:
-        r = requests.get(
-            "https://api.unsplash.com/search/photos",
-            headers={"Authorization": f"Client-ID {UNSPLASH_KEY}"},
-            params={"query":q,"per_page":10,"orientation":"portrait",
-                    "content_filter":"high","order_by":"relevant"},
-            timeout=12
-        )
-        results = r.json().get("results",[])
-        out = []
-        for item in results:
-            alt = (item.get("alt_description") or "").lower()
-            desc= (item.get("description") or "").lower()
-            if any(w in alt+desc for w in FEMALE_WORDS): continue
-            url = item["urls"].get("regular") or item["urls"].get("full")
-            if url: out.append((f"u_{item['id']}", url))
-        return out
-    except Exception as e:
-        print(f"  ⚠️ Unsplash({q[:20]}): {e}")
-        return []
-
-# ── Pexels 검색 ──
-def search_pexels(query: str) -> list:
-    """returns list of (id, url)"""
-    if not PEXELS_KEY: return []
-    q = sanitize_query(query)
-    try:
-        r = requests.get(
-            "https://api.pexels.com/v1/search",
-            headers={"Authorization": PEXELS_KEY},
-            params={"query":q,"orientation":"portrait","size":"large","per_page":15},
-            timeout=10
-        )
-        return [(str(p["id"]), p["src"]["large2x"]) for p in r.json().get("photos",[])]
-    except Exception as e:
-        print(f"  ⚠️ Pexels({q[:20]}): {e}")
-        return []
-
-# ── 수동 이미지 ──
-def find_manual(slide_num: int) -> Path | None:
-    prefix = f"{slide_num:02d}_"
-    for ext in [".jpg",".jpeg",".png",".JPG",".JPEG",".PNG"]:
-        matches = list(MANUAL_DIR.glob(f"{prefix}*{ext}"))
-        if matches:
-            print(f"  📁 수동 이미지: {matches[0].name}")
-            return matches[0]
-    return None
-
-# ── 통합 이미지 선택 ──
-def pick_best(queries: list, slide_num: int) -> tuple | None:
-    """
-    Unsplash + Pexels 동시 검색 → 미사용 ID 우선으로 최적 선택
-    둘 다 없으면 수동 폴더 확인
-    """
-    for q in queries:
-        u_results = search_unsplash(q)   # 1순위: Unsplash
-        p_results = search_pexels(q)     # 2순위: Pexels
-
-        # 미사용 Unsplash 우선
-        for pid, url in u_results:
-            if pid not in recent_used and pid not in session_used:
-                print(f"  🖼️ Unsplash(미사용): {q[:28]}")
-                return pid, url, "img"
-
-        # 미사용 Pexels
-        for pid, url in p_results:
-            if pid not in recent_used and pid not in session_used:
-                print(f"  🖼️ Pexels(미사용): {q[:28]}")
-                return pid, url, "img"
-
-        # 둘 다 미사용 없으면 Unsplash 첫번째
-        if u_results:
-            pid, url = u_results[0]
-            print(f"  🖼️ Unsplash(재사용): {q[:28]}")
-            return pid, url, "img"
-
-        # Pexels 첫번째
-        if p_results:
-            pid, url = p_results[0]
-            print(f"  🖼️ Pexels(재사용): {q[:28]}")
-            return pid, url, "img"
-
-    # 3순위: 수동 폴더
-    manual = find_manual(slide_num)
-    if manual:
-        return f"manual_{slide_num}", str(manual), "manual"
-
-    return None
-
-def download_image(url: str) -> Image.Image | None:
-    try:
-        r = requests.get(url, timeout=20)
-        return Image.open(io.BytesIO(r.content)).convert("RGB")
-    except Exception as e:
-        print(f"  ⚠️ 다운로드 실패: {e}")
-        return None
-
-def smart_crop(img: Image.Image) -> Image.Image:
-    ow, oh = img.size
-    scale = max(W/ow, H/oh)
-    nw, nh = int(ow*scale+1), int(oh*scale+1)
-    img = img.resize((nw,nh), Image.LANCZOS)
-    left=(nw-W)//2; top=int((nh-H)*0.35)
-    return img.crop((max(0,min(left,nw-W)), max(0,min(top,nh-H)),
-                     max(0,min(left,nw-W))+W, max(0,min(top,nh-H))+H))
-
-def fetch_for(slide: dict, fallback_q: str, slide_num: int) -> Image.Image | None:
-    forced = subject_override(slide)
-    qs = forced if forced else (slide.get("image_queries") or [])
-    if forced: print(f"    → 주제 보정: {qs[0][:30]}")
-    qs = qs + [fallback_q, "man dark moody cinematic editorial"]
-
-    result = pick_best(qs, slide_num)
-    if result is None:
-        print(f"  ⚠️ 슬라이드{slide_num} 이미지 없음 → 검정 배경")
-        slide["image_url"] = ""
-        return None
-
-    pid, src, src_type = result
-    if src_type == "manual":
-        img = Image.open(src).convert("RGB")
-        slide["image_url"] = ""  # 로컬 파일은 URL 없음
+# ══════════════════════════════════════════════
+def main():
+    today=datetime.date.today()
+    if RERENDER:
+        cj=OUT/"content.json"
+        if not cj.exists():
+            print("❌ 재렌더 모드인데 posts_nail/latest/content.json이 없음"); sys.exit(1)
+        data=json.loads(cj.read_text(encoding="utf-8"))
+        topic=data.get("_topic","(재렌더)")
+        print(f"🔁 재렌더 모드 — content.json 기반")
     else:
-        img = download_image(src)
-        if img:
-            session_used.append(pid)
-            slide["image_url"] = src  # ★ URL 저장 → JSON에 포함돼서 편집기에서 바로 보임
+        if not ANTHROPIC_KEY:
+            print("❌ ANTHROPIC_API_KEY(오타 시크릿 ANTROPIC_API_KEY로 주입) 없음"); sys.exit(1)
+        topic,ttype = (TOPIC_OVERRIDE,"info") if TOPIC_OVERRIDE else load_or_make_topics()
+        print(f"🐰 리버니 데일리 | 주제: {topic} ({ttype})")
+        data=generate_content(topic,ttype)
+        data["_topic"]=topic
+    # 기존 이미지 캐시 유지(재렌더 시 사진 재검색 안 함)
+    photo_cache={}
+    if RERENDER and (OUT/"assets").exists():
+        for p in (OUT/"assets").glob("photo_*.jpg"): photo_cache[p.stem]=p
+    tmp=Path("._nail_tmp"); 
+    if tmp.exists(): shutil.rmtree(tmp)
+    tmp.mkdir(); (tmp/"assets").mkdir()
+    files=[]
+    p=tmp/"01_cover.png"; render_cover(data,p,today); files.append(p)
+    FALLBACK_Q={"info":"pastel manicure nails close up","product":"nail care product flatlay pastel"}
+    print(f"  🔑 사진 API 키 상태 — PEXELS_API_KEY: {'있음(' + str(len(PEXELS_KEY)) + '자)' if PEXELS_KEY else '❌ 없음'} / "
+          f"UNSPLASH_ACCESS_KEY: {'있음(' + str(len(UNSPLASH_KEY)) + '자)' if UNSPLASH_KEY else '❌ 없음'}")
+    for i,sl in enumerate((data.get("slides") or [])[:3]):
+        photo=None
+        t=sl.get("type","info")
+        q=(sl.get("img_query") or "").strip()
+        fb=FALLBACK_Q.get(t)
+        key=f"photo_{i}"
+        if key in photo_cache:
+            photo=tmp/"assets"/f"{key}.jpg"; shutil.copy(photo_cache[key],photo)
+            print(f"  🖼️ 슬라이드{i+1}: 캐시된 사진 재사용")
+        elif t!="tier" and (q or fb):
+            print(f"  🔎 슬라이드{i+1} 사진 검색 ({t}) — '{q or fb}'")
+            cand=tmp/"assets"/f"{key}.jpg"
+            if run_ok(fetch_photo,q,cand,fb): photo=cand
+        p=tmp/f"{i+2:02d}_slide.png"
+        if t=="tier": render_tier(sl,i,p,photo)
+        elif t=="product": render_product(sl,i,p,photo)
+        else: render_info(sl,i,p,photo)
+        files.append(p)
+    p=tmp/"05_last.png"; render_last(data,p); files.append(p)
+    caption=data.get("caption","")
+    (tmp/"caption.txt").write_text(caption,encoding="utf-8")
+    (tmp/"content.json").write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
+    if OUT.exists(): shutil.rmtree(OUT)
+    shutil.move(str(tmp),str(OUT))
+    files=[OUT/f.name for f in files]
+    ARCH.mkdir(parents=True,exist_ok=True)
+    for f in list(files)+[OUT/"caption.txt"]:
+        shutil.copy(f,ARCH/Path(f).name)
+    print(f"  ✅ 카드 {len(files)}장 → {OUT}")
+    send_email([str(f) for f in files],caption,topic)
+    print("🎉 완료!")
 
-    return smart_crop(img) if img else None
-
-# ── 이미지 수집 ──
-print("📸 슬라이드별 이미지 수집 중...")
-slides_data    = content.get("slides",[])
-cover_data     = next((s for s in slides_data if s["type"]=="cover"), {})
-content_slides = [s for s in slides_data if s["type"] in ("content","pick")]
-
-topic_fb = f"{topic.get('image_search','editorial men')} dark"
-cover_data["_photo"] = fetch_for(cover_data, topic_fb, 1)
-print(f"  커버: {'✅' if cover_data.get('_photo') else '⚠️ 검정배경'}")
-for i, s in enumerate(content_slides):
-    s["_photo"] = fetch_for(s, "man grooming detail dark moody", i+2)
-    print(f"  슬라이드{i+2}: {'✅' if s.get('_photo') else '⚠️ 검정배경'}")
-
-save_used(used_history + session_used)
-
-# ══════════════════════════════════════════════════════════════
-# 5. 이미지 처리
-# ══════════════════════════════════════════════════════════════
-def apply_dark_mood(photo=None):
-    if photo is not None:
-        base = np.array(photo, dtype=np.float32)
-        if base.shape[:2] != (H,W):
-            photo = photo.resize((W,H), Image.LANCZOS)
-            base  = np.array(photo, dtype=np.float32)
-        gray = 0.299*base[:,:,0]+0.587*base[:,:,1]+0.114*base[:,:,2]
-        base = gray[:,:,None]*0.62 + base*0.38
-        base *= 0.88
-    else:
-        base = np.zeros((H,W,3),dtype=np.float32); base[:]=list(DARK)
-        Xg,Yg = np.meshgrid(np.arange(W),np.arange(H))
-        d = np.sqrt(((Xg-W*0.52)/320.)**2+((Yg-H*0.56)/360.)**2)
-        g = np.clip(1-d,0,1)*0.28
-        base[:,:,0]+=g*80; base[:,:,1]+=g*68; base[:,:,2]+=g*52
-
-    ink = np.array(DARK,dtype=np.float32)[None,None,:]
-    base = base*0.58 + ink*0.42
-    yv   = np.linspace(0,1,H)[:,None]
-    fade = np.clip((yv-0.48)/0.52,0,1)**1.5*0.65
-    mask = np.repeat(fade[:,:,None],W,axis=1)
-    base = base*(1-mask)+ink*mask
-    Xg,Yg=np.meshgrid(np.arange(W),np.arange(H)); cx,cy=W/2,H/2
-    dist = np.sqrt(((Xg-cx)/cx)**2+((Yg-cy)/cy)**2)
-    vig  = np.clip((dist-0.55)/0.75,0,1)**1.5*0.60
-    base = base*(1-vig[:,:,None])
-    out  = np.clip(base,0,255).astype(np.uint8)
-    arr2 = np.array(Image.fromarray(out),dtype=np.int16)
-    noise= np.random.randint(-8,8,arr2.shape,dtype=np.int16)
-    return Image.fromarray(np.clip(arr2+noise,0,255).astype(np.uint8))
-
-def text_scrim(img, top_y, bot_y, strength=0.58):
-    arr=np.array(img,dtype=np.float32); yv=np.arange(H).astype(np.float32)
-    t0,t1=float(top_y),float(bot_y); fe=180.0
-    m=np.zeros(H,dtype=np.float32)
-    m[(yv>=t0)&(yv<=t1)]=1.0
-    up=(yv<t0)&(yv>=t0-fe); m[up]=np.clip((yv[up]-(t0-fe))/fe,0,1)
-    dn=(yv>t1)&(yv<=t1+fe); m[dn]=np.clip(((t1+fe)-yv[dn])/fe,0,1)
-    m=(m*strength)[:,None,None]; mask=np.repeat(m,W,axis=1)
-    ink=np.array(DARK,dtype=np.float32)[None,None,:]
-    return Image.fromarray(np.clip(arr*(1-mask)+ink*mask,0,255).astype(np.uint8))
-
-def bottom_scrim(img, ratio=0.48, strength=0.70):
-    arr=np.array(img,dtype=np.float32); yv=np.linspace(0,1,H)[:,None]
-    m=np.clip((yv-(1-ratio))/ratio,0,1)**1.4*strength
-    mask=np.repeat(m[:,:,None],W,axis=1)
-    ink=np.array(DARK,dtype=np.float32)[None,None,:]
-    return Image.fromarray(np.clip(arr*(1-mask)+ink*mask,0,255).astype(np.uint8))
-
-# ══════════════════════════════════════════════════════════════
-# 6. 드로잉 헬퍼
-# ══════════════════════════════════════════════════════════════
-def ptext(draw, xy, text, font, fill): draw.text(xy, text, font=font, fill=fill)
-
-def wrap_text(draw, text, font, mw):
-    if text=="": return [""]
-    words=text.split(" "); lines=[]; cur=""
-    for w in words:
-        t=w if cur=="" else cur+" "+w
-        if draw.textlength(t,font=font)<=mw: cur=t
-        else:
-            if cur: lines.append(cur)
-            if draw.textlength(w,font=font)>mw:
-                piece=""
-                for ch in w:
-                    if draw.textlength(piece+ch,font=font)<=mw: piece+=ch
-                    else: lines.append(piece); piece=ch
-                cur=piece
-            else: cur=w
-    if cur: lines.append(cur)
-    return lines
-
-def draw_header(draw, sec, vol):
-    lf=fnt(SANS_MED,30); vf=fnt(SANS_LT,24)
-    ptext(draw,(MAR_X,MAR_Y),sec,lf,GOLD)
-    lw=tw(draw,sec,lf); ls=MAR_X+lw+24; le=W-MAR_X-86
-    draw.line([(ls,MAR_Y+18),(le,MAR_Y+18)],fill=(*GOLD,180),width=2)
-    if vol: ptext(draw,(le+14,MAR_Y+6),vol,vf,(*CREAM,220))
-
-def draw_sig(draw):
-    sf=fnt(SERIF,26); t="bodetail"; x=(W-tw(draw,t,sf))//2
-    ptext(draw,(x,H-62),t,sf,(*CREAM,210))
-
-def numbox(draw, n, x, y):
-    nf=fnt(SANS_BLK,50); bb=draw.textbbox((0,0),n,font=nf)
-    gw,gh=bb[2]-bb[0],bb[3]-bb[1]; px,py=24,14; bw,bh=gw+px*2,gh+py*2
-    draw.rectangle([(x,y),(x+bw,y+bh)],fill=GOLD)
-    draw.text((x+px-bb[0],y+py-bb[1]),n,font=nf,fill=INK)
-    return y+bh+30
-
-# ══════════════════════════════════════════════════════════════
-# 7. 슬라이드 렌더링 (기존 v5 구조 그대로 유지)
-# ══════════════════════════════════════════════════════════════
-def render_cover(slide_data):
-    img=apply_dark_mood(slide_data.get("_photo")); img=bottom_scrim(img)
-    draw=ImageDraw.Draw(img)
-    draw_header(draw,content["section_label"],content.get("vol","VOL.01"))
-    bf=fnt(SANS_MED,24); bt=SECTION_BADGE.get(topic.get("section","DETAIL"),"DETAIL INDEX")
-    bb=draw.textbbox((0,0),bt,font=bf); gw,gh=bb[2]-bb[0],bb[3]-bb[1]
-    px,py=18,12; bx,by=MAR_X,MAR_Y+66
-    draw.rectangle([(bx,by),(bx+gw+px*2,by+gh+py*2)],outline=(*CREAM,110),width=2)
-    ptext(draw,(bx+px-bb[0],by+py-bb[1]),bt,bf,(*CREAM,155))
-    max_w=W-MAR_X*2
-    sub=slide_data.get("headline_sub",""); main_lines=slide_data.get("headline_main",[])
-    if isinstance(main_lines,str): main_lines=[main_lines]
-    serif_txt=slide_data.get("headline_serif","")
-    fsize=100
-    while fsize>62:
-        mf=fnt(SANS_BLK,fsize); wrapped=[]
-        for ln in main_lines: wrapped+=wrap_text(draw,ln,mf,max_w)
-        lh=int(fsize*1.16)
-        if len(wrapped)*lh<=470: break
-        fsize-=6
-    srf=fnt(SERIF,40); subf=fnt(SANS_LT,36)
-    block_h=(th(draw,"가",subf)+18 if sub else 0)+len(wrapped)*lh+(int(40*1.3) if serif_txt else 0)
-    y=H-MAR_Y-block_h-8
-    if sub: ptext(draw,(MAR_X,y),sub,subf,(*CREAM,235)); y+=th(draw,"가",subf)+18
-    for l in wrapped: ptext(draw,(MAR_X,y),l,mf,WHITE); y+=lh
-    if serif_txt:
-        for sl in wrap_text(draw,serif_txt,srf,max_w):
-            ptext(draw,(MAR_X,y+8),sl,srf,GOLD_BRIGHT); y+=int(40*1.3)
-    draw_sig(draw); return img
-
-def render_content(slide_data):
-    img=apply_dark_mood(slide_data.get("_photo")); max_w=W-MAR_X*2
-    sbf=fnt(SANS_BOLD,52); bf=fnt(SANS_REG,37)
-    d0=ImageDraw.Draw(img)
-    sub_lines=wrap_text(d0,slide_data.get("subhead",""),sbf,max_w)
-    body_lines=[]
-    for raw in slide_data.get("body",[]): body_lines+=wrap_text(d0,raw,bf,max_w) if raw else [""]
-    y_start=MAR_Y+70; nb_h=96
-    sub_h=len(sub_lines)*int(52*1.28)
-    body_h=sum(int(37*0.8) if bl=="" else int(37*1.62) for bl in body_lines)
-    text_bottom=y_start+nb_h+sub_h+34+body_h+24
-    img=text_scrim(img,MAR_Y-30,text_bottom,strength=0.58)
-    draw=ImageDraw.Draw(img)
-    draw_header(draw,content["section_label"],content.get("vol","VOL.01"))
-    y=y_start; n=slide_data.get("number","")
-    if n: y=numbox(draw,n,MAR_X,y)
-    for sl in sub_lines: ptext(draw,(MAR_X,y),sl,sbf,WHITE); y+=int(52*1.28)
-    y+=34
-    for bl in body_lines:
-        if bl=="": y+=int(37*0.8); continue
-        ptext(draw,(MAR_X,y),bl,bf,BODY_LIGHT); y+=int(37*1.62)
-    cap_txt=slide_data.get("caption","")
-    if cap_txt:
-        cf=fnt(SANS_MED,33); cap_lines=wrap_text(draw,cap_txt,cf,max_w-44)
-        lh=int(33*1.4); ch=len(cap_lines)*lh+30; cy=H-MAR_Y-ch-8
-        ov=Image.new("RGBA",(W,H),(0,0,0,0)); od=ImageDraw.Draw(ov)
-        od.rectangle([(MAR_X,cy),(W-MAR_X,cy+ch)],fill=(*DARK,185))
-        od.rectangle([(MAR_X,cy),(MAR_X+6,cy+ch)],fill=(*GOLD,255))
-        img=Image.alpha_composite(img.convert("RGBA"),ov).convert("RGB")
-        draw=ImageDraw.Draw(img); ty=cy+16
-        for cl in cap_lines: ptext(draw,(MAR_X+22,ty),cl,cf,WHITE); ty+=lh
-    draw_sig(draw); return img
-
-def render_pick(slide_data):
-    img=apply_dark_mood(slide_data.get("_photo"))
-    img=text_scrim(img,MAR_Y-30,int(H*0.60),strength=0.65)
-    max_w=W-MAR_X*2; draw=ImageDraw.Draw(img)
-    draw_header(draw,content["section_label"],content.get("vol","VOL.01"))
-    y=MAR_Y+70; n=slide_data.get("number","")
-    if n: y=numbox(draw,n,MAR_X,y)
-    pf=fnt(SANS_BOLD,54); product=slide_data.get("product_name","")
-    for pl in wrap_text(draw,product,pf,max_w): ptext(draw,(MAR_X,y),pl,pf,WHITE); y+=int(54*1.22)
-    y+=16
-    stars=int(slide_data.get("stars",4))
-    sf2=fnt(SANS_MED,38); ptext(draw,(MAR_X,y),"★"*stars+"☆"*(5-stars),sf2,GOLD); y+=int(38*1.3)
-    price=slide_data.get("price",""); one_line=slide_data.get("one_line","")
-    mf2=fnt(SANS_LT,34)
-    if price: ptext(draw,(MAR_X,y),f"{price}  ·  {one_line}",mf2,(*CREAM,210)); y+=int(34*1.5)
-    y+=20; bf=fnt(SANS_REG,37)
-    for raw in slide_data.get("body",[]):
-        for bl in wrap_text(draw,raw,bf,max_w): ptext(draw,(MAR_X,y),f"— {bl}",bf,BODY_LIGHT); y+=int(37*1.62)
-    cap_txt=slide_data.get("caption","")
-    if cap_txt:
-        cf=fnt(SANS_MED,33); cap_lines=wrap_text(draw,cap_txt,cf,max_w-44)
-        lh=int(33*1.4); ch=len(cap_lines)*lh+30; cy=H-MAR_Y-ch-8
-        ov=Image.new("RGBA",(W,H),(0,0,0,0)); od=ImageDraw.Draw(ov)
-        od.rectangle([(MAR_X,cy),(W-MAR_X,cy+ch)],fill=(*DARK,185))
-        od.rectangle([(MAR_X,cy),(MAR_X+6,cy+ch)],fill=(*GOLD,255))
-        img=Image.alpha_composite(img.convert("RGBA"),ov).convert("RGB")
-        draw=ImageDraw.Draw(img); ty=cy+16
-        for cl in cap_lines: ptext(draw,(MAR_X+22,ty),cl,cf,WHITE); ty+=lh
-    draw_sig(draw); return img
-
-def render_closing():
-    arr=np.zeros((H,W,3),dtype=np.uint8); arr[:]=list(DARK)
-    noise=np.random.randint(-8,8,arr.shape,dtype=np.int16)
-    arr=np.clip(arr.astype(np.int16)+noise,0,255).astype(np.uint8)
-    img=Image.fromarray(arr); draw=ImageDraw.Draw(img)
-    draw_header(draw,content["section_label"],"")
-    wf=fnt(SERIF_B,88); cf=fnt(SANS_LT,30)
-    wt="bodetail"; ct="남들이 놓치는 한 끗"; cta="@bodetail_official 팔로우"
-    cx=W//2
-    wbb=draw.textbbox((0,0),wt,font=wf); wgw=wbb[2]-wbb[0]; wgh=wbb[3]-wbb[1]
-    cbb=draw.textbbox((0,0),ct,font=cf); cgw=cbb[2]-cbb[0]
-    bar_w=64; gap=40
-    wm_y=H//2-wgh//2-wbb[1]; wm_top=H//2-wgh//2; wm_bot=H//2+wgh//2
-    draw.rectangle([(cx-bar_w//2,wm_top-gap-2),(cx+bar_w//2,wm_top-gap+1)],fill=GOLD)
-    draw.text((cx-wgw//2-wbb[0],wm_y),wt,font=wf,fill=CREAM)
-    bot_bar_y=wm_bot+gap
-    draw.rectangle([(cx-bar_w//2,bot_bar_y-2),(cx+bar_w//2,bot_bar_y+1)],fill=GOLD)
-    draw.text((cx-cgw//2-cbb[0],bot_bar_y+22),ct,font=cf,fill=(150,140,124))
-    ctaf=fnt(SANS_MED,30); ctab=draw.textbbox((0,0),cta,font=ctaf); ctaw=ctab[2]-ctab[0]
-    draw.text((cx-ctaw//2-ctab[0],bot_bar_y+22+46),cta,font=ctaf,fill=GOLD_BRIGHT)
-    return img
-
-# ══════════════════════════════════════════════════════════════
-# 8. 슬라이드 조합 & 저장
-# ══════════════════════════════════════════════════════════════
-rendered=[]
-rendered.append(("01_커버", render_cover(cover_data)))
-slide_idx=2
-for s in content_slides:
-    stype=s.get("type","content")
-    img=render_pick(s) if stype=="pick" else render_content(s)
-    rendered.append((f"{slide_idx:02d}_{s.get('number',str(slide_idx))}", img))
-    slide_idx+=1
-rendered.append((f"{slide_idx:02d}_마무리", render_closing()))
-
-import shutil
-print(f"\n💾 PNG 저장 → {OUT}/")
-for name,img in rendered:
-    p=OUT/f"{name}_1080x1440.png"
-    img.save(p,"PNG",optimize=True,compress_level=6)
-    print(f"  ✅ {p.name}")
-
-latest=Path("posts/latest"); latest.mkdir(exist_ok=True)
-for old in latest.glob("*.png"): old.unlink()
-for name,img in rendered:
-    img.save(latest/f"{name}_1080x1440.png","PNG")
-(latest/"caption.txt").write_text((OUT/"caption.txt").read_text("utf-8"),encoding="utf-8")
-
-# ★ 편집기용 post_content.json 저장
-import copy
-export_slides=[]
-for s in content.get("slides",[]):
-    sl=copy.deepcopy(s)
-    sl.pop("_photo",None)          # PIL 이미지 객체 제거
-    # image_url은 fetch_for에서 이미 저장됨 — 그대로 유지
-    if "image_url" not in sl:
-        sl["image_url"]=""
-    export_slides.append(sl)
-post_json={
-    "section_label": content.get("section_label",""),
-    "vol":           content.get("vol",""),
-    "caption_full":  content.get("caption_full",""),
-    "hashtags":      content.get("hashtags",""),
-    "slides":        export_slides,
-}
-json_path=latest/"post_content.json"
-json_path.write_text(json.dumps(post_json,ensure_ascii=False,indent=2),encoding="utf-8")
-(OUT/"post_content.json").write_text(json.dumps(post_json,ensure_ascii=False,indent=2),encoding="utf-8")
-print("  ✅ post_content.json 저장 (편집기용)")
-
-print(f"\n🎉 {len(rendered)}장 완료 → posts/latest/ & {OUT}/")
-print(f"\n📋 수동 이미지 사용법:")
-print(f"   posts/images/manual/01_커버.jpg, 02_슬라이드2.jpg ... 형식으로 올리면")
-print(f"   해당 슬라이드에 자동 적용 (API 둘 다 없을 때만)")
+if __name__=="__main__":
+    main()
