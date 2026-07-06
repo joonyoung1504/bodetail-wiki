@@ -1,46 +1,64 @@
 {
   "cover": {
-    "kicker": "직장인 필수",
-    "title1": "사무실에서",
-    "title2": "쓰는 네일 케어",
-    "sub": "책상 서랍에 넣어둘 3종",
-    "bubble": "회사에서도 관리 가능!"
+    "kicker": "아는 사람만 아는",
+    "title1": "사무실 네일",
+    "title2": "케어 3종 세트",
+    "sub": "책상 서랍에 넣어두면 끝",
+    "bubble": "직장인은 이거 챙겨!"
   },
   "slides": [
     {
       "type": "product",
       "heading": "큐티클 오일",
       "product": {
-        "name": "큐티클 오일 펜 타입",
+        "name": "롤온 타입 큐티클 오일",
         "price": "5천원~1만원대",
-        "pros": "펜처럼 휴대 간편",
-        "cons": "하루 2회 이상 발라야 함"
+        "pros": "책상에서 바로 발라",
+        "cons": "처음엔 끈적일 수 있어"
       },
-      "body": "물 많이 닿는 분께 추천",
+      "body": "타이핑 많은 날 수시로",
       "img_query": "cuticle oil pen office desk"
     },
     {
       "type": "product",
-      "heading": "네일 글로스",
+      "heading": "네일 파일",
       "product": {
-        "name": "투명 탑코트 미니",
+        "name": "유리 네일 파일",
         "price": "3천원~8천원대",
-        "pros": "끝 들뜸 즉시 보수",
-        "cons": "냄새 나서 환기 필요"
+        "pros": "소리 안 나고 정리 깔끔",
+        "cons": "깨질 수 있으니 케이스 필수"
       },
-      "body": "젤 네일 광택 되살릴 때",
-      "img_query": "clear top coat mini bottle"
+      "body": "회의 전 급하게 정리할 때",
+      "img_query": "glass nail file case"
+    },
+    {
+      "type": "product",
+      "heading": "핸드크림",
+      "product": {
+        "name": "무향 핸드크림",
+        "price": "1만원 초중반",
+        "pros": "향 없어서 사무실 OK",
+        "cons": "보습력 강한 건 서류 만질 때 불편"
+      },
+      "body": "가벼운 텍스처로 골라야 해",
+      "img_query": "unscented hand cream desk"
     },
     {
       "type": "info",
       "heading": "사용 타이밍",
-      "body": "큐티클 오일은 점심 후.\n탑코트는 퇴근 직전 바르면 출근 때 굳어있어요.",
-      "img_query": "office worker applying nail care"
+      "body": "오일은 점심 후, 파일은 아침 출근 직후, 핸드크림은 화장실 다녀온 뒤.",
+      "img_query": "office desk routine"
+    },
+    {
+      "type": "info",
+      "heading": "보관 꿀팁",
+      "body": "파우치 하나에 모아두면 자리 이동할 때도 편해. 투명 파우치 추천.",
+      "img_query": "clear pouch nail care kit"
     }
   ],
   "last": {
-    "next_tease": "여름 네일 지속력 높이는 법"
+    "next_tease": "다음은 여름 네일 컬러 추천"
   },
-  "caption": "회사 책상에 이 3개만 넣어두세요\n\n큐티클 오일 펜 / 투명 탑코트 미니 / 점심 후·퇴근 전 루틴\n물 자주 닿아도, 끝 살짝 들떠도 사무실에서 바로 관리 가능해요.\n\n저장해두고 다음 출근 때 챙겨보세요!\n\n#송파네일 #문정동네일 #문정네일 #리버니네일룸 #송파네일샵 #문정네일샵 #직장인네일 #오피스네일 #네일관리 #젤네일관리 #큐티클오일 #네일케어 #네일꿀팁 #셀프네일케어 #네일아트송파",
+  "caption": "사무실 책상 서랍 필수템 📌\n\n직장인은 네일 관리도 전략적으로! 큐티클 오일·유리파일·무향 핸드크림만 챙겨두면 회의 전 급할 때도 OK. 소리 안 나고 향 없는 게 포인트예요.\n\n저장해두고 내일 출근길에 다이소 들러보세요 🐰\n\n#송파네일 #문정동네일 #문정네일 #리버니네일룸 #송파네일샵 #문정네일샵 #직장인네일 #사무실네일 #네일케어 #큐티클오일 #핸드크림추천 #네일관리 #셀프네일케어 #오피스룩 #직장인필수템",
   "_topic": "직장인 필수템! 사무실에서 쓰는 네일 케어 제품 3종"
 }
