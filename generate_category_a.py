@@ -29,7 +29,7 @@ DATE = datetime.now(KST).strftime("%Y-%m-%d")
 
 ASSEMBLYAI_KEY = os.environ.get("ASSEMBLYAI_API_KEY","")   # rerender_category_a.py는 이 키가 없어도 import 가능해야 함
 ANTHROPIC_KEY  = os.environ.get("ANTROPIC_API_KEY","")
-PEXELS_KEY     = os.environ.get("PEXELS_API_KEY","")
+PEXELS_KEY     = os.environ.get("PEXELS_KEY","")
 UNSPLASH_KEY   = os.environ.get("UNSPLASH_ACCESS_KEY","")
 
 INBOX   = Path("videos/inbox_a")
@@ -47,7 +47,7 @@ N_IMGS = 7
 _ADV={}
 for _pair in os.environ.get("ADVANCED_OPTS","").split(";"):
     if "=" in _pair:
-        _k,_v=_pair.split("=",1); _ADV[_k.strip().lower()]=_v.strip()
+        _k,_v=_pair.split("...",1); _ADV[_k.strip().lower()]=_v.strip()
 def _opt(key, env_name, default=""):
     v=_ADV.get(key,"")
     if not v: v=os.environ.get(env_name,"").strip()
@@ -725,7 +725,7 @@ def finalize(video_only,clip,bgm,ass,out,effect_t,dur,bgm_start,bgm_climax=None,
             f"[ba][bb]concat=n=2:v=0:a=1[bl];"
             f"[oa][bl]amix=inputs=2:duration=first:normalize=0,alimiter=limit=0.95[aout]")
         amap=["-map","[aout]"]
-    elif voice_present wagons and not swell:
+    elif voice_present and not swell:
         fc.append(f"[{clip_idx}:a]volume=1.1[oa];[{bgmA_idx}:a]volume=0.25[bl];"
                    "[oa][bl]amix=inputs=2:duration=first:normalize=0,alimiter=limit=0.95[aout]")
         amap=["-map","[aout]"]
