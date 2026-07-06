@@ -20,7 +20,6 @@ generate_category_a.py — bodetail 카테고리 A v8 (20초 퐁크 하이브리
 
 입력: youtube_url / videos/inbox_a/url.txt / *.mp4 직접 업로드
 """
-
 import os, json, re, time, requests, shutil, subprocess
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
@@ -340,9 +339,18 @@ broll_keywords는 정확히 {N_IMGS}개, 모두 "man/male/men" 포함 + 무드�
     if res.status_code!=200: raise RuntimeError(f"Claude API {res.status_code}: {res.text[:400]}")
     body=res.json()
     if "content" not in body: raise RuntimeError(f"Claude 형식오류: {json.dumps(body)[:400]}")
-    raw=body["content"][0]["text"].strip()
-    raw=re.sub(r'^```json\s*','',raw); raw=re.sub(r'\s*```$','',raw)
-    data=json.loads(raw)
+    raw = body["content"][0]["text"].strip()
+
+# '{' 부터 '}' 까지의 구간만 추출하는 안전한 방식 적용
+match = re.search(r'\{.*\}', raw, re.DOTALL)
+if match:
+    raw = match.group(0)
+else:
+    # 혹시 모를 대비용 (기존 로직 유지)
+    raw = re.sub(r'^```json\s*', '', raw)
+    raw = re.sub(r'\s*```$', '', raw)
+
+data = json.loads(raw)
     def f(x,d):
         try: return float(x)
         except (TypeError,ValueError): return d
