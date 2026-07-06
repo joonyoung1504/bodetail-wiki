@@ -178,53 +178,66 @@ def sparkle(d,x,y,s,fill=GOLD):
     d.line([x-s*0.5,y-s*0.5,x+s*0.5,y+s*0.5],fill=fill,width=1)
     d.line([x-s*0.5,y+s*0.5,x+s*0.5,y-s*0.5],fill=fill,width=1)
 
+FACE_WHITE = (253, 251, 247)   # 흰색 얼굴/몸
+EAR_PINK   = (240, 200, 199)   # 귀(바깥) — 분홍
+EAR_INNER  = (222, 163, 161)   # 귀 안쪽 — 진한 분홍
+NOSE_PINK  = (224, 140, 138)   # 코 — 분홍
+OUTLINE    = (176, 156, 130)   # 라인아트 브라운(LINE과 동일 톤) — 흰 얼굴이 배경에 묻히지 않도록 얇은 윤곽선
+
 def _bunny_raw(dd, cx, cy, r):
-    """리버니 원본 드로잉 (4배 해상도 캔버스에 그려질 좌표 기준)."""
-    # 귀 (바깥 + 안쪽 그라데이션 느낌 2단)
+    """리버니 원본 드로잉 (4배 해상도 캔버스에 그려질 좌표 기준).
+    흰색 얼굴 + 분홍 귀·코 + 검은 눈동자. 흰 얼굴이 크림/핑크 배경에 묻히지 않도록
+    얇은 라인아트 톤 윤곽선을 둘러 시인성을 확보(브랜드의 손그림 라인아트와도 통일감)."""
+    ow = max(2, int(r*0.045))  # 윤곽선 두께(슈퍼샘플 좌표 기준)
+    # 귀 (바깥 분홍 + 안쪽 진분홍 + 윤곽선)
     for sx in (-1, 1):
         ex = cx + sx*r*0.56
-        dd.ellipse([ex-r*0.30, cy-r*2.18, ex+r*0.30, cy-r*0.30], fill=BUNNY)
-        dd.ellipse([ex-r*0.16, cy-r*1.92, ex+r*0.16, cy-r*0.52], fill=EAR)
-        dd.ellipse([ex-r*0.08, cy-r*1.78, ex+r*0.08, cy-r*0.72], fill=(244, 224, 221))
-    # 머리 (살짝 계란형 — 아래로 갈수록 좁아지게)
-    dd.ellipse([cx-r, cy-r*0.98, cx+r, cy+r*1.02], fill=BUNNY)
+        dd.ellipse([ex-r*0.30, cy-r*2.18, ex+r*0.30, cy-r*0.30], fill=EAR_PINK, outline=OUTLINE, width=ow)
+        dd.ellipse([ex-r*0.16, cy-r*1.92, ex+r*0.16, cy-r*0.52], fill=EAR_INNER)
+    # 머리 (흰색 + 윤곽선)
+    dd.ellipse([cx-r, cy-r*0.98, cx+r, cy+r*1.02], fill=FACE_WHITE, outline=OUTLINE, width=ow)
     # 볼터치
     for sx in (-1, 1):
         bx, by = cx+sx*r*0.60, cy+r*0.30
-        dd.ellipse([bx-r*0.17, by-r*0.11, bx+r*0.17, by+r*0.11], fill=(240, 199, 195))
-    # 눈 (동그랗고 큼직 + 캐치라이트로 생기)
+        dd.ellipse([bx-r*0.17, by-r*0.11, bx+r*0.17, by+r*0.11], fill=(245, 210, 206))
+    # 눈 (동그랗고 큼직 + 캐치라이트로 생기, 검은색)
     er = r*0.125
     for sx in (-1, 1):
         ex, ey = cx+sx*r*0.35, cy-r*0.02
-        dd.ellipse([ex-er, ey-er*1.2, ex+er, ey+er*1.2], fill=(56, 48, 44))
+        dd.ellipse([ex-er, ey-er*1.2, ex+er, ey+er*1.2], fill=(30, 28, 26))
         dd.ellipse([ex-er*0.15, ey-er*1.0, ex+er*0.55, ey-er*0.35], fill=(255, 255, 255))
-    # 코 (작은 하트)
+    # 코 (작은 하트, 분홍)
     nr = r*0.075; ny = cy+r*0.24
-    dd.ellipse([cx-nr*1.5, ny-nr*0.5, cx, ny+nr*0.6], fill=(214, 156, 154))
-    dd.ellipse([cx, ny-nr*0.5, cx+nr*1.5, ny+nr*0.6], fill=(214, 156, 154))
-    dd.polygon([(cx-nr*1.4, ny+nr*0.15), (cx+nr*1.4, ny+nr*0.15), (cx, ny+nr*1.7)], fill=(214, 156, 154))
+    dd.ellipse([cx-nr*1.5, ny-nr*0.5, cx, ny+nr*0.6], fill=NOSE_PINK)
+    dd.ellipse([cx, ny-nr*0.5, cx+nr*1.5, ny+nr*0.6], fill=NOSE_PINK)
+    dd.polygon([(cx-nr*1.4, ny+nr*0.15), (cx+nr*1.4, ny+nr*0.15), (cx, ny+nr*1.7)], fill=NOSE_PINK)
     # 입 (부드러운 w자 곡선)
     mw = r*0.15
-    dd.arc([cx-mw, ny+nr, cx, ny+nr+mw*0.85], 15, 165, fill=(150, 128, 116), width=max(2, int(r*0.028)))
-    dd.arc([cx, ny+nr, cx+mw, ny+nr+mw*0.85], 15, 165, fill=(150, 128, 116), width=max(2, int(r*0.028)))
+    dd.arc([cx-mw, ny+nr, cx, ny+nr+mw*0.85], 15, 165, fill=(190, 168, 156), width=max(2, int(r*0.028)))
+    dd.arc([cx, ny+nr, cx+mw, ny+nr+mw*0.85], 15, 165, fill=(190, 168, 156), width=max(2, int(r*0.028)))
 
-_BUNNY_CACHE = {}
+_MASCOT_CACHE={}
+MASCOT_PATH=Path("assets_brand/mascot_libunny.png")  # repo에 올려둘 마스코트 이미지
+
 def bunny(img, cx, cy, s=1.0):
-    """리버니 마스코트 — 4배 슈퍼샘플링 후 축소해 가장자리를 매끈하게(앤티앨리어싱).
-    img: 마스코트를 붙여넣을 PIL Image (Draw 객체가 아니라 Image 자체를 넘길 것)."""
-    r = max(8, int(60*s))
-    key = r
-    if key not in _BUNNY_CACHE:
-        SS = 4
-        cw, ch = int(r*4.6), int(r*5.3)
-        canvas = Image.new("RGBA", (cw*SS, ch*SS), (0, 0, 0, 0))
-        dd = ImageDraw.Draw(canvas)
-        hcx, hcy = cw*SS//2, int(ch*SS*0.55)
-        _bunny_raw(dd, hcx, hcy, r*SS)
-        small = canvas.resize((cw, ch), Image.LANCZOS)
-        _BUNNY_CACHE[key] = (small, cw, ch)
-    small, cw, ch = _BUNNY_CACHE[key]
-    img.paste(small, (int(cx-cw/2), int(cy-ch*0.55)), small)
+    """리버니 마스코트 — repo에 올려둔 실제 캐릭터 이미지(assets_brand/mascot_libunny.png)를
+    불러와 배치. 파일이 없으면 조용히 생략(로그만). s=1.0 기준 지름 약 120px."""
+    if not MASCOT_PATH.exists():
+        if "warned" not in _MASCOT_CACHE:
+            print(f"  ⚠️ 마스코트 이미지 없음({MASCOT_PATH}) — 토끼 생략. repo에 파일을 올려주세요.")
+            _MASCOT_CACHE["warned"]=True
+        return
+    diam=max(40,int(150*s))
+    key=diam
+    if key not in _MASCOT_CACHE:
+        try:
+            m=Image.open(MASCOT_PATH).convert("RGBA")
+            m=m.resize((diam,diam),Image.LANCZOS)
+            _MASCOT_CACHE[key]=m
+        except Exception as e:
+            print(f"  ⚠️ 마스코트 로드 실패: {e}"); return
+    m=_MASCOT_CACHE[key]
+    img.paste(m,(int(cx-diam/2),int(cy-diam/2)),m)
 
 def speech_bubble(d,cx,y,text,f,pad=26):
     """리버니 말풍선 — '오늘도 리버니가 알려줄게요' 컨셉."""
@@ -248,16 +261,18 @@ def _brightness(p):
 
 def _search_once(q):
     """한 검색어로 Unsplash+Pexels 후보 URL 수집. 실패 이유를 반드시 로그로 남김
-    (예전엔 except: pass로 조용히 삼켜져서 '사진이 하나도 안 붙는' 원인을 알 수 없었음)."""
+    (예전엔 except: pass로 조용히 삼켜져서 '사진이 하나도 안 붙는' 원인을 알 수 없었음).
+    orientation=portrait, content_filter 등은 bodetail의 검증된 사진 파이프라인
+    (generate_daily_post.py)에서 가져온 설정 — 실전에서 사진이 잘 붙는 것으로 확인된 조합."""
     cand=[]
     if UNSPLASH_KEY:
         try:
             r=requests.get("https://api.unsplash.com/search/photos",
                 headers={"Authorization":f"Client-ID {UNSPLASH_KEY}"},
-                params={"query":q,"per_page":6},timeout=12)
+                params={"query":q,"per_page":12,"orientation":"portrait","content_filter":"high"},timeout=12)
             if r.status_code==200:
                 res=r.json().get("results",[])
-                cand+=[x["urls"]["regular"] for x in res[:6]]
+                cand+=[x["urls"]["regular"] for x in res[:12] if x.get("urls",{}).get("regular")]
                 print(f"    · Unsplash '{q}' → {len(res)}건")
             else:
                 print(f"    ⚠️ Unsplash 응답 {r.status_code}: {r.text[:150]}")
@@ -267,10 +282,10 @@ def _search_once(q):
         try:
             r=requests.get("https://api.pexels.com/v1/search",
                 headers={"Authorization":PEXELS_KEY},
-                params={"query":q,"per_page":6},timeout=12)
+                params={"query":q,"per_page":15,"orientation":"portrait","size":"large"},timeout=12)
             if r.status_code==200:
                 res=r.json().get("photos",[])
-                cand+=[x["src"]["large"] for x in res[:6]]
+                cand+=[x["src"]["large2x"] for x in res[:15] if x.get("src",{}).get("large2x")]
                 print(f"    · Pexels '{q}' → {len(res)}건")
             else:
                 print(f"    ⚠️ Pexels 응답 {r.status_code}: {r.text[:150]}")
@@ -293,39 +308,35 @@ def fetch_photo(query, save, fallback=None):
     if not cand:
         print("  ⚠️ 이미지 후보 0건 — 사진 없이 진행")
         return False
-    best=None; best_score=-1
-    for j,u in enumerate(cand[:8]):
+    import io
+    best_im=None; best_score=-1
+    for j,u in enumerate(cand[:14]):
         try:
             resp=requests.get(u,timeout=20,headers={"User-Agent":"Mozilla/5.0"})
             if resp.status_code!=200 or len(resp.content)<3000:
                 continue
-            tmp=str(save)+f".c{j}"
-            Path(tmp).write_bytes(resp.content)
             try:
-                Image.open(tmp).verify()   # 손상/HTML 에러페이지가 아닌 진짜 이미지인지 확인
+                im=Image.open(io.BytesIO(resp.content)).convert("RGB")  # 메모리에서 바로 검증+로드
             except Exception:
-                Path(tmp).unlink(missing_ok=True); continue
-            b=_brightness(tmp)
-            score=-abs(b-185)   # 밝고 화사한 것(185 부근) 선호 — bodetail과 정반대
-            if score>best_score: best_score=score; best=tmp
+                continue
+            import numpy as np
+            b=float(np.array(im.resize((48,48)).convert("L")).mean())
+            score=-abs(b-185)   # 밝고 화사한 것(185 부근) 선호
+            if score>best_score: best_score=score; best_im=im
         except Exception as e:
             print(f"    ⚠️ 다운로드 실패({j}): {e}")
-    if best is None:
+    if best_im is None:
         print("  ⚠️ 후보는 있었으나 전부 다운로드/검증 실패 — 사진 없이 진행")
         return False
-    shutil.move(best,str(save))
-    for j in range(8):
-        t=str(save)+f".c{j}"
-        if Path(t).exists(): Path(t).unlink()
-    # 파스텔 보정: 살짝 밝게 + 채도 낮춰 크림톤
+    # 파스텔 보정: 살짝 밝게 + 채도 낮춰 크림톤 (메모리 → 최종 저장, 임시파일 없음)
     try:
-        im=Image.open(save).convert("RGB")
-        im=ImageEnhance.Brightness(im).enhance(1.05)
+        im=ImageEnhance.Brightness(best_im).enhance(1.05)
         im=ImageEnhance.Color(im).enhance(0.88)
         overlay=Image.new("RGB",im.size,(255,244,238))
         im=Image.blend(im,overlay,0.07)
         im.save(save,quality=92)
-    except Exception as e: print(f"  ⚠️ 보정 생략: {e}")
+    except Exception as e:
+        print(f"  ⚠️ 보정 생략: {e}"); best_im.save(save,quality=92)
     print(f"  🖼️ 사진 확보 완료 ({q})")
     return True
 
@@ -530,51 +541,69 @@ def tip_block(d,tip,y):
     return y+80
 
 def render_info(sl, idx, path, photo):
-    bg=[CREAM,PINKBG,SAGEBG][idx%3]
+    bg=[CREAM,PINKBG][idx%2]   # 연두색(SAGEBG) 제거 — 크림/핑크만 순환
     img=Image.new("RGB",(W,H),bg); d=ImageDraw.Draw(img)
     slide_frame(img,d,idx)
-    y=head_block(d,sl.get("heading",""))
-    if photo:
-        paste_photo_panel(img,d,photo,[210,y,W-210,y+380]); y+=430
-        max_body=3
+    zone_top=head_block(d,sl.get("heading",""))
+    tip=clean(sl.get("tip",""))
+    # 팁이 있으면 하단 팁 슬롯을 비워두고 그 위 공간에 중앙정렬,
+    # 팁이 없으면 박스 하단까지 전체를 정렬 영역으로 사용(위쪽 쏠림 버그 수정)
+    if tip:
+        tip_y=H-256; zone_bottom=tip_y-40
     else:
-        y+=30; max_body=5
+        tip_y=None; zone_bottom=H-150-40
+    PHOTO_H=380
+    max_body=3 if photo else 6
     f_b=F("kr",44)
-    for ln in wrap_kr(d,clean(sl.get("body","")),f_b,W-340)[:max_body]:
+    body_lines=wrap_kr(d,clean(sl.get("body","")),f_b,W-340)[:max_body]
+    photo_h = (PHOTO_H+50) if photo else 0
+    body_h = len(body_lines)*66
+    total_h = photo_h+body_h
+    zone_h = zone_bottom-zone_top
+    y = zone_top+max(16,(zone_h-total_h)/2)
+    if photo:
+        paste_photo_panel(img,d,photo,[210,y,W-210,y+PHOTO_H]); y+=PHOTO_H+50
+    for ln in body_lines:
         lw,_=tw(d,ln,f_b); d.text((W/2-lw/2,y),ln,font=f_b,fill=BROWN); y+=66
-    # 팁은 박스 안 고정 슬롯 (넘침 방지)
-    tip_y=H-256
-    dashed_line(d,W/2-140,tip_y-30,W/2+140,tip_y-30)
-    tip_block(d,sl.get("tip",""),tip_y)
+    if tip_y is not None:
+        dashed_line(d,W/2-140,tip_y-30,W/2+140,tip_y-30)
+        tip_block(d,tip,tip_y)
     sparkle(d,150,320,9); sparkle(d,W-160,H-260,10)
     img.save(path,quality=95)
 
 def render_tier(sl, idx, path, photo):
     img=Image.new("RGB",(W,H),CREAM); d=ImageDraw.Draw(img)
     slide_frame(img,d,idx)
-    y=head_block(d,sl.get("heading","티어 정리"))
+    zone_top=head_block(d,sl.get("heading","티어 정리"))
+    tip_y=H-232
+    zone_bottom=tip_y-30
     grade_col={"S":ROSE,"A":GOLD,"B":SOFT}
     f_g=F("en",50); f_i=F("kb",38); f_n=F("kr",30)
     tiers=(sl.get("tiers") or [])[:3]
-    for ti,t in enumerate(tiers):
+    # 1단계: 각 행 높이를 먼저 측정
+    rows=[]
+    for t in tiers:
         g=str(t.get("grade","?")).upper()[:1]
+        item_lines=wrap_kr(d,clean(t.get("items","")),f_i,W-380)[:2]
+        note_lines=wrap_kr(d,clean(t.get("note","")),f_n,W-380)[:2]
+        row_h=max(84,2+len(item_lines)*48+8+len(note_lines)*40)
+        rows.append((g,item_lines,note_lines,row_h))
+    total_h=sum(r[3] for r in rows)+30*max(0,len(rows)-1)
+    zone_h=zone_bottom-zone_top
+    y=zone_top+max(16,(zone_h-total_h)/2)
+    # 2단계: 중앙정렬된 시작점부터 그리기
+    for ri,(g,item_lines,note_lines,row_h) in enumerate(rows):
         col=grade_col.get(g,SOFT)
         row_top=y
         d.ellipse([130,y,206,y+76],outline=col,width=4)
         gw,_=tw(d,g,f_g); d.text((168-gw/2,y+8),g,font=f_g,fill=col)
-        items=clean(t.get("items",""))
-        item_lines=wrap_kr(d,items,f_i,W-380)[:2]
         for i,ln in enumerate(item_lines):
             d.text((236,y+2+i*48),ln,font=f_i,fill=BROWN)
-        # note는 item 줄 수만큼 내려온 실제 위치에서 시작 (겹침 방지 핵심)
         note_y=y+2+len(item_lines)*48+8
-        note=clean(t.get("note",""))
-        note_lines=wrap_kr(d,note,f_n,W-380)[:2]
         for i,ln in enumerate(note_lines):
             d.text((236,note_y+i*40),ln,font=f_n,fill=SOFT)
-        block_h=max(84,(note_y+len(note_lines)*40)-row_top)
-        y=row_top+block_h+30
-        if ti<len(tiers)-1:
+        y=row_top+row_h+30
+        if ri<len(rows)-1:
             dashed_line(d,130,y-15,W-130,y-15,dash=8,gap=10)
     tip_y=H-232
     dashed_line(d,W/2-140,tip_y-30,W/2+140,tip_y-30)
@@ -584,32 +613,44 @@ def render_tier(sl, idx, path, photo):
 def render_product(sl, idx, path, photo):
     img=Image.new("RGB",(W,H),PINKBG); d=ImageDraw.Draw(img)
     slide_frame(img,d,idx)
-    y=head_block(d,sl.get("heading",""))
+    zone_top=head_block(d,sl.get("heading",""))
+    zone_bottom=H-150-40   # product 슬라이드엔 별도 tip 존이 없어 박스 하단까지 사용
     pr=sl.get("product",{}) or {}
-    if photo:
-        paste_photo_panel(img,d,photo,[250,y,W-250,y+380]); y+=414
-    f_pr=F("kb",46)
     price=clean(pr.get("price",""))
-    if price:
-        pw,_=tw(d,"참고가  "+price,f_pr)
-        d.rounded_rectangle([W/2-pw/2-30,y,W/2+pw/2+30,y+78],radius=39,fill=WHITE,outline=LINE,width=2)
-        d.text((W/2-pw/2,y+12),"참고가  "+price,font=f_pr,fill=BROWN); y+=104
-    f_b=F("kr",40)
-    for ln in wrap_kr(d,clean(sl.get("body","")),f_b,W-320)[:4]:
-        lw,_=tw(d,ln,f_b); d.text((W/2-lw/2,y),ln,font=f_b,fill=BROWN); y+=58
-    y+=16
-    f_pc=F("kr",34)
-    f_lab=F("kb",34)
+    f_pr=F("kb",46); f_b=F("kr",40); f_pc=F("kr",34); f_lab=F("kb",34)
+    PHOTO_H=340
+    body_lines=wrap_kr(d,clean(sl.get("body","")),f_b,W-320)[:4]
+    rows=[]
     for label,key,col in [("좋아요","pros",ROSE),("아쉬워요","cons",SOFT)]:
         v=clean(pr.get(key,""))
         if not v: continue
         lab=f"· {label}  "
         lw,_=tw(d,lab,f_lab)
-        d.text((170,y),lab,font=f_lab,fill=col)
         lines=wrap_kr(d,v,f_pc,W-360-lw)[:2]
+        rows.append((lab,lw,lines,col))
+    # 1단계: 전체 블록 높이 측정(사진+가격뱃지+본문+장단점)
+    photo_h=(PHOTO_H+34) if photo else 0
+    price_h=104 if price else 0
+    body_h=(len(body_lines)*58+16) if body_lines else 0
+    procon_h=sum(max(46,46*len(lines))+20 for _,_,lines,_ in rows)
+    total_h=photo_h+price_h+body_h+procon_h
+    zone_h=zone_bottom-zone_top
+    y=zone_top+max(16,(zone_h-total_h)/2)
+    # 2단계: 중앙정렬된 시작점부터 그리기
+    if photo:
+        paste_photo_panel(img,d,photo,[250,y,W-250,y+PHOTO_H]); y+=PHOTO_H+34
+    if price:
+        pw,_=tw(d,"참고가  "+price,f_pr)
+        d.rounded_rectangle([W/2-pw/2-30,y,W/2+pw/2+30,y+78],radius=39,fill=WHITE,outline=LINE,width=2)
+        d.text((W/2-pw/2,y+12),"참고가  "+price,font=f_pr,fill=BROWN); y+=104
+    for ln in body_lines:
+        lw,_=tw(d,ln,f_b); d.text((W/2-lw/2,y),ln,font=f_b,fill=BROWN); y+=58
+    if body_lines: y+=16
+    for lab,lw,lines,col in rows:
+        d.text((170,y),lab,font=f_lab,fill=col)
         for i,ln in enumerate(lines):
             d.text((170+lw,y+i*46),ln,font=f_pc,fill=BROWN)
-        y+=max(46,46*len(lines))+20   # 실제 줄 수만큼 내려가야 다음 줄과 안 겹침(버그 수정 핵심)
+        y+=max(46,46*len(lines))+20
     img.save(path,quality=95)
 
 # ══════════════════════════════════════════════
@@ -704,6 +745,8 @@ def main():
     files=[]
     p=tmp/"01_cover.png"; render_cover(data,p,today); files.append(p)
     FALLBACK_Q={"info":"pastel manicure nails close up","product":"nail care product flatlay pastel"}
+    print(f"  🔑 사진 API 키 상태 — PEXELS_API_KEY: {'있음(' + str(len(PEXELS_KEY)) + '자)' if PEXELS_KEY else '❌ 없음'} / "
+          f"UNSPLASH_ACCESS_KEY: {'있음(' + str(len(UNSPLASH_KEY)) + '자)' if UNSPLASH_KEY else '❌ 없음'}")
     for i,sl in enumerate((data.get("slides") or [])[:3]):
         photo=None
         t=sl.get("type","info")
