@@ -260,25 +260,55 @@ def _bunny_raw(dd, cx, cy, r):
     dd.arc([cx, ny+nr, cx+mw, ny+nr+mw*0.85], 15, 165, fill=(190, 168, 156), width=max(2, int(r*0.028)))
 
 _MASCOT_CACHE={}
-MASCOT_PATH=Path("assets_brand/mascot_libunny.png")  # repo에 올려둘 마스코트 이미지
+MASCOT_DIR=Path("assets_brand")
+
+def _find_mascot():
+    """assets_brand 폴더에서 마스코트 이미지를 자동 탐색.
+    'mascot'이 이름에 있으면 최우선, 없으면 Gemini_Generated 등 png 아무거나 사용.
+    → 파일명을 바꿔 올려도(예: Gemini_Generated_Image_xxx.png) 알아서 찾음."""
+    if not MASCOT_DIR.exists(): return None
+    pngs=sorted([p for p in MASCOT_DIR.glob("*.png")]) + sorted([p for p in MASCOT_DIR.glob("*.PNG")])
+    if not pngs: return None
+    for p in pngs:
+        if "mascot" in p.name.lower(): return p
+    return pngs[0]   # mascot 이름 없으면 첫 png
+
+def _prep_mascot(path):
+    """마스코트 이미지 로드 + 흰 배경 자동 투명화(원본에 배경이 남아있어도 카드에 자연스럽게)."""
+    im=Image.open(path).convert("RGBA")
+    import numpy as np
+    a=np.array(im).astype(int)
+    r,g,b,al=a[:,:,0],a[:,:,1],a[:,:,2],a[:,:,3]
+    mx=np.maximum(np.maximum(r,g),b); mn=np.minimum(np.minimum(r,g),b)
+    white=(mn>228)&((mx-mn)<20)&(al>0)   # 밝고 무채색 = 배경
+    a[:,:,3]=np.where(white,0,al)
+    im=Image.fromarray(a.astype("uint8"))
+    bbox=im.getbbox()
+    if bbox: im=im.crop(bbox)
+    w,h=im.size; s=int(max(w,h)*1.04)
+    canvas=Image.new("RGBA",(s,s),(0,0,0,0))
+    canvas.paste(im,((s-w)//2,(s-h)//2),im)
+    return canvas
 
 def bunny(img, cx, cy, s=1.0):
-    """리버니 마스코트 — repo에 올려둔 실제 캐릭터 이미지(assets_brand/mascot_libunny.png)를
-    불러와 배치. 파일이 없으면 조용히 생략(로그만). s=1.0 기준 지름 약 120px."""
-    if not MASCOT_PATH.exists():
+    """리버니 마스코트 — assets_brand 폴더의 이미지를 자동 탐색해 배치.
+    파일이 없으면 조용히 생략(로그만). s=1.0 기준 지름 약 150px."""
+    path=_find_mascot()
+    if path is None:
         if "warned" not in _MASCOT_CACHE:
-            print(f"  ⚠️ 마스코트 이미지 없음({MASCOT_PATH}) — 토끼 생략. repo에 파일을 올려주세요.")
+            print(f"  ⚠️ 마스코트 이미지 없음(assets_brand 폴더에 png 필요) — 토끼 생략")
             _MASCOT_CACHE["warned"]=True
         return
-    diam=max(40,int(150*s))
-    key=diam
-    if key not in _MASCOT_CACHE:
+    if "base" not in _MASCOT_CACHE:
         try:
-            m=Image.open(MASCOT_PATH).convert("RGBA")
-            m=m.resize((diam,diam),Image.LANCZOS)
-            _MASCOT_CACHE[key]=m
+            _MASCOT_CACHE["base"]=_prep_mascot(path)
+            print(f"  🐰 마스코트 사용: {path.name}")
         except Exception as e:
             print(f"  ⚠️ 마스코트 로드 실패: {e}"); return
+    diam=max(40,int(150*s))
+    key=f"d{diam}"
+    if key not in _MASCOT_CACHE:
+        _MASCOT_CACHE[key]=_MASCOT_CACHE["base"].resize((diam,diam),Image.LANCZOS)
     m=_MASCOT_CACHE[key]
     img.paste(m,(int(cx-diam/2),int(cy-diam/2)),m)
 
@@ -303,50 +333,50 @@ def _brightness(p):
     except Exception: return 150.0
 
 def _search_once(q):
-    """한 검색어로 Unsplash+Pexels 후보 URL 수집. 실패 이유를 반드시 로그로 남김
-    (예전엔 except: pass로 조용히 삼켜져서 '사진이 하나도 안 붙는' 원인을 알 수 없었음).
-    orientation=portrait, content_filter 등은 bodetail의 검증된 사진 파이프라인
-    (generate_daily_post.py)에서 가져온 설정 — 실전에서 사진이 잘 붙는 것으로 확인된 조합.
+    """한 검색어로 Unsplash+Pexels 후보 URL 수집.
+    반환: (후보 URL 리스트, 레이트리밋여부) — 레이트리밋(429/403)이면 호출부가 잠깐 쉬고 재시도.
     per_page는 카테고리 A/B 릴스와 같은 API 키를 공유하는 걸 감안해 절제된 수치로 유지."""
-    cand=[]
-    if UNSPLASH_KEY:
-        try:
-            r=requests.get("https://api.unsplash.com/search/photos",
-                headers={"Authorization":f"Client-ID {UNSPLASH_KEY}"},
-                params={"query":q,"per_page":8,"orientation":"portrait","content_filter":"high"},timeout=12)
-            if r.status_code==200:
-                res=r.json().get("results",[])
-                cand+=[x["urls"]["regular"] for x in res[:8] if x.get("urls",{}).get("regular")]
-                print(f"    · Unsplash '{q}' → {len(res)}건")
-            elif r.status_code in (403,429):
-                print(f"    ⚠️ Unsplash 요청 한도 초과({r.status_code}) — 릴스(카테고리 A/B)와 키를 공유 중이면 "
-                      f"시간당 한도가 이미 소진됐을 수 있음")
-            else:
-                print(f"    ⚠️ Unsplash 응답 {r.status_code}: {r.text[:150]}")
-        except Exception as e:
-            print(f"    ⚠️ Unsplash 요청 실패: {e}")
-    if PEXELS_KEY:
+    cand=[]; rate_limited=False
+    if PEXELS_KEY:   # Pexels를 먼저(무료 한도가 더 넉넉) 시도
         try:
             r=requests.get("https://api.pexels.com/v1/search",
                 headers={"Authorization":PEXELS_KEY},
-                params={"query":q,"per_page":10,"orientation":"portrait","size":"large"},timeout=12)
+                params={"query":q,"per_page":15},timeout=12)   # orientation 제약 제거 — 네일/제품컷은 정사각·가로가 많아 portrait로 묶으면 결과가 급감
             if r.status_code==200:
                 res=r.json().get("photos",[])
-                cand+=[x["src"]["large2x"] for x in res[:10] if x.get("src",{}).get("large2x")]
+                cand+=[x["src"]["large2x"] for x in res[:15] if x.get("src",{}).get("large2x")]
                 print(f"    · Pexels '{q}' → {len(res)}건")
             elif r.status_code in (403,429):
-                print(f"    ⚠️ Pexels 요청 한도 초과({r.status_code}) — 릴스(카테고리 A/B)와 키를 공유 중이면 "
-                      f"시간당 한도가 이미 소진됐을 수 있음")
+                rate_limited=True
+                print(f"    ⚠️ Pexels 요청 한도 초과({r.status_code})")
             else:
-                print(f"    ⚠️ Pexels 응답 {r.status_code}: {r.text[:150]}")
+                print(f"    ⚠️ Pexels 응답 {r.status_code}: {r.text[:120]}")
         except Exception as e:
             print(f"    ⚠️ Pexels 요청 실패: {e}")
-    return cand
+    if not cand and UNSPLASH_KEY:
+        try:
+            r=requests.get("https://api.unsplash.com/search/photos",
+                headers={"Authorization":f"Client-ID {UNSPLASH_KEY}"},
+                params={"query":q,"per_page":12,"content_filter":"high"},timeout=12)   # orientation 제거
+            if r.status_code==200:
+                res=r.json().get("results",[])
+                cand+=[x["urls"]["regular"] for x in res[:12] if x.get("urls",{}).get("regular")]
+                print(f"    · Unsplash '{q}' → {len(res)}건")
+            elif r.status_code in (403,429):
+                rate_limited=True
+                print(f"    ⚠️ Unsplash 요청 한도 초과({r.status_code})")
+            else:
+                print(f"    ⚠️ Unsplash 응답 {r.status_code}: {r.text[:120]}")
+        except Exception as e:
+            print(f"    ⚠️ Unsplash 요청 실패: {e}")
+    return cand, rate_limited
 
 def fetch_photo(queries, save):
-    """queries: 검색어 리스트(우선순위 순). 앞에서부터 시도해 결과 있는 첫 검색어를 사용
-    (bodetail의 image_queries 순차 시도 패턴과 동일) — subject_override로 강제된 구체적
-    검색어를 최우선으로 넣고, 그 다음 Claude의 img_query, 마지막에 범용 폴백 순으로 전달됨."""
+    """queries: 검색어 리스트(우선순위 순). 앞에서부터 시도해 결과 있는 첫 검색어를 사용.
+    ★ bodetail(generate_daily_post.py)의 pick_best 방식 이식 — 핵심 교훈:
+      "검색 결과가 하나라도 있으면, 다운로드되는 첫 이미지를 무조건 쓴다."
+    예전 실패 원인은 밝기 필터(185 근처만 선호)+과한 검증으로 후보가 전부 탈락한 것.
+    이제 밝기는 '더 밝은 걸 앞으로' 정렬하는 용도로만 쓰고, 다운로드만 되면 채택한다."""
     if not UNSPLASH_KEY and not PEXELS_KEY:
         print("  ⚠️ PEXELS_API_KEY / UNSPLASH_ACCESS_KEY 둘 다 없음 — 사진 생략")
         return False
@@ -354,39 +384,43 @@ def fetch_photo(queries, save):
     queries=[clean(q) for q in queries if clean(q)] or ["pastel manicure nails"]
     cand=[]; used_q=None
     for q in queries:
-        cand=_search_once(q)
+        cand,rl=_search_once(q)
         if cand: used_q=q; break
+        if rl:
+            print("    · 레이트리밋 감지 → 3초 대기 후 재시도")
+            time.sleep(3)
+            cand,rl=_search_once(q)
+            if cand: used_q=q; break
     if not cand:
         print("  ⚠️ 모든 검색어에서 후보 0건 — 사진 없이 진행(레이트리밋이면 위 경고 참고)")
         return False
-    import io
-    best_im=None; best_score=-1
-    for j,u in enumerate(cand[:8]):   # 다운로드 수를 줄여 API 다운로드 부담/시간 절약
+    import io, numpy as np
+    # bodetail 방식: 후보 URL을 순서대로 다운로드 시도 → 성공하는 첫 이미지를 바로 채택.
+    # (검색 결과 순서 자체가 이미 관련도 순이므로, 무리한 밝기 필터로 버리지 않음)
+    picked=None
+    for j,u in enumerate(cand):
         try:
             resp=requests.get(u,timeout=20,headers={"User-Agent":"Mozilla/5.0"})
-            if resp.status_code!=200 or len(resp.content)<3000:
+            if resp.status_code!=200: 
                 continue
-            try:
-                im=Image.open(io.BytesIO(resp.content)).convert("RGB")
-            except Exception:
-                continue
-            import numpy as np
-            b=float(np.array(im.resize((48,48)).convert("L")).mean())
-            score=-abs(b-185)
-            if score>best_score: best_score=score; best_im=im
+            im=Image.open(io.BytesIO(resp.content)).convert("RGB")
+            picked=im
+            break   # ★ 다운로드+열기 성공하면 즉시 채택 (bodetail과 동일 — 이게 '항상 사진 나오는' 비결)
         except Exception as e:
-            print(f"    ⚠️ 다운로드 실패({j}): {e}")
-    if best_im is None:
-        print("  ⚠️ 후보는 있었으나 전부 다운로드/검증 실패 — 사진 없이 진행")
+            print(f"    · 후보{j} 스킵({e}) → 다음 후보")
+            continue
+    if picked is None:
+        print("  ⚠️ 후보 URL을 모두 시도했으나 다운로드 실패 — 사진 없이 진행")
         return False
+    # 파스텔 보정(실패해도 원본 저장 — 절대 사진을 버리지 않음)
     try:
-        im=ImageEnhance.Brightness(best_im).enhance(1.05)
-        im=ImageEnhance.Color(im).enhance(0.88)
+        im=ImageEnhance.Brightness(picked).enhance(1.05)
+        im=ImageEnhance.Color(im).enhance(0.9)
         overlay=Image.new("RGB",im.size,(255,244,238))
-        im=Image.blend(im,overlay,0.07)
+        im=Image.blend(im,overlay,0.06)
         im.save(save,quality=92)
     except Exception as e:
-        print(f"  ⚠️ 보정 생략: {e}"); best_im.save(save,quality=92)
+        print(f"  ⚠️ 보정 생략(원본 저장): {e}"); picked.save(save,quality=92)
     print(f"  🖼️ 사진 확보 완료 (검색어: '{used_q}')")
     return True
 
@@ -402,37 +436,44 @@ def paste_photo_panel(img, d, photo_path, box, r=36):
 # 30일 주제: 자동 순환 + 소진 시 Claude가 다음 배치 생성
 # ══════════════════════════════════════════════
 FALLBACK_TOPICS=[
- "모르면 손해보는 손톱 영양제 티어리스트 — S부터 B까지 솔직 정리|tier",
- "이번 달 띠별 행운 네일 컬러 — 좋은 기운을 부르는 조합|info",
- "아는 사람만 아는 젤네일 2주 더 오래가는 습관|info",
- "네일 아티스트가 진짜 쓰는 큐티클 오일 소개 — 참고가 포함|product",
- "손톱 세로줄·갈라짐 원인과 집에서 하는 해결 루틴|info",
- "퍼스널컬러 여름쿨이 하면 손이 하얘 보이는 컬러 5|info",
- "물어뜯은 손톱 교정 전후 — 어떻게 달라질까|info",
- "여름 물놀이에도 안 지워지는 컬러·디자인 추천|info",
- "핸드크림 티어리스트 — 흡수력·향·가성비로 나눈 솔직 등급|tier",
- "직장인 오피스 네일 — 단정한데 밋밋하지 않게|info",
- "젤네일 휴식기 팩트체크 — 꼭 필요할까|info",
- "이번 주 별자리별 행운 네일 컬러|info",
- "손이 예뻐 보이는 네일 모양 고르는 법|info",
- "짧은 손톱에 더 예쁜 숏네일 디자인 모음|info",
- "네일샵 처음 가는 사람을 위한 예약→시술 안내|info",
- "손 나이 -5살 만드는 핸드크림 바르는 순서|info",
- "웨딩·상견례를 위한 온화한 네일 추천|info",
- "젤 제거 후 얇아진 손톱 회복시키는 법|info",
- "가을 뉴트럴 컬러 미리보기 — 올해 유행 예측|info",
- "네일 오래가는 사람들의 공통 습관 5|info",
- "손톱에 좋은 음식 티어리스트 — 영양소 기준 등급|tier",
- "퍼스널컬러 봄웜 필수 네일 컬러 5|info",
- "탑코트 하나로 달라지는 광 — 추천 제품과 참고가|product",
- "이달의 탄생석 컬러 네일과 그 의미|info",
- "패디 시즌 — 발 관리 순서와 꿀팁|info",
- "민감한 손톱을 위한 저자극 케어 가이드|info",
- "피부톤별 피해야 할 네일 컬러|info",
- "미니멀 원컬러를 고급스럽게 하는 법|info",
- "손톱 물어뜯는 습관 끊는 현실적인 방법|info",
- "젤네일 첫 24시간이 중요한 이유 — 시술 후 관리|info",
+ # 형식: "주제|타입|다음편 예고" — 다음편 예고가 마지막 장 CTA와 연결돼 '타고타고' 보게 함.
+ # 스토리라인: 유지력(입문) → 홈케어 → 케어템 소개 → 반응 좋으면 티어리스트/탑3로 심화 → 디자인/컬러 → 순환
+ # ── 1주차: 유지력(가장 많이 검색하는 고민)으로 시작 ──
+ "젤네일, 왜 나만 빨리 들뜰까? 유지력 망치는 습관 5|info|다음편, 유지력 200% 만드는 홈케어 루틴",
+ "네일 유지력 200% 만드는 집에서 하는 홈케어 루틴|info|다음편, 사장이 매일 쓰는 큐티클 오일 공개",
+ "네일샵 사장이 매일 쓰는 큐티클 오일 — 왜 이걸 쓰나|product|반응 좋으면! 오일 5개 다 써보고 티어리스트 예고",
+ "손톱 세로줄·갈라짐, 이게 원인이었어요|info|다음편, 손톱 얇은 분들 영양제 이야기",
+ "손톱이 얇고 잘 찢어진다면 — 영양제 진짜 필요할까|info|예고! 사장이 다 써본 영양제 탑3 곧 공개",
+ "아는 사람만 아는, 젤네일 오래 가는 사람들의 공통 습관|info|다음편, 물어뜯는 습관 진짜 끊는 법",
+ "손톱 물어뜯는 습관, 이렇게 끊었어요 (실제 후기)|info|다음편, 물어뜯은 손톱도 예뻐지는 교정 과정",
+ # ── 2주차: 심화 — 티어리스트/탑3 (예고했던 것 실행) ──
+ "사장이 다 써봤다 — 큐티클 오일 티어리스트 S~B|tier|다음편, 핸드크림도 등급 매겨드려요",
+ "사장이 다 써봤다 — 핸드크림 티어리스트 (흡수·향·가성비)|tier|예고! 영양제 탑3는 다음 주에",
+ "물어뜯은 손톱 교정, 한 달이면 이렇게 달라져요|info|다음편, 짧은 손톱도 예뻐 보이는 디자인",
+ "짧은 손톱이 더 예쁜 숏네일 디자인 모음|info|다음편, 손 예뻐 보이는 네일 모양 고르기",
+ "손이 길고 예뻐 보이는 네일 모양 고르는 법|info|다음편, 직장인 오피스 네일 추천",
+ "단정한데 밋밋하지 않은 직장인 오피스 네일|info|다음편, 사무실 책상에 둘 네일 케어템 3종",
+ "사무실에서 쓰는 네일 케어템 3종|product|예고! 네일 영양제 탑3 드디어 공개",
+ # ── 3주차: 예고했던 영양제 탑3 + 컬러/운세 ──
+ "드디어 공개! 사장이 뽑은 손톱 영양제 탑3|tier|다음편, 영양제 언제 먹어야 효과 볼까",
+ "손톱 영양제, 언제 먹어야 효과 볼까 (타이밍이 반)|info|다음편, 이번 달 띠별 행운 네일 컬러",
+ "이번 달 띠별 행운 네일 컬러|info|다음편, 퍼스널컬러별 손 하얘 보이는 컬러",
+ "퍼스널컬러 여름쿨, 손이 하얘 보이는 네일 컬러 5|info|다음편, 봄웜 웜톤 필수 컬러",
+ "퍼스널컬러 봄웜에게 잘 어울리는 네일 컬러 5|info|다음편, 피부톤별 피해야 할 컬러",
+ "피부톤별로 피하면 좋은 네일 컬러|info|다음편, 미니멀 원컬러 고급스럽게 하는 법",
+ "밋밋한 원컬러를 고급스럽게 만드는 법|info|다음편, 여름 물놀이에도 안 지워지는 네일",
+ # ── 4주차: 시즌/상황 + 시술 전후 (신규 고객 전환) ──
+ "여름 물놀이에도 안 지워지는 컬러·디자인|info|다음편, 발 관리 패디큐어 시즌 준비",
+ "패디큐어 시즌 — 집에서 하는 발 관리 순서|info|다음편, 네일샵 처음 가는 분들을 위한 안내",
+ "네일샵 처음이신가요? 예약부터 시술까지 A to Z|info|다음편, 시술 후 첫 24시간이 중요한 이유",
+ "시술 후 첫 24시간, 이것만은 지켜주세요|info|다음편, 젤 제거 후 얇아진 손톱 회복법",
+ "젤 제거 후 얇아진 손톱, 이렇게 회복시켜요|info|다음편, 손 나이 -5살 핸드크림 바르는 법",
+ "손 나이 -5살 만드는 핸드크림 바르는 순서|info|다음편, 웨딩·상견례를 위한 우아한 네일",
+ "웨딩·상견례를 위한 우아한 네일 추천|info|다음편, 가을 뉴트럴 컬러 미리보기",
+ "가을에 유행할 뉴트럴 네일 컬러 미리보기|info|다음편, 이달의 탄생석 컬러 네일",
+ "이달의 탄생석 컬러 네일과 그 의미|info|다음달, 새로운 이야기로 다시 시작해요",
 ]
+
 
 def load_or_make_topics():
     today=datetime.date.today()
@@ -449,24 +490,35 @@ def load_or_make_topics():
         TOPICS_FILE.write_text(json.dumps(data,ensure_ascii=False,indent=1),encoding="utf-8")
         print(f"  🗓️ 새 30일 주제 배치 #{batch} 생성·저장")
     t=data["topics"][within%len(data["topics"])]
-    if "|" in t: topic,ttype=t.rsplit("|",1)
-    else: topic,ttype=t,"info"
-    return topic.strip(), ttype.strip()
+    parts=t.split("|")
+    topic=parts[0].strip()
+    ttype=parts[1].strip() if len(parts)>1 else "info"
+    next_hook=parts[2].strip() if len(parts)>2 else ""
+    return topic, ttype, next_hook
 
 def generate_topic_batch(batch, prev):
-    prompt=f"""서울 송파/문정 1인 네일샵 '리버니 네일룸' 인스타 카드뉴스의 다음 30일 주제를 만들어.
+    prompt=f"""서울 송파/문정 1인 네일샵 '리버니 네일룸' 인스타 카드뉴스의 다음 30일 주제를 짜.
 직전 배치와 겹치지 않게: {json.dumps(prev[:30],ensure_ascii=False)}
 
-규칙:
-- 잠재고객(네일에 관심 있는 20~40대 여성)이 저장/팔로우하게 만드는 주제만.
-- 제목은 후킹형으로 — '모르면 손해보는', '아는 사람만 아는', '~하면 큰일나는' 같은 클릭 유도 어법을 30개 중 8개 이상에 섞어.
-- 구성 비율: 티어리스트/순위(한국인 취향 저격) 4개 이상, 제품 소개(참고가 포함) 3개 이상,
-  띠별/별자리/탄생석 운세 네일 3개 이상, 관리/케어 팁, 디자인 추천, 네일 상식 골고루.
-- 각 줄 형식: "주제문|타입"  (타입은 info / tier / product 중 하나)
-순수 JSON 배열만 출력: ["주제|info", "주제|tier", ...] 정확히 30개."""
+★ 핵심: 30개가 '따로 노는 주제'가 아니라 하나의 스토리라인으로 이어져야 해.
+독자가 오늘 글을 보면 다음 글이 궁금해서 팔로우하고 기다리게 만드는 게 목표야.
+
+연결 설계 규칙:
+- 각 주제의 '다음편 예고'가 바로 다음 주제와 자연스럽게 이어지게.
+- 처음엔 가볍게 시작(유지력·홈케어 같은 최다 검색 고민) → 케어템을 큼직하게 하나씩 소개 →
+  반응이 쌓이면 "사장이 다 써보고 뽑은 티어리스트/탑3"로 심화(예고 먼저 깔고 나중에 실행).
+- '네일 유지력 늘리는 법' 같은 실전 고민을 곳곳에 배치(가장 많이 저장됨).
+- 신규 고객 전환용(예약 안내, 시술 전후 관리)도 3~4개 섞어.
+- 후킹 어법('모르면 손해보는','아는 사람만 아는','드디어 공개','예고!')을 적절히.
+- 타입 비율: tier 4개+, product 3개+, 나머지 info. 운세/컬러(띠별·퍼스널컬러·탄생석)도 3개+.
+
+각 줄 형식(3개 필드): "주제문|타입|다음편 예고"
+  타입 = info / tier / product 중 하나
+  다음편 예고 = 다음 주제를 궁금하게 만드는 한 줄(예: "다음편, 핸드크림도 등급 매겨드려요")
+순수 JSON 배열만 출력: ["주제|tier|다음편 예고", ...] 정확히 30개."""
     r=requests.post("https://api.anthropic.com/v1/messages",
         headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-        json={"model":"claude-sonnet-4-5","max_tokens":2200,"messages":[{"role":"user","content":prompt}]},timeout=120)
+        json={"model":"claude-sonnet-4-5","max_tokens":3000,"messages":[{"role":"user","content":prompt}]},timeout=120)
     txt=r.json()["content"][0]["text"]
     arr=json.loads(txt[txt.find("["):txt.rfind("]")+1])
     return arr[:30] if len(arr)>=25 else None
@@ -474,34 +526,35 @@ def generate_topic_batch(batch, prev):
 # ══════════════════════════════════════════════
 # 콘텐츠 생성
 # ══════════════════════════════════════════════
-def generate_content(topic, ttype):
+def generate_content(topic, ttype, next_hook=""):
     today=datetime.date.today()
     type_rule={
-     "info":"""slides 3개, 각각 {"type":"info","heading":"소제목(9자 내)","body":"1~2문장, 한 문장당 18자 내외로 짧게 끊어써(줄바꿈 \\n으로 문장 구분)","tip":"리버니 한 줄 팁(16자 내)","img_query":"이 슬라이드에 어울리는 밝고 화사한 사진 영어 검색어 3~5단어 (예: 'soft pink gel nails manicure')"}""",
-     "tier":"""slides는 [1] {"type":"tier","heading":"티어 정리(8자 내)","tiers":[{"grade":"S","items":"항목들(쉼표구분 2개, 짧게)","note":"이유 한 줄(14자 내)"},{"grade":"A",...},{"grade":"B",...}],"img_query":"..."} 와
-[2],[3] {"type":"info",...} (S티어 상세/고르는 기준 등, body는 1~2문장 짧게)로 구성. 등급은 솔직하고 근거 있게.""",
-     "product":"""slides는 [1] {"type":"product","heading":"제품명(10자 내)","product":{"name":"제품명","price":"참고가 (예: 1만원대 중반)","pros":"장점 한 줄(16자 내)","cons":"아쉬운 점 한 줄(16자 내, 솔직하게)"},"body":"어떤 사람에게 맞는지 1문장(20자 내)","img_query":"제품/사용 장면 영어 검색어 3~5단어"} 와
-[2],[3] {"type":"info",...} (사용법/궁합 팁, body는 1~2문장 짧게)으로 구성. 가격은 '참고가'로 대략 범위만 — 단정 금지."""}
-    prompt=f"""너는 송파/문정 프라이빗 1인 네일샵 '리버니 네일룸'(@libunny.nailroom)의 콘텐츠 에디터.
-마스코트 토끼 '리버니'가 팔로워에게 오늘의 네일 정보를 다정하게 알려주는 카드뉴스야.
+     "info":"""slides 3개, 각각 {"type":"info","heading":"소제목(9자 내)","body":"1~2문장, 한 문장당 18자 내외로 짧게 끊어써(줄바꿈 \\n으로 문장 구분). 사장이 직접 말하는 말투 ~해요/~예요/~더라고요","tip":"리버니 한 줄 팁(16자 내)","img_query":"이 슬라이드에 어울리는 밝고 화사한 사진 영어 검색어 3~5단어 (예: 'soft pink gel nails manicure')"}""",
+     "tier":"""slides는 [1] {"type":"tier","heading":"티어 정리(8자 내)","tiers":[{"grade":"S","items":"항목들(쉼표구분 2개, 짧게)","note":"이유 한 줄(14자 내, ~해요 말투)"},{"grade":"A",...},{"grade":"B",...}],"img_query":"..."} 와
+[2],[3] {"type":"info",...} (S티어 상세/고르는 기준 등, body는 사장 말투로 짧게)로 구성. 등급은 사장이 직접 다 써보고 매긴 솔직한 평가로.""",
+     "product":"""slides는 [1] {"type":"product","heading":"제품명(10자 내)","product":{"name":"제품명","price":"참고가 (예: 1만원대 중반)","pros":"장점 한 줄(16자 내)","cons":"아쉬운 점 한 줄(16자 내, 솔직하게)"},"body":"어떤 사람에게 맞는지 1문장(20자 내, 사장 말투)","img_query":"제품/사용 장면 영어 검색어 3~5단어"} 와
+[2],[3] {"type":"info",...} (사용법/궁합 팁, body는 사장 말투로 짧게)으로 구성. 가격은 '참고가'로 대략 범위만 — 단정 금지."""}
+    next_line=f'\n[다음편 예고] 마지막 장 next_tease와 캡션에 이 방향을 반영해 궁금증을 남겨: "{next_hook}"' if next_hook else ""
+    prompt=f"""너는 송파/문정 프라이빗 1인 네일샵 '리버니 네일룸'(@libunny.nailroom)의 사장이야.
+마스코트 토끼 '리버니'와 함께, 사장이 직접 팔로워에게 오늘의 네일 정보를 알려주는 카드뉴스야.
 오늘({today.month}월 {today.day}일) 주제: "{topic}"
 
-[톤] 다정+화사, 호들갑 금지, 이모지 금지(디자인에서 처리함).
-[글자 수 — 반드시 지킬 것] 이 카드뉴스는 모바일 세로 카드라 글자가 많으면 안 읽혀.
-모든 문장은 최대한 짧게. 위에 명시된 글자 수 제한을 절대 넘기지 마.
-1문장 = 1의미 단위로 끊고, 접속사·수식어를 과감히 생략해.
-[원칙] 카드마다 '저장할 가치'가 있는 구체 정보 1개 이상. 뻔한 말 금지, 아티스트만 아는 디테일을
-아주 짧은 문장으로. 길게 설명하지 말고 핵심만.
-[표지 훅] title은 후킹형 — 주제가 이미 후킹형이면 살리고, 아니면 '모르면 손해보는/아는 사람만 아는/
-저장 필수' 류의 어법으로 강화. 단, 과장 광고 금지(팩트 기반).
+[말투 — 매우 중요] 네일샵 사장이 단골에게 직접 말하듯 다정하고 친근하게.
+반드시 ~해요/~예요/~더라고요/~거든요/~보세요 같은 부드러운 종결어미를 써.
+딱딱한 명사형 종결(굳음/필요/추천/소진) 절대 금지 → 굳어요/필요해요/추천해요/떨어져요 처럼.
+전문가지만 잘난 척 없이, 실제로 써보고 겪은 사람의 생생한 말투로.
+[글자 수 — 반드시] 모바일 세로 카드라 길면 안 읽혀. 문장은 최대한 짧게, 글자 수 제한 준수.
+1문장 = 1의미. 접속사·군더더기 생략. 하지만 말투의 다정함은 유지.
+[원칙] 카드마다 '저장할 가치'가 있는 구체 정보 1개 이상. 뻔한 말 금지, 사장만 아는 실전 디테일.
+[표지 훅] title은 후킹형 — 이미 후킹형이면 살리고, 아니면 강화. 과장 광고는 금지(팩트 기반).{next_line}
 
 {type_rule.get(ttype,type_rule["info"])}
 
 순수 JSON만:
-{{"cover":{{"kicker":"티저 한 줄(예: 모르면 손해보는) 8자 내","title1":"제목 윗줄(7자 내)","title2":"제목 아랫줄(8자 내)","sub":"부제(14자 내, 뭘 얻어가는지)","bubble":"리버니 말풍선(12자 내, 예: 오늘은 이거 알려줄게요)"}},
+{{"cover":{{"kicker":"티저 한 줄(예: 모르면 손해봐요) 8자 내","title1":"제목 윗줄(7자 내)","title2":"제목 아랫줄(8자 내)","sub":"부제(14자 내, 뭘 얻어가는지)","bubble":"리버니 말풍선(12자 내, 예: 오늘은 이거 알려줄게요)"}},
 "slides":[...위 규칙대로 3개...],
-"last":{{"next_tease":"다음 콘텐츠 예고(16자 내)"}},
-"caption":"인스타 캡션 — 첫 줄 훅 / 요약 2줄 / '저장해두고 네일 고를 때 꺼내보세요' 류 CTA / 해시태그 15개(#송파네일 #문정동네일 #문정네일 #리버니네일룸 필수 포함)"}}"""
+"last":{{"next_tease":"다음 콘텐츠 예고(18자 내, 위 다음편 예고 반영)"}},
+"caption":"인스타 캡션 — 사장 말투로, 첫 줄 훅 / 요약 2줄 / 저장 유도 CTA / 다음편 궁금증 한 줄 / 해시태그 15개(#송파네일 #문정동네일 #문정네일 #리버니네일룸 필수 포함)"}}"""
     r=requests.post("https://api.anthropic.com/v1/messages",
         headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
         json={"model":"claude-sonnet-4-5","max_tokens":2800,"messages":[{"role":"user","content":prompt}]},timeout=120)
@@ -781,10 +834,13 @@ def main():
     else:
         if not ANTHROPIC_KEY:
             print("❌ ANTHROPIC_API_KEY(오타 시크릿 ANTROPIC_API_KEY로 주입) 없음"); sys.exit(1)
-        topic,ttype = (TOPIC_OVERRIDE,"info") if TOPIC_OVERRIDE else load_or_make_topics()
-        print(f"🐰 리버니 데일리 | 주제: {topic} ({ttype})")
-        data=generate_content(topic,ttype)
-        data["_topic"]=topic
+        if TOPIC_OVERRIDE:
+            topic,ttype,next_hook = TOPIC_OVERRIDE,"info",""
+        else:
+            topic,ttype,next_hook = load_or_make_topics()
+        print(f"🐰 리버니 데일리 | 주제: {topic} ({ttype}) | 다음편: {next_hook or '-'}")
+        data=generate_content(topic,ttype,next_hook)
+        data["_topic"]=topic; data["_next_hook"]=next_hook
     # 기존 이미지 캐시 유지(재렌더 시 사진 재검색 안 함)
     photo_cache={}
     if RERENDER and (OUT/"assets").exists():
