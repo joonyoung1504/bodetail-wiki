@@ -1,27 +1,25 @@
 {
-  "clip_start": 277.26,
-  "clip_end": 296.14,
-  "drop_at": 284.79,
-  "quote": "She taught me how to get up when I was knocked down.",
-  "hook_reason": "짧고 단정적인 역전 선언. '절대 일으켜주지 않았다'는 빌드업 끝에 터지는 '스스로 일어나는 법을 배웠다'는 한 줄 — 설명 없이 박제되는 문장. 앞 두 문장(277.26~282.77)의 반복 리듬이 긴장을 쌓고, 284.79에 정점을 찍고 침묵이 온다. bodetail 브랜드의 '스스로 단련하는 남자' 코어 메시지와 완벽하게 맞아떨어짐.",
+  "clip_start": 40.44,
+  "clip_end": 49.52,
+  "drop_at": 45.888,
+  "quote": "wonderful!",
+  "hook_reason": "대본 전체를 통틀어 단독으로 폭발하는 감탄사 'wonderful!'과 그 직후 'He has nailed it for Norway!'는 짧고 단정적이며, 침묵과 외침의 대비가 극적 긴장을 최고조로 끌어올림. 특히 42.69~43.5의 'Haaland!' 호명 → 43.91의 'Oh,' 짧은 숨 → 45.92의 'wonderful!' 단독 폭발 구조는 commentary 특유의 날것 에너지를 그대로 전달하며, 남성 그루밍 브랜드의 '완성의 순간' 서사와 직결됨. pause 간격(43.99→45.92 = 약 2초 침묵)이 drop 직전 빌드업을 극대화함.",
   "emphasis_words": [
-    "never",
-    "picked",
+    "Shoulder",
     "up",
-    "fell",
-    "taught",
-    "get",
-    "up",
-    "knocked",
-    "down"
+    "Haaland",
+    "Oh",
+    "wonderful",
+    "nailed",
+    "Norway"
   ],
   "broll_keywords": [
-    "man standing alone dark cinematic silhouette",
-    "man face closeup moody low key light",
-    "male hands clenched fist dark dramatic",
-    "man jaw closeup grooming editorial ink black",
-    "men training dark industrial gym grind",
-    "man mirror reflection dark solitary",
-    "male figure rising shadow rim light cinematic"
+    "man neck jawline dark cinematic",
+    "man hands grooming dark moody",
+    "men cologne bottle ink black editorial",
+    "man face closeup moody rim light",
+    "male suit dark editorial slow motion",
+    "man silhouette dark rim light gold",
+    "man mirror reflection dark cinematic"
   ]
 }
