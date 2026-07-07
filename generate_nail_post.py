@@ -50,7 +50,7 @@ RERENDER   = os.environ.get("RERENDER","").strip().lower() in ("1","true","yes")
 SKIP_EMAIL = os.environ.get("SKIP_EMAIL","").strip().lower() in ("1","true","yes")
 GMAIL_ADDR = os.environ.get("GMAIL_ADDRESS","").strip()
 GMAIL_PW   = os.environ.get("GMAIL_APP_PASSWORD","").strip()
-MAIL_TO    = os.environ.get("MAIL_TO","").strip() or GMAIL_ADDR
+MAIL_TO    = os.environ.get("MAIL_TO","").strip() or "ulsanhsls12@naver.com"
 PEXELS_KEY   = os.environ.get("PEXELS_API_KEY","").strip()
 UNSPLASH_KEY = os.environ.get("UNSPLASH_ACCESS_KEY","").strip()
 
@@ -263,55 +263,91 @@ def _bunny_raw(dd, cx, cy, r):
 _MASCOT_CACHE={}
 MASCOT_DIR=Path("assets_brand")
 
-def _find_mascot():
-    """assets_brand 폴더에서 마스코트 이미지를 자동 탐색.
-    'mascot'이 이름에 있으면 최우선, 없으면 Gemini_Generated 등 png 아무거나 사용.
-    → 파일명을 바꿔 올려도(예: Gemini_Generated_Image_xxx.png) 알아서 찾음."""
+def _find_asset(name_keys, exclude=None):
+    """assets_brand 폴더에서 name_keys(우선순위 순) 중 이름에 포함된 첫 png 반환.
+    exclude에 든 단어가 이름에 있으면 건너뜀."""
     if not MASCOT_DIR.exists(): return None
-    pngs=sorted([p for p in MASCOT_DIR.glob("*.png")]) + sorted([p for p in MASCOT_DIR.glob("*.PNG")])
-    if not pngs: return None
-    for p in pngs:
-        if "mascot" in p.name.lower(): return p
-    return pngs[0]   # mascot 이름 없으면 첫 png
+    pngs=sorted(MASCOT_DIR.glob("*.png"))+sorted(MASCOT_DIR.glob("*.PNG"))
+    exclude=exclude or []
+    for key in name_keys:
+        for p in pngs:
+            low=p.name.lower()
+            if key in low and not any(x in low for x in exclude):
+                return p
+    return None
 
-def _prep_mascot(path):
-    """마스코트 이미지 로드 + 흰 배경 자동 투명화(원본에 배경이 남아있어도 카드에 자연스럽게)."""
+def _find_bunny():
+    """본문/표지용 '토끼만' 이미지: mascot_bunny > bunny > (logo 제외) 아무 mascot/png."""
+    p=_find_asset(["mascot_bunny","bunny"], exclude=["logo"]) or _find_asset(["mascot"], exclude=["logo"])
+    if p: return p
+    if MASCOT_DIR.exists():
+        for q in sorted(MASCOT_DIR.glob("*.png")):
+            if "logo" not in q.name.lower(): return q
+    return None
+
+def _find_logo():
+    """마지막장용 '로고 전체' 이미지: mascot_logo > logo."""
+    return _find_asset(["mascot_logo","logo"])
+
+def _load_rgba(path, square=True):
+    """이미지 로드 → (필요 시)흰배경 투명화 → 여백 트림 → square면 정사각 캔버스 중앙배치.
+    이미 투명 배경이 있는 PNG면 흰배경 제거를 건너뛰어 원본 알파를 보존."""
     im=Image.open(path).convert("RGBA")
     import numpy as np
-    a=np.array(im).astype(int)
-    r,g,b,al=a[:,:,0],a[:,:,1],a[:,:,2],a[:,:,3]
-    mx=np.maximum(np.maximum(r,g),b); mn=np.minimum(np.minimum(r,g),b)
-    white=(mn>228)&((mx-mn)<20)&(al>0)   # 밝고 무채색 = 배경
-    a[:,:,3]=np.where(white,0,al)
-    im=Image.fromarray(a.astype("uint8"))
+    a=np.array(im)
+    if (a[:,:,3]<250).mean() < 0.02:   # 사실상 불투명 = 흰배경 있음 → 투명화
+        ai=a.astype(int); r,g,b,al=ai[:,:,0],ai[:,:,1],ai[:,:,2],ai[:,:,3]
+        mx=np.maximum(np.maximum(r,g),b); mn=np.minimum(np.minimum(r,g),b)
+        white=(mn>228)&((mx-mn)<20)&(al>0)
+        a[:,:,3]=np.where(white,0,al); im=Image.fromarray(a.astype("uint8"))
     bbox=im.getbbox()
     if bbox: im=im.crop(bbox)
-    w,h=im.size; s=int(max(w,h)*1.04)
-    canvas=Image.new("RGBA",(s,s),(0,0,0,0))
-    canvas.paste(im,((s-w)//2,(s-h)//2),im)
-    return canvas
+    if square:
+        w,h=im.size; s=int(max(w,h)*1.04)
+        c=Image.new("RGBA",(s,s),(0,0,0,0)); c.paste(im,((s-w)//2,(s-h)//2),im); return c
+    return im
 
 def bunny(img, cx, cy, s=1.0):
-    """리버니 마스코트 — assets_brand 폴더의 이미지를 자동 탐색해 배치.
+    """리버니 마스코트(토끼만) — assets_brand의 mascot_bunny.png 등을 자동 탐색해 배치.
     파일이 없으면 조용히 생략(로그만). s=1.0 기준 지름 약 150px."""
-    path=_find_mascot()
+    path=_find_bunny()
     if path is None:
         if "warned" not in _MASCOT_CACHE:
-            print(f"  ⚠️ 마스코트 이미지 없음(assets_brand 폴더에 png 필요) — 토끼 생략")
+            print(f"  ⚠️ 토끼 이미지 없음(assets_brand에 mascot_bunny.png 필요) — 토끼 생략")
             _MASCOT_CACHE["warned"]=True
         return
-    if "base" not in _MASCOT_CACHE:
+    if "bunny_base" not in _MASCOT_CACHE:
         try:
-            _MASCOT_CACHE["base"]=_prep_mascot(path)
-            print(f"  🐰 마스코트 사용: {path.name}")
+            _MASCOT_CACHE["bunny_base"]=_load_rgba(path, square=True)
+            print(f"  🐰 토끼 사용: {path.name}")
         except Exception as e:
-            print(f"  ⚠️ 마스코트 로드 실패: {e}"); return
+            print(f"  ⚠️ 토끼 로드 실패: {e}"); return
     diam=max(40,int(150*s))
-    key=f"d{diam}"
+    key=f"bd{diam}"
     if key not in _MASCOT_CACHE:
-        _MASCOT_CACHE[key]=_MASCOT_CACHE["base"].resize((diam,diam),Image.LANCZOS)
+        _MASCOT_CACHE[key]=_MASCOT_CACHE["bunny_base"].resize((diam,diam),Image.LANCZOS)
     m=_MASCOT_CACHE[key]
     img.paste(m,(int(cx-diam/2),int(cy-diam/2)),m)
+
+def paste_logo(img, cx, top_y, target_w):
+    """마지막장용 로고(토끼+말풍선+브랜드텍스트 통짜) 배치. 가로폭 target_w에 맞춰 비율유지.
+    로고 파일이 없으면 None 반환(호출부가 폴백 처리)."""
+    path=_find_logo()
+    if path is None: return None
+    if "logo_base" not in _MASCOT_CACHE:
+        try:
+            _MASCOT_CACHE["logo_base"]=_load_rgba(path, square=False)
+            print(f"  🏷️ 로고 사용: {path.name}")
+        except Exception as e:
+            print(f"  ⚠️ 로고 로드 실패: {e}"); return None
+    base=_MASCOT_CACHE["logo_base"]
+    w,h=base.size; tw_=int(target_w); th=int(h*tw_/w)
+    key=f"logo{tw_}"
+    if key not in _MASCOT_CACHE:
+        _MASCOT_CACHE[key]=base.resize((tw_,th),Image.LANCZOS)
+    lg=_MASCOT_CACHE[key]
+    img.paste(lg,(int(cx-tw_/2),int(top_y)),lg)
+    return int(top_y)+th   # 로고 하단 y 반환
 
 def speech_bubble(d,cx,y,text,f,pad=26):
     """리버니 말풍선 — '오늘도 리버니가 알려줄게요' 컨셉."""
@@ -570,7 +606,9 @@ def generate_content(topic, ttype, next_hook=""):
 [2],[3] {"type":"info",...} (S티어 상세/고르는 기준 등, body는 사장 말투로 짧게)로 구성. 등급은 사장이 직접 다 써보고 매긴 솔직한 평가로.""",
      "product":"""slides는 [1] {"type":"product","heading":"제품명(10자 내)","product":{"name":"제품명","price":"참고가 (예: 1만원대 중반)","pros":"장점 한 줄(16자 내)","cons":"아쉬운 점 한 줄(16자 내, 솔직하게)"},"body":"어떤 사람에게 맞는지 1문장(20자 내, 사장 말투)","img_query":"제품/사용 장면 영어 검색어 3~5단어"} 와
 [2],[3] {"type":"info",...} (사용법/궁합 팁, body는 사장 말투로 짧게)으로 구성. 가격은 '참고가'로 대략 범위만 — 단정 금지."""}
-    next_line=f'\n[다음편 예고] 마지막 장 next_tease와 캡션에 이 방향을 반영해 궁금증을 남겨: "{next_hook}"' if next_hook else ""
+    next_line=(f'\n[다음편 예고 — 매우 중요] 다음 게시물 주제는 "{next_hook}" 방향이야. '
+               f'마지막 장 next_tease와 캡션 마지막 줄에서 이걸 구체적으로 예고해서, 독자가 "그거 궁금하다, 다음 글 기다려야지" 하게 만들어. '
+               f'막연한 예고("다음에 또 봐요") 금지 — 반드시 다음 내용의 핵심을 콕 집어 미리 흘려.') if next_hook else ""
     prompt=f"""너는 송파/문정 프라이빗 1인 네일샵 '리버니 네일룸'(@libunny.nailroom)의 사장이야.
 마스코트 토끼 '리버니'와 함께, 사장이 직접 팔로워에게 오늘의 네일 정보를 알려주는 카드뉴스야.
 오늘({today.month}월 {today.day}일) 주제: "{topic}"
@@ -582,15 +620,18 @@ def generate_content(topic, ttype, next_hook=""):
 [글자 수 — 반드시] 모바일 세로 카드라 길면 안 읽혀. 문장은 최대한 짧게, 글자 수 제한 준수.
 1문장 = 1의미. 접속사·군더더기 생략. 하지만 말투의 다정함은 유지.
 [원칙] 카드마다 '저장할 가치'가 있는 구체 정보 1개 이상. 뻔한 말 금지, 사장만 아는 실전 디테일.
-[표지 훅] title은 후킹형 — 이미 후킹형이면 살리고, 아니면 강화. 과장 광고는 금지(팩트 기반).{next_line}
+[표지 훅] title은 후킹형 — 이미 후킹형이면 살리고, 아니면 강화. 과장 광고는 금지(팩트 기반).
+[리버니 목소리 — 중요] cover.bubble 과 last.next_tease 는 마스코트 토끼 '리버니'가 직접 말하는 대사야.
+  귀엽고 친근한 반말 섞인 말투로("~야!","~게!","~자!","오늘은 ~ 알려줄게!"), 사람 말투(~해요)와 살짝 다르게 토끼답게.
+  특히 next_tease는 리버니가 다음 편을 신나게 예고하는 한마디로("다음엔 ○○ 알려줄게, 기대해!" 같은 느낌).{next_line}
 
 {type_rule.get(ttype,type_rule["info"])}
 
 순수 JSON만:
-{{"cover":{{"kicker":"티저 한 줄(예: 모르면 손해봐요) 8자 내","title1":"제목 윗줄(7자 내)","title2":"제목 아랫줄(8자 내)","sub":"부제(14자 내, 뭘 얻어가는지)","bubble":"리버니 말풍선(12자 내, 예: 오늘은 이거 알려줄게요)"}},
+{{"cover":{{"kicker":"티저 한 줄(예: 모르면 손해봐요) 8자 내","title1":"제목 윗줄(7자 내)","title2":"제목 아랫줄(8자 내)","sub":"부제(14자 내, 뭘 얻어가는지)","bubble":"리버니(토끼) 대사 12자 내 — 오늘 주제를 신나게 예고(예: 오늘은 이거 알려줄게!)"}},
 "slides":[...위 규칙대로 3개...],
-"last":{{"next_tease":"다음 콘텐츠 예고(18자 내, 위 다음편 예고 반영)"}},
-"caption":"인스타 캡션 — 사장 말투로, 첫 줄 훅 / 요약 2줄 / 저장 유도 CTA / 다음편 궁금증 한 줄 / 해시태그 15개(#송파네일 #문정동네일 #문정네일 #리버니네일룸 필수 포함)"}}"""
+"last":{{"next_tease":"리버니(토끼)가 다음 편을 예고하는 대사 18자 내 — 다음 주제 핵심을 콕 집어(예: 다음엔 여름 컬러 보여줄게, 기대해!)"}},
+"caption":"인스타 캡션 — 사장 말투로, 첫 줄 훅 / 요약 2줄 / 저장 유도 CTA / 다음편 궁금증 한 줄(다음 주제 예고) / 해시태그 15개(#송파네일 #문정동네일 #문정네일 #리버니네일룸 필수 포함)"}}"""
     r=requests.post("https://api.anthropic.com/v1/messages",
         headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
         json={"model":"claude-sonnet-4-5","max_tokens":2800,"messages":[{"role":"user","content":prompt}]},timeout=120)
@@ -799,63 +840,67 @@ def render_last(data, path):
     img=Image.new("RGB",(W,H),PINKBG); d=ImageDraw.Draw(img)
     m=64
     d.rounded_rectangle([m,m,W-m,H-m],radius=54,outline=LINE,width=3)
-    bunny(img,W/2,430,s=1.9)
-    tracked(d,0,600,"LIBUNNY NAIL",F("en",52),BROWN,track=18,center_w=W)
-    f_kr=F("kb",64)
-    t="리버니 네일룸"; kw_,_=tw(d,t,f_kr); d.text((W/2-kw_/2,676),t,font=f_kr,fill=BROWN)
-    divider_dot(d,W/2,790,150)
+    # ── 로고(토끼+말풍선+브랜드텍스트 통짜)를 상단에 배치 ──
+    logo_bottom=paste_logo(img,W/2,150,470)
+    if logo_bottom is None:                      # 로고 파일 없으면 기존 방식 폴백
+        bunny(img,W/2,420,s=1.9)
+        tracked(d,0,590,"LIBUNNY NAIL",F("en",52),BROWN,track=18,center_w=W)
+        y=666
+    else:
+        y=logo_bottom+24
+    f_kr=F("kb",60)
+    t="리버니 네일룸"; kw_,_=tw(d,t,f_kr); d.text((W/2-kw_/2,y),t,font=f_kr,fill=BROWN); y+=94
+    divider_dot(d,W/2,y,150); y+=54
     # 강한 CTA
-    f_q=F("kr",46)
-    q="당신에게 가장 잘 어울리는 네일을"
-    qw,_=tw(d,q,f_q); d.text((W/2-qw/2,836),q,font=f_q,fill=BROWN)
-    q2="만나고 싶다면?"
-    q2w,_=tw(d,q2,f_q); d.text((W/2-q2w/2,900),q2,font=f_q,fill=BROWN)
-    f_big=F("kb",76)
-    big="리버니네일"
-    bw_,_=tw(d,big,f_big)
-    d.rounded_rectangle([W/2-bw_/2-46,980,W/2+bw_/2+46,1096],radius=58,fill=WHITE,outline=LINE,width=3)
-    d.text((W/2-bw_/2,996),big,font=f_big,fill=ROSE)
-    f_i=F("kr",34)
-    info="송파·문정 프라이빗 1인샵 · 예약은 프로필 링크"
-    iw,_=tw(d,info,f_i); d.text((W/2-iw/2,1130),info,font=f_i,fill=SOFT)
+    f_q=F("kr",44)
+    for line in ["당신에게 가장 잘 어울리는 네일을","만나고 싶다면?"]:
+        qw,_=tw(d,line,f_q); d.text((W/2-qw/2,y),line,font=f_q,fill=BROWN); y+=60
+    y+=12
+    f_big=F("kb",72); big="리버니네일"; bw_,_=tw(d,big,f_big)
+    d.rounded_rectangle([W/2-bw_/2-46,y,W/2+bw_/2+46,y+112],radius=56,fill=WHITE,outline=LINE,width=3)
+    d.text((W/2-bw_/2,y+16),big,font=f_big,fill=ROSE); y+=140
+    f_i=F("kr",32); info="송파·문정 프라이빗 1인샵 · 예약은 프로필 링크"
+    iw,_=tw(d,info,f_i); d.text((W/2-iw/2,y),info,font=f_i,fill=SOFT); y+=70
+    # ★ 다음편 예고 — 리버니(토끼)가 직접 말하는 말풍선(꼬리는 위=로고 토끼 쪽)
     tease=clean((data.get("last") or {}).get("next_tease",""))
     if tease:
-        f_t2=F("pen",48)
-        tt="다음 이야기 · "+tease
-        tw2,_=tw(d,tt,f_t2); d.text((W/2-tw2/2,1196),tt,font=f_t2,fill=ROSE)
-    heart_line(d,W/2,1284,30,fill=ROSE,width=3)
-    sparkle(d,190,240,11); sparkle(d,W-180,320,9); sparkle(d,W-220,1180,10)
+        speech_bubble(d,W/2,y+4,tease,F("pen",46))
+    heart_line(d,W/2,H-92,26,fill=ROSE,width=3)
+    sparkle(d,190,220,11); sparkle(d,W-180,300,9)
     img.save(path,quality=95)
 
 # ══════════════════════════════════════════════
-# 이메일
+# 이메일 — content.json만 발송 (이미지 5장 메일은 중단)
 # ══════════════════════════════════════════════
-def send_email(files, caption, topic):
+def send_content_email(json_path, topic):
     if SKIP_EMAIL:
         print("  ✉️ SKIP_EMAIL=true → 발송 생략"); return
     if not (GMAIL_ADDR and GMAIL_PW and MAIL_TO):
         print("  ⚠️ 이메일 시크릿 미설정 → 발송 생략"); return
+    from email.mime.base import MIMEBase
+    from email import encoders
     today=datetime.date.today()
     msg=MIMEMultipart()
-    msg["Subject"]=f"🐰 리버니 오늘의 게시물 ({today.month}/{today.day}) — {topic[:24]}"
+    msg["Subject"]=f"🐰 리버니 content.json ({today.month}/{today.day}) — {topic[:24]}"
     msg["From"]=GMAIL_ADDR; msg["To"]=MAIL_TO
-    body=("리버니 네일룸 오늘의 카드뉴스가 완성됐어요!\n\n"
-          "① 첨부 이미지를 순서대로 저장 (01→마지막)\n"
-          "② 아래 캡션 복사 → 인스타 붙여넣기\n\n"
-          "──────── 캡션 (복사용) ────────\n\n"+caption+
-          "\n\n────────────────────────\n"
-          "수정하고 싶으면: repo의 posts_nail/latest/content.json을 에디터(tools/nail_post_editor.html)로 열어 고치고\n"
-          "Actions에서 rerender=true로 재실행하면 새 버전이 다시 도착해요.")
+    body=("리버니 네일룸 오늘의 게시물 데이터(content.json)를 보냅니다.\n\n"
+          f"· 오늘 주제: {topic}\n"
+          "· 에디터(tools/nail_post_editor.html)로 열어 사진·문구 확인·수정하세요.\n"
+          "· 수정 후 GitHub의 posts_nail/latest/content.json 을 덮어쓰고\n"
+          "  Actions에서 rerender=true로 재실행하면 최종 카드가 다시 만들어져요.")
     msg.attach(MIMEText(body,"plain","utf-8"))
-    for f in files:
-        with open(f,"rb") as fp:
-            part=MIMEImage(fp.read())
-            part.add_header("Content-Disposition","attachment",filename=Path(f).name)
-            msg.attach(part)
+    try:
+        with open(json_path,"rb") as fp:
+            part=MIMEBase("application","json"); part.set_payload(fp.read())
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition","attachment",filename="content.json")
+        msg.attach(part)
+    except Exception as e:
+        print(f"  ⚠️ content.json 첨부 실패: {e}")
     with smtplib.SMTP_SSL("smtp.gmail.com",465,timeout=30) as s:
         s.login(GMAIL_ADDR,GMAIL_PW)
         s.sendmail(GMAIL_ADDR,[m.strip() for m in MAIL_TO.split(",")],msg.as_string())
-    print(f"  ✉️ 발송 완료 → {MAIL_TO}")
+    print(f"  ✉️ content.json 발송 완료 → {MAIL_TO}")
 
 # ══════════════════════════════════════════════
 def main():
@@ -930,7 +975,7 @@ def main():
     for f in list(files)+[OUT/"caption.txt"]:
         shutil.copy(f,ARCH/Path(f).name)
     print(f"  ✅ 카드 {len(files)}장 → {OUT}")
-    send_email([str(f) for f in files],caption,topic)
+    send_content_email(OUT/"content.json", topic)
     print("🎉 완료!")
 
 if __name__=="__main__":
