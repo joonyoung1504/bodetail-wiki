@@ -408,47 +408,61 @@ def _search_once(q):
             print(f"    ⚠️ Unsplash 요청 실패: {e}")
     return cand, rate_limited
 
-def fetch_photo(queries, save):
-    """queries: 검색어 리스트(우선순위 순). 앞에서부터 시도해 결과 있는 첫 검색어를 사용.
-    ★ bodetail(generate_daily_post.py)의 pick_best 방식 이식 — 핵심 교훈:
-      "검색 결과가 하나라도 있으면, 다운로드되는 첫 이미지를 무조건 쓴다."
-    예전 실패 원인은 밝기 필터(185 근처만 선호)+과한 검증으로 후보가 전부 탈락한 것.
-    이제 밝기는 '더 밝은 걸 앞으로' 정렬하는 용도로만 쓰고, 다운로드만 되면 채택한다."""
+def _photo_score(im):
+    """선명도(높을수록 선명) — Laplacian 대용으로 엣지 강도의 표준편차(numpy만 사용)."""
+    from PIL import ImageFilter
+    import numpy as np
+    g=im.convert("L").resize((320,320))
+    e=g.filter(ImageFilter.FIND_EDGES)
+    return float(np.array(e).std())
+
+def fetch_photo(queries, save, used=None):
+    """queries(우선순위 순)로 후보를 모아 다운로드·채택.
+    ★ 이번 개선(사진 중복/흐림 해결):
+      - used(이미 쓴 URL 집합)에 든 사진은 건너뜀 → 슬라이드 간 '같은 사진' 방지
+      - 너무 작거나(가로<640) 흐린(선명도<9) 후보는 우선 제외
+      - 여러 검색어 후보를 순서 유지해 취합 → 다양성 확보
+      - 조건 통과 후보가 없으면 '미사용 다운로드 첫 장'으로 폴백(빈 슬라이드 방지)"""
+    if used is None: used=set()
     if not UNSPLASH_KEY and not PEXELS_KEY:
         print("  ⚠️ PEXELS_API_KEY / UNSPLASH_ACCESS_KEY 둘 다 없음 — 사진 생략")
         return False
     if isinstance(queries,str): queries=[queries]
     queries=[clean(q) for q in queries if clean(q)] or ["pastel manicure nails"]
-    cand=[]; used_q=None
+    # 여러 검색어의 후보를 순서 유지해 합침(URL 중복 제거)
+    cand=[]; seen=set()
     for q in queries:
-        cand,rl=_search_once(q)
-        if cand: used_q=q; break
-        if rl:
-            print("    · 레이트리밋 감지 → 3초 대기 후 재시도")
-            time.sleep(3)
-            cand,rl=_search_once(q)
-            if cand: used_q=q; break
+        c,rl=_search_once(q)
+        if rl and not c:
+            print("    · 레이트리밋 감지 → 3초 대기 후 재시도"); time.sleep(3); c,rl=_search_once(q)
+        for u in c:
+            if u not in seen: seen.add(u); cand.append((u,q))
+        if len(cand)>=14: break
     if not cand:
-        print("  ⚠️ 모든 검색어에서 후보 0건 — 사진 없이 진행(레이트리밋이면 위 경고 참고)")
+        print("  ⚠️ 모든 검색어에서 후보 0건 — 사진 없이 진행")
         return False
-    import io, numpy as np
-    # bodetail 방식: 후보 URL을 순서대로 다운로드 시도 → 성공하는 첫 이미지를 바로 채택.
-    # (검색 결과 순서 자체가 이미 관련도 순이므로, 무리한 밝기 필터로 버리지 않음)
-    picked=None
-    for j,u in enumerate(cand):
+    import io
+    best=None; fallback=None
+    for j,(u,q) in enumerate(cand):
+        if u in used:                       # 다른 슬라이드가 이미 쓴 사진 → 스킵(중복 방지)
+            continue
         try:
             resp=requests.get(u,timeout=20,headers={"User-Agent":"Mozilla/5.0"})
-            if resp.status_code!=200: 
-                continue
+            if resp.status_code!=200: continue
             im=Image.open(io.BytesIO(resp.content)).convert("RGB")
-            picked=im
-            break   # ★ 다운로드+열기 성공하면 즉시 채택 (bodetail과 동일 — 이게 '항상 사진 나오는' 비결)
         except Exception as e:
-            print(f"    · 후보{j} 스킵({e}) → 다음 후보")
-            continue
-    if picked is None:
-        print("  ⚠️ 후보 URL을 모두 시도했으나 다운로드 실패 — 사진 없이 진행")
+            print(f"    · 후보{j} 스킵({e})"); continue
+        if fallback is None: fallback=(im,u,q)   # 미사용 다운로드 첫 장(최후 폴백)
+        if im.width<640: continue                # 너무 작음
+        s=run_ok(_photo_score,im) or 0
+        if s<9: continue                         # 너무 흐림
+        best=(im,u,q); break                     # 미사용 + 충분히 큼 + 선명 → 채택
+    if best: picked,pu,pq=best
+    elif fallback: picked,pu,pq=fallback; print("    · 크기/선명 조건 통과 없음 → 미사용 첫 장 사용")
+    else:
+        print("  ⚠️ 미사용 후보 없음(전부 다른 슬라이드가 사용) — 사진 없이 진행")
         return False
+    used.add(pu)
     # 파스텔 보정(실패해도 원본 저장 — 절대 사진을 버리지 않음)
     try:
         im=ImageEnhance.Brightness(picked).enhance(1.05)
@@ -458,7 +472,7 @@ def fetch_photo(queries, save):
         im.save(save,quality=92)
     except Exception as e:
         print(f"  ⚠️ 보정 생략(원본 저장): {e}"); picked.save(save,quality=92)
-    print(f"  🖼️ 사진 확보 완료 (검색어: '{used_q}')")
+    print(f"  🖼️ 사진 확보 완료 (검색어: '{pq}', 중복·흐림 필터 통과)")
     return True
 
 def paste_photo_panel(img, d, photo_path, box, r=36):
@@ -935,6 +949,7 @@ def main():
     print(f"  🔑 사진 API 키 상태 — PEXELS_API_KEY: {'있음(' + str(len(PEXELS_KEY)) + '자)' if PEXELS_KEY else '❌ 없음'} / "
           f"UNSPLASH_ACCESS_KEY: {'있음(' + str(len(UNSPLASH_KEY)) + '자)' if UNSPLASH_KEY else '❌ 없음'}")
     slides_list=(data.get("slides") or [])[:6]      # ★ 3 → 6 : 슬라이드 최대 6개까지 렌더
+    used_urls=set()                                  # ★ 슬라이드 간 사진 중복 방지용(이미 쓴 URL 기록)
     for i,sl in enumerate(slides_list):
         photo=None
         t=sl.get("type","info")
@@ -955,7 +970,7 @@ def main():
             if forced: print(f"    → 주제 키워드 매칭: '{forced[0]}' 우선 검색")
             print(f"  🔎 슬라이드{i+1} 사진 검색 ({t}) — 후보 {len(queries)}개: {queries}")
             cand=tmp/"assets"/f"{key}.jpg"
-            if run_ok(fetch_photo,queries,cand): photo=cand
+            if run_ok(fetch_photo,queries,cand,used_urls): photo=cand
             time.sleep(1.2)   # API 요청 사이 짧은 간격 — 버스트 레이트리밋 방지
         p=tmp/f"{i+2:02d}_slide.png"
         if t=="tier": render_tier(sl,i,p,photo)
