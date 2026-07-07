@@ -14,6 +14,7 @@
  · 마지막 장: 강한 CTA + 리버니 브랜드 카드로 마무리
  · RERENDER=true → Claude 호출 없이 posts_nail/latest/content.json으로 재렌더
    (HTML 에디터로 content.json 수정 후 재실행하는 워크플로)
+ · content.json에 사진(최대 6장)을 축소 base64로 임베드 → 에디터가 JSON만으로 사진 자동 표시
  · 완성본 이메일 발송(08:30 KST cron)
 """
 import os, sys, json, shutil, smtplib, datetime, random, re, math, time
@@ -433,6 +434,41 @@ def paste_photo_panel(img, d, photo_path, box, r=36):
     d.rounded_rectangle(box,radius=r,outline=LINE,width=2)
 
 # ══════════════════════════════════════════════
+# content.json에 사진(최대 6장)을 축소 base64로 임베드
+#  → 에디터(nail_post_editor.html)가 JSON만으로 사진을 자동 표시
+#    (bodetail 게시물 에디터의 image_url=data URI 방식과 동일)
+# ★ 용량 관리: 장당 byte_budget(기본 45KB)을 넘으면 품질→해상도 순으로 단계적으로
+#   낮춰 재압축 — 슬라이드가 6장이어도 content.json이 과도하게 커지지 않도록 함.
+# ══════════════════════════════════════════════
+def embed_photos_base64(data, assets_dir, max_w=600, quality=72,
+                         byte_budget=45_000, min_quality=40, min_w=340):
+    import base64, io
+    slides = (data.get("slides") or [])[:6]
+    total_bytes = 0
+    for i, sl in enumerate(slides):
+        pj = Path(assets_dir)/f"photo_{i}.jpg"
+        if not pj.exists():
+            sl.pop("photo", None); continue
+        try:
+            im = Image.open(pj).convert("RGB")
+            w, q = max_w, quality
+            while True:
+                resized = im.resize((w, round(im.height*w/im.width)), Image.LANCZOS) if im.width > w else im
+                buf = io.BytesIO(); resized.save(buf, format="JPEG", quality=q)
+                raw = buf.getvalue()
+                if len(raw) <= byte_budget or (w <= min_w and q <= min_quality):
+                    break
+                if q > min_quality: q -= 10          # 1순위: 화질부터 낮춤
+                else: w = max(min_w, int(w*0.85))     # 한계면 해상도도 축소
+            sl["photo"] = "data:image/jpeg;base64," + base64.b64encode(raw).decode("ascii")
+            total_bytes += len(raw)
+            print(f"    · photo_{i} 임베드: {len(raw)//1024}KB (w={resized.width}, q={q})")
+        except Exception as e:
+            print(f"  ⚠️ photo_{i} base64 임베드 실패: {e}"); sl.pop("photo", None)
+    if total_bytes:
+        print(f"  📦 사진 base64 총합: {total_bytes//1024}KB (content.json에 포함)")
+
+# ══════════════════════════════════════════════
 # 30일 주제: 자동 순환 + 소진 시 Claude가 다음 배치 생성
 # ══════════════════════════════════════════════
 FALLBACK_TOPICS=[
@@ -804,7 +840,7 @@ def send_email(files, caption, topic):
     msg["Subject"]=f"🐰 리버니 오늘의 게시물 ({today.month}/{today.day}) — {topic[:24]}"
     msg["From"]=GMAIL_ADDR; msg["To"]=MAIL_TO
     body=("리버니 네일룸 오늘의 카드뉴스가 완성됐어요!\n\n"
-          "① 첨부 이미지 5장을 순서대로 저장 (01→05)\n"
+          "① 첨부 이미지를 순서대로 저장 (01→마지막)\n"
           "② 아래 캡션 복사 → 인스타 붙여넣기\n\n"
           "──────── 캡션 (복사용) ────────\n\n"+caption+
           "\n\n────────────────────────\n"
@@ -853,7 +889,8 @@ def main():
     FALLBACK_Q={"info":"pastel manicure nails close up","product":"nail care product flatlay pastel nails"}
     print(f"  🔑 사진 API 키 상태 — PEXELS_API_KEY: {'있음(' + str(len(PEXELS_KEY)) + '자)' if PEXELS_KEY else '❌ 없음'} / "
           f"UNSPLASH_ACCESS_KEY: {'있음(' + str(len(UNSPLASH_KEY)) + '자)' if UNSPLASH_KEY else '❌ 없음'}")
-    for i,sl in enumerate((data.get("slides") or [])[:3]):
+    slides_list=(data.get("slides") or [])[:6]      # ★ 3 → 6 : 슬라이드 최대 6개까지 렌더
+    for i,sl in enumerate(slides_list):
         photo=None
         t=sl.get("type","info")
         pr=sl.get("product",{}) or {}
@@ -880,9 +917,11 @@ def main():
         elif t=="product": render_product(sl,i,p,photo)
         else: render_info(sl,i,p,photo)
         files.append(p)
-    p=tmp/"05_last.png"; render_last(data,p); files.append(p)
+    last_idx=len(slides_list)+2                      # ★ 슬라이드 개수에 맞춰 마지막 장 번호 자동 계산
+    p=tmp/f"{last_idx:02d}_last.png"; render_last(data,p); files.append(p)
     caption=data.get("caption","")
     (tmp/"caption.txt").write_text(caption,encoding="utf-8")
+    run_ok(embed_photos_base64, data, tmp/"assets")   # ★ content.json 쓰기 직전: 사진 base64 임베드(용량 관리 포함)
     (tmp/"content.json").write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
     if OUT.exists(): shutil.rmtree(OUT)
     shutil.move(str(tmp),str(OUT))
