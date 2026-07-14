@@ -317,6 +317,8 @@ input[type=file]{display:none;}
     <input type="file" id="p-pngFiles" accept="image/png,image/jpeg" multiple>
     <button class="btn ghost" onclick="p_exportJSON()">② JSON 저장</button>
     <button class="btn" onclick="p_downloadAllPNG()" style="background:var(--cream);color:var(--ink);">③ PNG 전체 저장</button>
+    <button class="btn" onclick="p_toReel()" id="pr-btn" style="background:var(--gold);">🎞️ 릴스로 변환</button>
+    <span style="font-size:11px;color:#8a857c;">표지<input type="number" id="pr-cover" value="2.4" step="0.2" style="width:52px;background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:4px;padding:3px 5px;margin:0 6px 0 4px;">본문<input type="number" id="pr-slide" value="3.2" step="0.2" style="width:52px;background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:4px;padding:3px 5px;margin:0 0 0 4px;">초</span>
     <button class="btn ghost" onclick="p_loadSample()">샘플</button>
     <span class="hint">① JSON → 🖼️ PNG 배경 → 텍스트 수정 → ③ PNG 전체 저장</span>
   </div>
@@ -1032,6 +1034,151 @@ async function a_downloadAllImages(){
     await new Promise(r=>setTimeout(r,300));
   }
   alert('✅ 이미지 저장 완료. 다운로드 폴더의 파일들을 GitHub reels/latest_a/assets/images/ 에 같은 파일명으로 재업로드(덮어쓰기)해줘.');
+}
+</script>
+<script>
+/* ══════════════════════════════════════════════
+   🎞️ 게시물 → 릴스 변환기 (브라우저 렌더링)
+   현재 편집 상태의 슬라이드를 그대로 캡처해
+   1080×1920 슬라이드쇼 영상(무음)으로 녹화한다.
+   - 표지/본문/마지막 장 개별 타이밍, 0.25s 크로스페이드
+   - 슬라이드마다 줌인/줌아웃 교차(켄번즈)
+   - mp4 우선, 미지원 브라우저는 webm 폴백
+   - BGM 없음: 인스타 앱에서 트렌딩 오디오를 입히는 게 도달에 유리
+══════════════════════════════════════════════ */
+const PR_W=1080, PR_H=1920, PR_FPS=30, PR_FADE=0.25;
+
+function pr_overlay(show){
+  let ov=document.getElementById('pr-ov');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='pr-ov';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;';
+    ov.innerHTML='<canvas id="pr-prev" style="height:70vh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.9);"></canvas>'+
+      '<div id="pr-msg" style="color:var(--cream);font-size:13px;">준비 중…</div>'+
+      '<div style="color:#8a857c;font-size:11px;">렌더링 동안 이 탭을 닫거나 최소화하지 마세요 (실시간 녹화 방식)</div>';
+    document.body.appendChild(ov);
+  }
+  ov.style.display=show?'flex':'none';
+  return ov;
+}
+
+function pr_pickMime(){
+  const cands=['video/mp4;codecs=avc1.42E01E','video/mp4',
+               'video/webm;codecs=h264','video/webm;codecs=vp9','video/webm'];
+  for(const m of cands){ if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m)) return m; }
+  return null;
+}
+
+async function p_toReel(){
+  const slideEls=[...document.querySelectorAll('#p-slidesArea .slide')];
+  if(slideEls.length<2){alert('슬라이드가 2장 이상 필요해. 먼저 JSON을 불러오세요.');return;}
+  const mime=pr_pickMime();
+  if(!mime){alert('이 브라우저는 화면 녹화(MediaRecorder)를 지원하지 않아.\n대안: PNG 전체 저장 → reels_input/ 커밋 (Actions 변환기)');return;}
+
+  // html2canvas 로드 (기존 PNG 저장 로직과 동일 CDN)
+  if(!window.html2canvas){
+    try{
+      await new Promise((res,rej)=>{const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        s.onload=res;s.onerror=()=>rej(new Error('load fail'));document.head.appendChild(s);});
+    }catch(e){alert('html2canvas 로드 실패. 인터넷 연결 확인.');return;}
+  }
+
+  const btn=document.getElementById('pr-btn');
+  btn.disabled=true; const orig=btn.textContent; btn.textContent='변환 중…';
+  const ov=pr_overlay(true), msg=document.getElementById('pr-msg');
+
+  try{
+    // ── 1) 슬라이드 캡처 ──
+    const caps=[];
+    for(let i=0;i<slideEls.length;i++){
+      msg.textContent=`슬라이드 캡처 중… ${i+1}/${slideEls.length}`;
+      caps.push(await html2canvas(slideEls[i],{
+        scale:PR_W/slideEls[i].offsetWidth, useCORS:true, allowTaint:true,
+        backgroundColor:null, logging:false}));
+    }
+
+    // ── 2) 슬라이드별 블러 배경 사전 합성 ──
+    msg.textContent='배경 합성 중…';
+    const frames=caps.map(c=>{
+      const bg=document.createElement('canvas'); bg.width=PR_W; bg.height=PR_H;
+      const bx=bg.getContext('2d');
+      const s=Math.max(PR_W/c.width, PR_H/c.height)*1.05;
+      bx.filter='blur(28px) brightness(0.45)';
+      bx.drawImage(c,(PR_W-c.width*s)/2,(PR_H-c.height*s)/2,c.width*s,c.height*s);
+      bx.filter='none';
+      const fs=Math.min(PR_W/c.width, PR_H/c.height);
+      return {c, bg, fw:c.width*fs, fh:c.height*fs};
+    });
+
+    // ── 3) 타임라인 ──
+    const n=frames.length;
+    const coverS=parseFloat(document.getElementById('pr-cover').value)||2.4;
+    const slideS=parseFloat(document.getElementById('pr-slide').value)||3.2;
+    const lastS=Math.max(2.5, slideS-0.2);
+    const durs=[coverS, ...Array(n-2).fill(slideS), lastS];
+    const starts=[0];
+    for(let i=1;i<n;i++) starts.push(starts[i-1]+durs[i-1]-PR_FADE);
+    const total=starts[n-1]+durs[n-1];
+
+    // ── 4) 캔버스 + 레코더 ──
+    const cv=document.getElementById('pr-prev'); cv.width=PR_W; cv.height=PR_H;
+    const cx=cv.getContext('2d');
+    const stream=cv.captureStream(PR_FPS);
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:12000000});
+    const chunks=[]; rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
+    const done=new Promise(res=>{rec.onstop=res;});
+
+    function drawOne(i,prog,alpha){
+      const f=frames[i], zin=(i%2===0);
+      const z=zin?1+0.05*prog:1.05-0.05*prog;
+      cx.save(); cx.globalAlpha=alpha;
+      cx.drawImage(f.bg,0,0);
+      const w=f.fw*z,h=f.fh*z;
+      cx.drawImage(f.c,(PR_W-w)/2,(PR_H-h)/2,w,h);
+      cx.restore();
+    }
+
+    rec.start(250);
+    const t0=performance.now();
+    await new Promise(resolve=>{
+      (function loop(){
+        const T=(performance.now()-t0)/1000;
+        if(T>=total){resolve();return;}
+        let i=0; for(let k=0;k<n;k++){ if(starts[k]<=T) i=k; }
+        cx.clearRect(0,0,PR_W,PR_H);
+        const local=T-starts[i];
+        if(i>0 && local<PR_FADE){
+          drawOne(i-1,(T-starts[i-1])/durs[i-1],1);
+          drawOne(i,local/durs[i],local/PR_FADE);
+        }else{
+          drawOne(i,Math.min(1,local/durs[i]),1);
+        }
+        msg.textContent=`녹화 중… ${T.toFixed(1)}s / ${total.toFixed(1)}s (슬라이드 ${i+1}/${n})`;
+        requestAnimationFrame(loop);
+      })();
+    });
+    rec.stop(); await done;
+
+    // ── 5) 다운로드 ──
+    const isMp4=mime.startsWith('video/mp4');
+    const blob=new Blob(chunks,{type:isMp4?'video/mp4':'video/webm'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`reel_${new Date().toISOString().slice(0,10)}.${isMp4?'mp4':'webm'}`;
+    a.click(); a.remove();
+    msg.textContent='✅ 완료! 다운로드됨';
+    if(!isMp4){
+      alert('이 브라우저는 mp4 녹화를 지원하지 않아 webm으로 저장했어.\n인스타 업로드가 안 되면: PNG 전체 저장 → 리포 reels_input/에 커밋하면 Actions가 mp4로 변환해줘.');
+    }
+    setTimeout(()=>pr_overlay(false),1200);
+  }catch(e){
+    console.error(e);
+    alert('릴스 변환 실패: '+e.message+'\n대안: PNG 전체 저장 → reels_input/ 커밋 (Actions 변환기)');
+    pr_overlay(false);
+  }finally{
+    btn.disabled=false; btn.textContent=orig;
+  }
 }
 </script>
 </body>
