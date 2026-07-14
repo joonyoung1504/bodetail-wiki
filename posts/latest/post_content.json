@@ -1,109 +1,105 @@
 {
   "section_label": "오늘의 디테일",
-  "vol": "VOL.04",
-  "caption_full": "거울을 볼 때 전체만 보고 있다면, 놓치는 게 있다.\n\n센스 있는 남자들은 5곳을 순서대로 훑는다.\n헤어라인 / 눈 밑 / 목 / 손 / 자세.\n\n이 5초가 오늘 하루의 인상을 결정한다.\n저장해두고, 내일 아침 거울 앞에서 꺼내봐요.\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자그루밍 #남자자기관리 #그루밍팁 #남자헤어 #남자피부관리 #남자손관리 #자세교정 #인상관리 #남자패션 #남자일상 #자기관리 #디테일 #남자뷰티 #센스있는남자",
+  "vol": "VOL.01",
+  "caption_full": "면접 떨어지는 이유, 손일 수도 있어요.\n\n말끔한 수트, 다려진 셔츠 — 그런데 손톱에 큐티클이 밀려 있으면 그게 다 보입니다. 면접관의 시선은 생각보다 훨씬 구체적인 곳에 닿아요.\n\n오늘 카드, 저장해두고 다음 면접 3시간 전에 꺼내보세요.\n\n✦ 큐티클 정리\n✦ 손톱 4mm 법칙\n✦ 핸드크림 3시간 전\n✦ 악수 전 온도 맞추기\n\n작은 디테일이 당락을 가릅니다.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #면접준비 #손관리 #남자손관리 #면접팁 #취업준비 #그루밍 #남자디테일 #셀프그루밍 #손끝디테일 #면접복장 #취준생 #남자패션 #디테일남",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "센스 있는 남자가 거울 앞에서 하는 것",
+      "headline_sub": "면접 직전, 손이 다 말해버린다",
       "headline_main": [
-        "거울 볼 때",
-        "5곳 본다"
+        "손끝이",
+        "당락 가른다"
       ],
-      "headline_serif": "당신이 놓친 디테일이 인상을 만든다",
+      "headline_serif": "5분 안에 고칠 수 있는 손 디테일 4",
       "image_queries": [
-        "man dark studio mirror portrait moody",
-        "male editorial dark reflection closeup",
-        "men moody bathroom mirror dark cinematic"
+        "man dark studio hands moody editorial",
+        "male hands suit dark background closeup",
+        "men formal interview dark moody portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/21369555/pexels-photo-21369555.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/37924817/pexels-photo-37924817.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "content",
       "number": "01",
-      "subhead": "헤어라인 — 정리됐나",
+      "subhead": "큐티클부터 자른다",
       "body": [
-        "귀 위 잔털 하나가 전체 인상을 흐린다.",
-        "면도기로 주 1회, 라인을 잡아둔다."
+        "손톱 길이보다 큐티클이 먼저다.",
+        "밀린 큐티클 하나가 전체 손 인상을 무너뜨린다."
       ],
-      "caption": "첫인상은 헤어라인이 결정한다.",
+      "caption": "관리된 손은 말하지 않아도 설득한다.",
       "image_queries": [
-        "man dark moody hairline closeup editorial",
-        "male grooming hair dark studio portrait",
-        "men barbershop dark cinematic closeup"
+        "man hands dark closeup grooming moody",
+        "male hand grooming editorial dark studio",
+        "men cuticle hand care dark background"
       ],
-      "image_url": "https://images.pexels.com/photos/4730941/pexels-photo-4730941.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7447142/pexels-photo-7447142.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
       "type": "content",
       "number": "02",
-      "subhead": "눈 밑 — 다크서클·붓기",
+      "subhead": "손톱은 4mm 법칙",
       "body": [
-        "수면 부족은 눈 밑에 그대로 새긴다.",
-        "아이크림 한 번이 피로감 30% 줄인다."
+        "손끝에서 4mm 이하. 그 이상은 관리 포기로 읽힌다.",
+        "직선 컷 후 파일로 모서리만 살짝 둥글린다."
       ],
-      "caption": "눈 밑이 칙칙하면 나이가 5년 더해진다.",
+      "caption": "길이가 아니라 각도가 인상을 완성한다.",
       "image_queries": [
-        "man dark moody under eye closeup editorial",
-        "male face dark studio eye detail portrait",
-        "men dark cinematic eye closeup moody"
+        "man hands trimmed nails dark moody closeup",
+        "male hand editorial clean nails dark studio",
+        "men hands formal dark background minimal"
       ],
-      "image_url": "https://images.pexels.com/photos/34536331/pexels-photo-34536331.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "03",
-      "subhead": "목 — 각도와 잔털",
+      "subhead": "핸드크림은 3시간 전",
       "body": [
-        "고개를 들었을 때 목선이 정돈돼야 한다.",
-        "턱선 아래 잔털은 외출 전 반드시 확인."
+        "면접 직전 바르면 번들거림이 남는다.",
+        "3시간 전 한 번, 흡수 후 손등만 가볍게 닦아낸다."
       ],
-      "caption": "목이 정리된 남자는 옷보다 강하다.",
+      "caption": "촉촉하되 번들거리지 않는 손이 정답이다.",
       "image_queries": [
-        "man dark moody neck jawline closeup editorial",
-        "male grooming neck dark studio cinematic",
-        "men jaw neck dark portrait moody"
+        "man hands moisturizer dark moody editorial",
+        "male hand skin care dark studio closeup",
+        "men hands hydrated clean dark background"
       ],
-      "image_url": "https://images.pexels.com/photos/13927646/pexels-photo-13927646.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7801866/pexels-photo-7801866.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "04",
-      "subhead": "손 — 큐티클·건조함",
+      "subhead": "악수 전 온도를 맞춘다",
       "body": [
-        "건조하고 거친 손은 관리 안 된 인상을 준다.",
-        "핸드크림 하루 두 번, 큐티클 오일 주 2회."
+        "차갑고 축축한 손은 첫인상을 0.5초 만에 깎는다.",
+        "대기실에서 손을 가볍게 쥐었다 펴 온도를 올린다."
       ],
-      "caption": "손은 말하지 않아도 디테일을 말한다.",
+      "caption": "손의 온도가 태도처럼 읽힌다.",
       "image_queries": [
-        "man hands dark moody closeup editorial",
-        "male hands dark studio cinematic detail",
-        "men grooming hands dark portrait moody"
+        "man handshake dark moody studio editorial",
+        "male hands formal suit dark background closeup",
+        "men hands warm grip dark moody portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/36763076/pexels-photo-36763076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
-      "type": "content",
-      "number": "05",
-      "subhead": "자세 — 어깨·등 라인",
-      "body": [
-        "거울 정면에서 어깨 높이가 같은지 확인한다.",
-        "구부정한 등은 옷태를 반으로 줄인다."
-      ],
-      "caption": "자세가 실루엣을 완성한다.",
+      "type": "outro",
+      "wordmark": "bodetail",
+      "closing_serif": "디테일이 인상을 완성한다",
+      "closing_sub": "면접 전 5분, 손부터 점검하세요.",
       "image_queries": [
-        "man dark moody posture back shoulder editorial",
-        "male dark studio full body posture cinematic",
-        "men moody dark silhouette back portrait"
+        "man dark studio portrait moody editorial minimal",
+        "male suit dark background editorial portrait",
+        "men formal dark moody studio closeup"
       ],
-      "image_url": "https://images.pexels.com/photos/5485626/pexels-photo-5485626.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": ""
     }
   ]
 }

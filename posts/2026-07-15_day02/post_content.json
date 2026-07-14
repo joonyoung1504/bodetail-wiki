@@ -1,0 +1,105 @@
+{
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.01",
+  "caption_full": "면접 떨어지는 이유, 손일 수도 있어요.\n\n말끔한 수트, 다려진 셔츠 — 그런데 손톱에 큐티클이 밀려 있으면 그게 다 보입니다. 면접관의 시선은 생각보다 훨씬 구체적인 곳에 닿아요.\n\n오늘 카드, 저장해두고 다음 면접 3시간 전에 꺼내보세요.\n\n✦ 큐티클 정리\n✦ 손톱 4mm 법칙\n✦ 핸드크림 3시간 전\n✦ 악수 전 온도 맞추기\n\n작은 디테일이 당락을 가릅니다.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #면접준비 #손관리 #남자손관리 #면접팁 #취업준비 #그루밍 #남자디테일 #셀프그루밍 #손끝디테일 #면접복장 #취준생 #남자패션 #디테일남",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "면접 직전, 손이 다 말해버린다",
+      "headline_main": [
+        "손끝이",
+        "당락 가른다"
+      ],
+      "headline_serif": "5분 안에 고칠 수 있는 손 디테일 4",
+      "image_queries": [
+        "man dark studio hands moody editorial",
+        "male hands suit dark background closeup",
+        "men formal interview dark moody portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/37924817/pexels-photo-37924817.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "큐티클부터 자른다",
+      "body": [
+        "손톱 길이보다 큐티클이 먼저다.",
+        "밀린 큐티클 하나가 전체 손 인상을 무너뜨린다."
+      ],
+      "caption": "관리된 손은 말하지 않아도 설득한다.",
+      "image_queries": [
+        "man hands dark closeup grooming moody",
+        "male hand grooming editorial dark studio",
+        "men cuticle hand care dark background"
+      ],
+      "image_url": "https://images.pexels.com/photos/7447142/pexels-photo-7447142.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "손톱은 4mm 법칙",
+      "body": [
+        "손끝에서 4mm 이하. 그 이상은 관리 포기로 읽힌다.",
+        "직선 컷 후 파일로 모서리만 살짝 둥글린다."
+      ],
+      "caption": "길이가 아니라 각도가 인상을 완성한다.",
+      "image_queries": [
+        "man hands trimmed nails dark moody closeup",
+        "male hand editorial clean nails dark studio",
+        "men hands formal dark background minimal"
+      ],
+      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "핸드크림은 3시간 전",
+      "body": [
+        "면접 직전 바르면 번들거림이 남는다.",
+        "3시간 전 한 번, 흡수 후 손등만 가볍게 닦아낸다."
+      ],
+      "caption": "촉촉하되 번들거리지 않는 손이 정답이다.",
+      "image_queries": [
+        "man hands moisturizer dark moody editorial",
+        "male hand skin care dark studio closeup",
+        "men hands hydrated clean dark background"
+      ],
+      "image_url": "https://images.pexels.com/photos/7801866/pexels-photo-7801866.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "악수 전 온도를 맞춘다",
+      "body": [
+        "차갑고 축축한 손은 첫인상을 0.5초 만에 깎는다.",
+        "대기실에서 손을 가볍게 쥐었다 펴 온도를 올린다."
+      ],
+      "caption": "손의 온도가 태도처럼 읽힌다.",
+      "image_queries": [
+        "man handshake dark moody studio editorial",
+        "male hands formal suit dark background closeup",
+        "men hands warm grip dark moody portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/36763076/pexels-photo-36763076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "outro",
+      "wordmark": "bodetail",
+      "closing_serif": "디테일이 인상을 완성한다",
+      "closing_sub": "면접 전 5분, 손부터 점검하세요.",
+      "image_queries": [
+        "man dark studio portrait moody editorial minimal",
+        "male suit dark background editorial portrait",
+        "men formal dark moody studio closeup"
+      ],
+      "image_url": ""
+    }
+  ]
+}
