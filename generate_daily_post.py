@@ -111,17 +111,34 @@ with open("content/topics_30.json", "r", encoding="utf-8") as f:
 # 실행할 때마다 last_day + 1 로 넘어가고, 마지막 주제 후에는 처음으로 순환.
 # posts/ 안에 있으므로 기존 워크플로의 `git add posts/`에 자동으로 커밋됨.
 STATE_FILE = Path("posts/topic_state.json")
-if day_override:
+
+# ── 커스텀 주제: Actions 수동 실행에서 주제를 직접 입력하면 그걸로 생성 ──
+# 비워두면 아래 정기 순환(다음 날짜 주제)으로 진행. 상태 파일은 건드리지 않음.
+CUSTOM_TOPIC   = os.environ.get("CUSTOM_TOPIC", "").strip()
+CUSTOM_DESC    = os.environ.get("CUSTOM_DESC", "").strip()
+CUSTOM_SECTION = (os.environ.get("CUSTOM_SECTION", "").strip().upper() or "DETAIL")
+_VALID_SECTIONS = {"WHY","DETAIL","ROUTINE","PICK","KNOW","STYLE","BODY","SCENE"}
+
+if CUSTOM_TOPIC:
+    if CUSTOM_SECTION not in _VALID_SECTIONS:
+        print(f"⚠️ 섹션 '{CUSTOM_SECTION}' 없음 → DETAIL로 대체 (가능: {', '.join(sorted(_VALID_SECTIONS))})")
+        CUSTOM_SECTION = "DETAIL"
+    day_num = 0  # 커스텀 표식: 폴더가 dayXX가 아닌 day00으로 생성됨
+    topic = {"day": 0, "section": CUSTOM_SECTION, "title_main": CUSTOM_TOPIC,
+             "hook_type": "정보 단언형", "num_slides": 5}
+    print(f"✍️ 커스텀 주제 모드: [{CUSTOM_SECTION}] {CUSTOM_TOPIC}"
+          + (f" | 지침: {CUSTOM_DESC[:60]}…" if len(CUSTOM_DESC) > 60 else (f" | 지침: {CUSTOM_DESC}" if CUSTOM_DESC else "")))
+elif day_override:
     day_num = int(day_override)
     print(f"🔧 DAY_OVERRIDE={day_num} — 수동 지정 (상태 파일은 건드리지 않음)")
 else:
     total_topics = len(schedule["topics"])
-    last_day = 1  # 상태 파일이 없을 때 기본값: day01은 이미 여러 번 소진됐으므로 day02부터 시작
+    last_day = 0  # 상태 파일이 없으면 DAY 1부터 시작
     if STATE_FILE.exists():
         try:
-            last_day = int(json.loads(STATE_FILE.read_text(encoding="utf-8")).get("last_day", 1))
+            last_day = int(json.loads(STATE_FILE.read_text(encoding="utf-8")).get("last_day", 0))
         except Exception as e:
-            print(f"⚠️ topic_state.json 파싱 실패({e}) → last_day=1로 재시작")
+            print(f"⚠️ topic_state.json 파싱 실패({e}) → DAY 1부터 재시작")
     day_num = (last_day % total_topics) + 1
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     STATE_FILE.write_text(
@@ -130,7 +147,14 @@ else:
     if day_num == total_topics:
         print(f"♻️ 이번 실행으로 {total_topics}일 주제 한 바퀴 완료 — 다음부터 처음부터 반복. 새 주제 배치 갱신 권장!")
 
-topic = next((t for t in schedule["topics"] if t["day"] == day_num), schedule["topics"][0])
+if not CUSTOM_TOPIC:
+    topic = next((t for t in schedule["topics"] if t["day"] == day_num), None)
+    if topic is None:
+        _total = len(schedule["topics"])
+        _wrapped = ((day_num - 1) % _total) + 1
+        print(f"⚠️ DAY {day_num}은 주제 목록(1~{_total}) 밖 → DAY {_wrapped}로 자동 매핑")
+        day_num = _wrapped
+        topic = next((t for t in schedule["topics"] if t["day"] == day_num), schedule["topics"][0])
 
 SECTION_KO = {
     "WHY":"오늘의 디테일","DETAIL":"오늘의 디테일","ROUTINE":"오늘의 루틴",
@@ -145,7 +169,7 @@ SECTION_BADGE = {
 sec_code = topic.get("section","DETAIL")
 topic["section_label_ko"] = SECTION_KO.get(sec_code, "오늘의 디테일")
 same_sec = [t for t in schedule["topics"] if t.get("section")==sec_code and t["day"]<=day_num]
-topic["vol_no"] = f"VOL.{len(same_sec):02d}"
+topic["vol_no"] = "SPECIAL" if CUSTOM_TOPIC else f"VOL.{len(same_sec):02d}"
 is_pick = (sec_code == "PICK")
 
 print(f"📅 {DATE} | DAY {day_num} | [{sec_code}] {topic['title_main']}")
@@ -191,6 +215,11 @@ JSON:
   {{"slide_num":1,"type":"cover","headline_sub":"맥락한줄","headline_main":["묵직한","제목"],"headline_serif":"구체약속","image_queries":["man dark studio portrait","male editorial dark","men moody portrait"]}},
   {{"slide_num":2,"type":"content","number":"01","subhead":"핵심팁제목","body":["내용1","내용2"],"caption":"핵심선언.","image_queries":["man hands dark closeup","male grooming moody","men hands editorial"]}}
 ],"caption_full":"캡션 (첫줄 후킹·저장유도·요약·@bodetail_official)","hashtags":"#bodetail #남자그루밍 ..."}}"""
+
+if CUSTOM_DESC:
+    _brief = f"\n★★ 창업자 직접 지침 (다른 규칙보다 최우선 반영): {CUSTOM_DESC}\n"
+    PICK_USER += _brief
+    CONTENT_USER += _brief
 
 print("🤖 Claude 콘텐츠 생성 중...")
 msg = client.messages.create(
@@ -657,3 +686,81 @@ print(f"\n🎉 {len(rendered)}장 완료 → posts/latest/ & {OUT}/")
 print(f"\n📋 수동 이미지 사용법:")
 print(f"   posts/images/manual/01_커버.jpg, 02_슬라이드2.jpg ... 형식으로 올리면")
 print(f"   해당 슬라이드에 자동 적용 (API 둘 다 없을 때만)")
+
+
+# ══════════════════════════════════════════════════════════════
+# 9. 주제 배치 자동 갱신 — 마지막 DAY 생성 후 다음 30일치를 Claude로 생성
+#    실패해도 오늘 게시물에는 영향 없음 (기존 주제로 처음부터 재순환)
+# ══════════════════════════════════════════════════════════════
+def refresh_topics_batch():
+    from datetime import datetime as _dt
+    # (1) 현재 배치 아카이브
+    arch_dir = Path("content/topics_archive")
+    arch_dir.mkdir(parents=True, exist_ok=True)
+    arch_path = arch_dir / f"batch_{_dt.now(KST).strftime('%Y-%m-%d')}.json"
+    arch_path.write_text(json.dumps(schedule, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # (2) 중복 금지 리스트: 현재 배치 + 최근 아카이브 3개
+    past_titles = [t["title_main"] for t in schedule["topics"]]
+    for f in sorted(arch_dir.glob("batch_*.json"))[-4:]:
+        try:
+            past_titles += [t.get("title_main","") for t in json.loads(f.read_text(encoding="utf-8")).get("topics", [])]
+        except Exception:
+            pass
+    past_titles = [t for t in dict.fromkeys(past_titles) if t][-100:]
+
+    month = _dt.now(KST).month
+    regen_prompt = f"""bodetail(@bodetail_official) 인스타그램의 다음 30일 콘텐츠 주제 배치를 JSON으로만 생성해.
+브랜드: "안목 있는 남자의 루틴" — 20~30대 남성 그루밍·라이프스타일 무드 매거진.
+
+[규칙]
+1. 정확히 30개, day 1~30 순서. 섹션 로테이션: WHY→DETAIL→ROUTINE→PICK→KNOW→STYLE→BODY→SCENE 반복.
+2. 아래 "이미 다룬 주제"와 겹치거나 유사한 주제 금지. 같은 소재라면 반드시 완전히 다른 각도로.
+3. 분야를 넓혀라 — 기존에 다루지 않은 세부 분야를 적극 포함:
+   치아·미소 관리 / 체취·데오 / 두피·헤어 심화 / 손·손톱 / 목소리·말투 /
+   사진 잘 나오는 법 / 안경·시계·액세서리 / 신발·가죽 관리 / 식단·수분·카페인 /
+   술자리 다음날 회복 / 출장·여행 그루밍 / 헬스장 루틴 / 계절 시의성(현재 {month}월 기준 앞으로 한 달).
+4. 모든 주제는 추상적 동기부여 금지 — 독자가 반드시 얻어가는 구체적 정보/팁 구조 (숫자 포함 제목 우선).
+5. 후킹 유형 다양화: 즉시실행형/상황특정형/반전·경고형/큐레이션형/시의성형/정체성 호명형 골고루.
+6. 각 주제의 필드: day, section, title_main(15자 내외 선언형), title_sub, hook_type, why_viral, num_slides(5~7), image_search(영문, man/men 포함 + dark/moody/minimal 톤).
+
+[이미 다룬 주제 — 중복 금지]
+{chr(10).join("- " + t for t in past_titles)}
+
+[출력 형식 — 순수 JSON만, 다른 텍스트 절대 금지]
+{{"topics":[{{"day":1,"section":"WHY","title_main":"...","title_sub":"...","hook_type":"...","why_viral":"...","num_slides":6,"image_search":"..."}}]}}"""
+
+    msg2 = client.messages.create(
+        model="claude-sonnet-4-6", max_tokens=8000,
+        messages=[{"role": "user", "content": regen_prompt}]
+    )
+    raw2 = msg2.content[0].text.strip()
+    raw2 = re.sub(r'^```json\s*', '', raw2); raw2 = re.sub(r'\s*```$', '', raw2)
+    new_topics = json.loads(raw2)["topics"]
+
+    # (3) 검증 — 실패 시 예외 → 기존 배치 유지
+    assert len(new_topics) == 30, f"주제 수 {len(new_topics)} != 30"
+    for i, t in enumerate(new_topics, 1):
+        assert t.get("day") == i, f"day 순서 오류: {t.get('day')} != {i}"
+        assert t.get("section") in _VALID_SECTIONS, f"섹션 오류: {t.get('section')}"
+        for k in ("title_main", "title_sub", "hook_type", "num_slides", "image_search"):
+            assert t.get(k), f"day{i} 필드 누락: {k}"
+
+    # (4) 교체 저장 + 상태 리셋 → 다음 실행이 새 배치 DAY 1
+    new_schedule = dict(schedule)
+    new_schedule["period"] = f"30일 자동 배치 ({DATE} 생성)"
+    new_schedule["topics"] = new_topics
+    Path("content/topics_30.json").write_text(
+        json.dumps(new_schedule, ensure_ascii=False, indent=2), encoding="utf-8")
+    STATE_FILE.write_text(
+        json.dumps({"last_day": 0, "updated": DATE, "note": "새 배치 생성됨 — 다음 실행 = DAY 1"},
+                   ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"🔄 다음 30일 주제 배치 자동 생성 완료 ({len(new_topics)}개) → 내일부터 새 배치 DAY 1")
+
+
+if (not CUSTOM_TOPIC) and (not day_override) and day_num == len(schedule["topics"]):
+    print("♻️ 이번 배치 마지막 주제 — 다음 30일 배치 자동 생성 시도")
+    try:
+        refresh_topics_batch()
+    except Exception as e:
+        print(f"⚠️ 주제 배치 자동 갱신 실패(오늘 게시물엔 영향 없음, 기존 배치 재순환): {e}")
