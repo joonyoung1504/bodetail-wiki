@@ -1,0 +1,139 @@
+{
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.01",
+  "caption_full": "아무것도 안 한 것 같은데 왜 달라 보일까.\n\n사실 그 차이는 대단한 게 아니다.\n핏, 색 수, 손끝, 향, 헤어, 자세 — 원칙 6가지.\n꾸민 티 없이 좋아 보이는 남자들은 이걸 조용히 지키고 있다.\n\n저장해두고 하나씩 체크해보세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자패션 #남자그루밍 #남자스타일 #남자옷 #패션디테일 #자기관리 #남성패션 #스타일팁 #옷잘입는법 #그루밍 #남자향수 #헤어스타일링 #자세교정 #패션센스",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "아무것도 안 한 것 같은데 왜 달라 보일까",
+      "headline_main": [
+        "꾸민 티 없이",
+        "좋아 보이는 법"
+      ],
+      "headline_serif": "원칙 6가지로 정리했다",
+      "image_queries": [
+        "man dark studio portrait moody editorial",
+        "male minimal outfit dark background fashion",
+        "men well dressed moody cinematic closeup"
+      ],
+      "image_url": "https://images.pexels.com/photos/9363610/pexels-photo-9363610.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "핏이 전부다",
+      "body": [
+        "옷값보다 사이즈가 인상을 먼저 결정한다.",
+        "어깨 솔기가 딱 끝나는 지점을 확인하라."
+      ],
+      "caption": "비싼 옷보다 맞는 옷.",
+      "image_queries": [
+        "man suit shoulder fit dark moody editorial",
+        "male blazer fitting dark background closeup",
+        "men tailored jacket dark cinematic portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/33290977/pexels-photo-33290977.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "색은 3가지로 끊는다",
+      "body": [
+        "베이스·미드·포인트 딱 셋. 그 이상은 산만함이다.",
+        "포인트는 신발이나 시계 하나면 충분하다."
+      ],
+      "caption": "색을 줄이면 실루엣이 산다.",
+      "image_queries": [
+        "man monochrome outfit dark editorial moody",
+        "male minimal color palette fashion dark studio",
+        "men neutral tones dark background fashion editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/21387372/pexels-photo-21387372.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "손끝이 인상을 마무리한다",
+      "body": [
+        "소매 끝 1cm 셔츠 노출, 손톱 길이 2mm 이내.",
+        "이 두 가지만 지켜도 완성도가 달라진다."
+      ],
+      "caption": "디테일은 손끝에서 결정된다.",
+      "image_queries": [
+        "man wrist watch shirt cuff dark moody closeup",
+        "male hands clean dark editorial minimal",
+        "men wrist detail dark cinematic closeup"
+      ],
+      "image_url": "https://images.pexels.com/photos/7447142/pexels-photo-7447142.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "향은 뿌리는 위치가 전부다",
+      "body": [
+        "손목보다 목 뒤·옷깃 안쪽이 잔향을 더 오래 남긴다.",
+        "문지르면 향이 깨진다. 살짝 올려두는 것으로 끝."
+      ],
+      "caption": "향수는 흔적으로 기억된다.",
+      "image_queries": [
+        "man neck dark moody editorial portrait closeup",
+        "male cologne perfume dark background minimal",
+        "men grooming dark studio cinematic portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/30263576/pexels-photo-30263576.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "content",
+      "number": "05",
+      "subhead": "헤어는 질감으로 말한다",
+      "body": [
+        "광택 없는 매트 제품이 '꾸민 티'를 지운다.",
+        "스타일링보다 두피 관리가 먼저다."
+      ],
+      "caption": "자연스러움도 관리의 결과다.",
+      "image_queries": [
+        "man hair dark moody editorial portrait side profile",
+        "male hair texture dark background closeup cinematic",
+        "men hairstyle minimal dark studio portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/3214773/pexels-photo-3214773.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 7,
+      "type": "content",
+      "number": "06",
+      "subhead": "자세가 옷을 입힌다",
+      "body": [
+        "어깨를 내리고 턱을 당기면 실루엣이 달라진다.",
+        "좋은 옷도 구부정한 자세 앞에선 무력하다."
+      ],
+      "caption": "태도가 스타일의 마지막 레이어다.",
+      "image_queries": [
+        "man upright posture dark cinematic editorial portrait",
+        "male confident standing dark moody studio",
+        "men posture dark background fashion editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/13927646/pexels-photo-13927646.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 8,
+      "type": "closing",
+      "wordmark": "bodetail",
+      "closing_line": "디테일을 챙기는 남자의 안목.",
+      "series_note": "WHY · VOL.01",
+      "image_queries": [
+        "man dark minimal studio editorial portrait moody",
+        "male dark background clean fashion portrait",
+        "men editorial dark ink background cinematic"
+      ],
+      "image_url": ""
+    }
+  ]
+}
