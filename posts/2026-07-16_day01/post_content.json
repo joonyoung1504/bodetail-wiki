@@ -1,0 +1,139 @@
+{
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.01",
+  "caption_full": "꾸민 것 같지 않은데, 왜 저 사람은 달라 보일까.\n\n비결은 '더 하는 것'이 아니라 '덜 틀리는 것'이다.\n핏 · 컬러 · 손끝 · 향 · 자세 · 헤어 —\n여섯 가지 원칙만 지켜도 인상이 달라진다.\n\n저장해두고 하나씩 점검해보세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자패션 #남자그루밍 #남자스타일 #남자코디 #자기관리 #남자자기관리 #남자헤어 #남자향수 #옷잘입는남자 #센스있는남자 #남자디테일 #스타일링팁 #남자패션팁 #mensfashion #mensstyle #mensgrooming #menswear #darkaesthetic #editorialmenswear",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "꾸민 흔적 없이 좋아 보이는 남자들의 공통점",
+      "headline_main": [
+        "티 없이",
+        "좋아 보임"
+      ],
+      "headline_serif": "그들이 지키는 원칙 6",
+      "image_queries": [
+        "man dark studio portrait editorial moody",
+        "male fashion dark minimal moody closeup",
+        "men well dressed dark background cinematic"
+      ],
+      "image_url": "https://images.pexels.com/photos/16564731/pexels-photo-16564731.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "핏이 전부다",
+      "body": [
+        "비싼 옷보다 몸에 맞는 옷이 낫다.",
+        "어깨선과 소매 끝, 두 곳만 잡아도 달라진다."
+      ],
+      "caption": "디테일은 핏에서 시작된다.",
+      "image_queries": [
+        "man suit shoulder fit dark moody editorial",
+        "male well fitted clothing dark studio portrait",
+        "men tailored look cinematic moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/16161340/pexels-photo-16161340.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "색을 줄여라",
+      "body": [
+        "전신 3가지 이하 컬러로 맞추면 정돈돼 보인다.",
+        "뉴트럴 베이스가 가장 빠른 정답이다."
+      ],
+      "caption": "적을수록 의도가 보인다.",
+      "image_queries": [
+        "man neutral tones outfit dark moody portrait",
+        "male monochrome look editorial dark",
+        "men minimal color clothing cinematic dark"
+      ],
+      "image_url": "https://images.pexels.com/photos/7312458/pexels-photo-7312458.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "손끝을 정리하라",
+      "body": [
+        "손톱 길이·정돈 여부가 첫인상을 가른다.",
+        "일주일에 한 번, 2분이면 충분하다."
+      ],
+      "caption": "보이지 않는 곳이 인상을 완성한다.",
+      "image_queries": [
+        "man hands dark moody closeup editorial",
+        "male groomed hands dark background cinematic",
+        "men clean hands dark studio moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "향은 과하면 없는 것만 못하다",
+      "body": [
+        "귀 뒤·목 한 곳만 뿌려도 충분히 느껴진다.",
+        "잔향이 남는 게 진짜 센스다."
+      ],
+      "caption": "향은 남길수록 기억된다.",
+      "image_queries": [
+        "man neck dark moody close up cinematic portrait",
+        "male fragrance dark editorial atmosphere",
+        "men cologne dark moody studio"
+      ],
+      "image_url": "https://images.pexels.com/photos/36834159/pexels-photo-36834159.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "content",
+      "number": "05",
+      "subhead": "자세가 옷을 입힌다",
+      "body": [
+        "구부정한 어깨는 어떤 옷도 망친다.",
+        "턱 살짝 당기고 어깨만 펴도 달라 보인다."
+      ],
+      "caption": "자세는 입는 게 아니라 쌓는 것이다.",
+      "image_queries": [
+        "man upright posture dark moody editorial portrait",
+        "male confident stance dark background cinematic",
+        "men straight posture dark studio moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/8648050/pexels-photo-8648050.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 7,
+      "type": "content",
+      "number": "06",
+      "subhead": "헤어는 매일 같은 모양으로",
+      "body": [
+        "스타일링보다 일관성이 인상을 만든다.",
+        "매일 같은 실루엣이 그 사람의 이미지가 된다."
+      ],
+      "caption": "반복이 곧 스타일이다.",
+      "image_queries": [
+        "man hair dark moody editorial close up",
+        "male styled hair dark cinematic portrait",
+        "men hairstyle dark studio moody side profile"
+      ],
+      "image_url": "https://images.pexels.com/photos/28028692/pexels-photo-28028692.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 8,
+      "type": "closing",
+      "headline_main": "bodetail",
+      "tagline": "디테일을 챙기는 남자의 안목",
+      "cta_text": "저장해두고 하나씩 체크해보세요.",
+      "image_queries": [
+        "man dark minimal editorial full body moody",
+        "male dark background cinematic portrait closing",
+        "men editorial ink black moody studio"
+      ],
+      "image_url": ""
+    }
+  ]
+}
