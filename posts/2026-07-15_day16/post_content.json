@@ -1,0 +1,105 @@
+{
+  "section_label": "오늘의 준비",
+  "vol": "VOL.02",
+  "caption_full": "출근 전 10분, 실제로 달라지는 것들.\n\n향수 뿌리는 위치, 옷깃 펴는 습관, 신발 코 하나.\n작은 것들이 쌓여서 그 사람의 인상이 된다.\n\n오늘 아침부터 바로 써먹을 수 있는 루틴 4가지 — 저장해두고 내일 아침에 열어보세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #남자코디 #출근룩 #남자패션 #남자스타일 #직장인패션 #아침루틴 #그루밍 #향수추천 #남자향수 #스타일링팁 #직장인남자 #남자옷 #데일리룩",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "출근 전 10분이 하루의 인상을 결정한다",
+      "headline_main": [
+        "10분의",
+        "디테일"
+      ],
+      "headline_serif": "아침 루틴 6가지, 오늘부터 달라진다",
+      "image_queries": [
+        "man dark morning mirror portrait moody editorial",
+        "male getting ready dark bathroom moody",
+        "men grooming morning dark studio editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/21369555/pexels-photo-21369555.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "세안 후 수분크림, 2분이면 충분",
+      "body": [
+        "세안 직후 30초 안에 바를 것.",
+        "수분 날아가기 전이 골든타임이다."
+      ],
+      "caption": "피부 결이 인상을 먼저 말한다.",
+      "image_queries": [
+        "man face skincare dark moody closeup editorial",
+        "male moisturizer application dark studio",
+        "men skincare routine moody dark portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/37711448/pexels-photo-37711448.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "옷깃 한 번, 소매 한 번 — 펴라",
+      "body": [
+        "구김 하나가 전체 인상을 무너뜨린다.",
+        "거울 앞 10초가 스팀다리미를 이긴다."
+      ],
+      "caption": "옷이 말하기 전에 당신이 먼저 말한다.",
+      "image_queries": [
+        "man adjusting collar dark moody editorial",
+        "male shirt collar detail dark studio closeup",
+        "men dress shirt cuff dark editorial moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/15299312/pexels-photo-15299312.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "향수는 목 뒤, 손목 안쪽에만",
+      "body": [
+        "뿌리는 위치가 잔향의 깊이를 결정한다.",
+        "옷에는 절대 뿌리지 않는다."
+      ],
+      "caption": "향은 뒤에서 은은하게 따라와야 한다.",
+      "image_queries": [
+        "man neck dark moody portrait editorial cologne",
+        "male wrist dark closeup fragrance moody",
+        "men applying perfume dark studio editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/30263576/pexels-photo-30263576.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "신발 코 먼지, 출발 전 닦아라",
+      "body": [
+        "코디의 마지막은 항상 발끝이 본다.",
+        "티슈 한 장이 완성도를 두 배 올린다."
+      ],
+      "caption": "아무도 말 안 해도 다 보고 있다.",
+      "image_queries": [
+        "man shoes dark moody closeup editorial leather",
+        "male dress shoes dark studio detail",
+        "men shoe detail dark editorial moody floor"
+      ],
+      "image_url": "https://images.pexels.com/photos/37813631/pexels-photo-37813631.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "closing",
+      "wordmark": "bodetail",
+      "closing_line": "디테일을 챙기는 남자의 안목",
+      "series_label": "SCENE — MORNING ROUTINE",
+      "image_queries": [
+        "man dark silhouette morning editorial moody",
+        "male shadow dark studio portrait editorial",
+        "men leaving dark corridor moody cinematic"
+      ],
+      "image_url": ""
+    }
+  ]
+}
