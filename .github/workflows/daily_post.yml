@@ -5,8 +5,20 @@ on:
     - cron: '30 20 * * *'
   workflow_dispatch:
     inputs:
+      custom_topic:
+        description: '✍️ 주제 직접 입력 (비워두면 다음 날짜 주제로 자동 진행)'
+        required: false
+        default: ''
+      custom_desc:
+        description: '📝 주제 설명·지침 (원하는 방향, 꼭 들어갈 내용 등 자유롭게)'
+        required: false
+        default: ''
+      custom_section:
+        description: '섹션 (기본 DETAIL) — WHY/DETAIL/ROUTINE/PICK/KNOW/STYLE/BODY/SCENE'
+        required: false
+        default: ''
       day_override:
-        description: 'DAY 번호 직접 지정 (비워두면 자동)'
+        description: 'DAY 번호 직접 지정 (특정 날짜 주제 재생성용, 보통 비워둠)'
         required: false
         default: ''
 
@@ -32,11 +44,14 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTROPIC_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           DAY_OVERRIDE: ${{ github.event.inputs.day_override }}
+          CUSTOM_TOPIC: ${{ github.event.inputs.custom_topic }}
+          CUSTOM_DESC: ${{ github.event.inputs.custom_desc }}
+          CUSTOM_SECTION: ${{ github.event.inputs.custom_section }}
         run: python generate_daily_post.py
       - name: 결과물 커밋
         run: |
           git config --local user.email "bot@bodetail.com"
           git config --local user.name "bodetail-bot"
-          git add posts/
+          git add posts/ content/
           git diff --staged --quiet || git commit -m "📸 $(date +'%Y-%m-%d') 게시물 자동생성"
           git push
