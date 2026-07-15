@@ -1,7 +1,7 @@
 {
   "brand": "bodetail",
-  "period": "30일 시드 스케줄 v2",
-  "note": "8개 섹션 순환. 손 관련 1/30 (Day 7 DETAIL). 세르칸 바이럴 패턴 반영.",
+  "period": "30일 시드 스케줄 v3 (2026-07-15 리셋)",
+  "note": "8개 섹션 순환. DAY 1 교체(기존 '거울 5곳'은 반복 게시로 소진 → 아카이브행). 30일 소진 시 스크립트가 다음 배치 자동 생성.",
   "sections": {
     "WHY": "철학·마인드셋 — 왜 관리해야 하는가",
     "DETAIL": "즉효 한 끗 — 오늘 당장 쓸 수 있는 디테일",
@@ -26,12 +26,12 @@
     {
       "day": 1,
       "section": "WHY",
-      "title_main": "거울 볼 때, 이 5곳을 본다",
-      "title_sub": "매일 30초 자가 점검 포인트",
-      "hook_type": "즉시실행형",
-      "why_viral": "추상적 자기관리론이 아니라 당장 따라할 체크포인트. 저장 욕구",
-      "num_slides": 5,
-      "image_search": "man mirror reflection dark moody grooming"
+      "title_main": "'꾸민 티' 없이 좋아 보이는 남자들의 원칙 6",
+      "title_sub": "과하지 않게, 그러나 확실하게",
+      "hook_type": "정체성 호명형",
+      "why_viral": "세르칸 '귀티' 계열 패턴. 노력 숨기고 결과만 보이고 싶은 남성 심리 저격. 저장 욕구 강함",
+      "num_slides": 6,
+      "image_search": "effortless well groomed man dark editorial portrait"
     },
     {
       "day": 2,
