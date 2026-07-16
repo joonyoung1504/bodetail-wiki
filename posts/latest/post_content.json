@@ -1,137 +1,140 @@
 {
   "section_label": "오늘의 디테일",
   "vol": "VOL.01",
-  "caption_full": "꾸민 것 같지 않은데, 왜 저 사람은 달라 보일까.\n\n비결은 '더 하는 것'이 아니라 '덜 틀리는 것'이다.\n핏 · 컬러 · 손끝 · 향 · 자세 · 헤어 —\n여섯 가지 원칙만 지켜도 인상이 달라진다.\n\n저장해두고 하나씩 점검해보세요.\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자패션 #남자그루밍 #남자스타일 #남자코디 #자기관리 #남자자기관리 #남자헤어 #남자향수 #옷잘입는남자 #센스있는남자 #남자디테일 #스타일링팁 #남자패션팁 #mensfashion #mensstyle #mensgrooming #menswear #darkaesthetic #editorialmenswear",
+  "caption_full": "면접장에서 손은 생각보다 훨씬 많이 보인다.\n악수, 서류 전달, 테이블 위에 올린 자세 — 손끝의 디테일이 첫인상을 조용히 완성하거나, 조용히 무너뜨린다.\n\n오늘 카드에 담은 6가지, 내일 면접 전 한 번만 훑어보세요.\n큰 노력 없이도 달라 보이는 사람이 되는 가장 빠른 방법입니다.\n\n저장해두고 면접 전날 꺼내 쓰세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #면접준비 #손관리 #남자손관리 #취업준비 #면접팁 #그루밍 #남자디테일 #셀프그루밍 #남자케어 #취준생 #면접복장 #디테일남자 #남자뷰티 #핸드케어 #남자패션 #스타일팁 #DETAIL #첫인상",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "꾸민 흔적 없이 좋아 보이는 남자들의 공통점",
+      "headline_sub": "면접 전 5분, 손끝이 인상을 결정한다",
       "headline_main": [
-        "티 없이",
-        "좋아 보임"
+        "손이",
+        "말한다"
       ],
-      "headline_serif": "그들이 지키는 원칙 6",
+      "headline_serif": "6가지 디테일, 지금 바로 점검",
       "image_queries": [
-        "man dark studio portrait editorial moody",
-        "male fashion dark minimal moody closeup",
-        "men well dressed dark background cinematic"
+        "man dark studio hands portrait moody editorial",
+        "male suit dark background hands closeup cinematic",
+        "men formal interview dark moody atmospheric"
       ],
-      "image_url": "https://images.pexels.com/photos/16564731/pexels-photo-16564731.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/14355520/pexels-photo-14355520.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "content",
       "number": "01",
-      "subhead": "핏이 전부다",
+      "subhead": "큐티클 정리",
       "body": [
-        "비싼 옷보다 몸에 맞는 옷이 낫다.",
-        "어깨선과 소매 끝, 두 곳만 잡아도 달라진다."
+        "큐티클이 들뜨면 관리 안 된 인상.",
+        "전날 밤, 오일 한 방울로 눌러두면 끝."
       ],
-      "caption": "디테일은 핏에서 시작된다.",
+      "caption": "손톱 테두리가 말끔하면 첫인상이 달라진다.",
       "image_queries": [
-        "man suit shoulder fit dark moody editorial",
-        "male well fitted clothing dark studio portrait",
-        "men tailored look cinematic moody"
+        "man hands dark moody closeup grooming",
+        "male hands editorial dark studio detail",
+        "men groomed hands cinematic dark background"
       ],
-      "image_url": "https://images.pexels.com/photos/16161340/pexels-photo-16161340.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/16875740/pexels-photo-16875740.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
       "type": "content",
       "number": "02",
-      "subhead": "색을 줄여라",
+      "subhead": "손톱 길이와 단면",
       "body": [
-        "전신 3가지 이하 컬러로 맞추면 정돈돼 보인다.",
-        "뉴트럴 베이스가 가장 빠른 정답이다."
+        "손끝 1mm, 넘으면 지저분해 보인다.",
+        "단면은 반드시 파일로 매끄럽게 마감."
       ],
-      "caption": "적을수록 의도가 보인다.",
+      "caption": "길이보다 단면 처리가 완성도를 결정한다.",
       "image_queries": [
-        "man neutral tones outfit dark moody portrait",
-        "male monochrome look editorial dark",
-        "men minimal color clothing cinematic dark"
+        "man dark hands nail grooming moody close",
+        "male editorial hands detail dark cinematic",
+        "men hands professional dark atmospheric studio"
       ],
-      "image_url": "https://images.pexels.com/photos/7312458/pexels-photo-7312458.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/19177717/pexels-photo-19177717.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "03",
-      "subhead": "손끝을 정리하라",
+      "subhead": "손 보습",
       "body": [
-        "손톱 길이·정돈 여부가 첫인상을 가른다.",
-        "일주일에 한 번, 2분이면 충분하다."
+        "건조하고 튼 손은 긴장한 인상을 강조한다.",
+        "무향 핸드크림, 면접 1시간 전 소량 흡수."
       ],
-      "caption": "보이지 않는 곳이 인상을 완성한다.",
+      "caption": "촉촉한 손이 악수 한 번을 완전히 바꾼다.",
       "image_queries": [
-        "man hands dark moody closeup editorial",
-        "male groomed hands dark background cinematic",
-        "men clean hands dark studio moody"
+        "man hands moisturizer dark moody editorial",
+        "male grooming hand cream dark cinematic closeup",
+        "men hands skin care dark studio atmospheric"
       ],
-      "image_url": "https://images.pexels.com/photos/13661725/pexels-photo-13661725.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/32904161/pexels-photo-32904161.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "04",
-      "subhead": "향은 과하면 없는 것만 못하다",
+      "subhead": "손목 아래 청결",
       "body": [
-        "귀 뒤·목 한 곳만 뿌려도 충분히 느껴진다.",
-        "잔향이 남는 게 진짜 센스다."
+        "소매 걷히는 순간, 손목 안쪽까지 시선이 간다.",
+        "샤워 후 손목 안쪽 각질, 한 번 더 닦아낸다."
       ],
-      "caption": "향은 남길수록 기억된다.",
+      "caption": "디테일은 보이지 않던 곳에서 드러난다.",
       "image_queries": [
-        "man neck dark moody close up cinematic portrait",
-        "male fragrance dark editorial atmosphere",
-        "men cologne dark moody studio"
+        "man wrist dark moody editorial cinematic suit",
+        "male formal wrist closeup dark atmospheric",
+        "men wrist detail dark studio moody close"
       ],
-      "image_url": "https://images.pexels.com/photos/36834159/pexels-photo-36834159.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/36668719/pexels-photo-36668719.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
       "type": "content",
       "number": "05",
-      "subhead": "자세가 옷을 입힌다",
+      "subhead": "향 레이어링 자제",
       "body": [
-        "구부정한 어깨는 어떤 옷도 망친다.",
-        "턱 살짝 당기고 어깨만 펴도 달라 보인다."
+        "손에 향이 남으면 악수 직후 불쾌감 줄 수 있다.",
+        "면접날은 핸드크림 향 없는 제품으로 교체."
       ],
-      "caption": "자세는 입는 게 아니라 쌓는 것이다.",
+      "caption": "향도 디테일이다. 덜어내는 게 배려다.",
       "image_queries": [
-        "man upright posture dark moody editorial portrait",
-        "male confident stance dark background cinematic",
-        "men straight posture dark studio moody"
+        "man hands dark studio editorial clean moody",
+        "male formal dark cinematic hands professional",
+        "men grooming hands dark atmospheric close up"
       ],
-      "image_url": "https://images.pexels.com/photos/8648050/pexels-photo-8648050.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7801866/pexels-photo-7801866.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 7,
       "type": "content",
       "number": "06",
-      "subhead": "헤어는 매일 같은 모양으로",
+      "subhead": "제스처 습관",
       "body": [
-        "스타일링보다 일관성이 인상을 만든다.",
-        "매일 같은 실루엣이 그 사람의 이미지가 된다."
+        "테이블 위 손, 주먹 쥐면 방어적으로 읽힌다.",
+        "손가락 모아 가볍게 얹는 것만으로 인상이 안정된다."
       ],
-      "caption": "반복이 곧 스타일이다.",
+      "caption": "손 모양 하나가 자신감의 언어가 된다.",
       "image_queries": [
-        "man hair dark moody editorial close up",
-        "male styled hair dark cinematic portrait",
-        "men hairstyle dark studio moody side profile"
+        "man dark table hands gesture moody editorial",
+        "male interview dark cinematic hands composed",
+        "men professional hands dark studio atmospheric"
       ],
-      "image_url": "https://images.pexels.com/photos/28028692/pexels-photo-28028692.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7859840/pexels-photo-7859840.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 8,
-      "type": "closing",
-      "headline_main": "bodetail",
-      "tagline": "디테일을 챙기는 남자의 안목",
-      "cta_text": "저장해두고 하나씩 체크해보세요.",
+      "type": "outro",
+      "headline_sub": "DETAIL — 손끝까지 완성한 사람이 기억된다",
+      "headline_main": [
+        "6가지를",
+        "점검했나요"
+      ],
+      "wordmark": "bodetail",
       "image_queries": [
-        "man dark minimal editorial full body moody",
-        "male dark background cinematic portrait closing",
-        "men editorial ink black moody studio"
+        "man dark editorial full body suit moody cinematic",
+        "male dark studio portrait composed atmospheric",
+        "men professional dark moody editorial portrait"
       ],
       "image_url": ""
     }
