@@ -1,0 +1,121 @@
+{
+  "section_label": "오늘의 루틴",
+  "vol": "VOL.01",
+  "caption_full": "취침 전 7분, 내일 아침 얼굴이 달라집니다.\n\n클렌징 30초 연장 / 토너 손바닥 압착 / 약지 눈가 마사지 / 크림 밀봉 / 수면 자세 교정 —\n순서대로 따라하면 7분이 채 안 걸려요.\n\n스킨케어는 재료보다 루틴의 밀도가 결과를 만듭니다.\n내일 아침 거울 앞에서 차이를 확인하세요.\n\n저장해두고 오늘 밤부터 바로 써보세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자루틴 #남자스킨케어 #취침전루틴 #남자그루밍 #남자피부관리 #스킨케어루틴 #남자셀프케어 #피부관리남자 #수면루틴 #남자뷰티 #그루밍 #자기관리 #남자일상 #남자외모관리",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "잠들기 전 7분이 내일의 첫인상을 만든다",
+      "headline_main": [
+        "취침 전 7분"
+      ],
+      "headline_serif": "얼굴은 밤에 완성된다",
+      "image_queries": [
+        "man dark studio moody portrait closeup",
+        "male editorial night skincare dark",
+        "men face shadow moody cinematic"
+      ],
+      "image_url": "https://images.pexels.com/photos/21369560/pexels-photo-21369560.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "클렌징은 30초 더",
+      "body": [
+        "잔여물 30초 추가 제거로 모공 막힘 차단.",
+        "자기 전 피부 흡수율은 낮보다 2배 높다."
+      ],
+      "caption": "클렌징이 스킨케어의 80%다.",
+      "image_queries": [
+        "man washing face dark moody bathroom",
+        "male skincare closeup editorial dark",
+        "men face cleansing moody cinematic"
+      ],
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "토너는 손바닥으로",
+      "body": [
+        "화장솜 대신 손바닥 압착으로 흡수율 상승.",
+        "5초 밀착 후 손 떼기 — 층이 쌓인다."
+      ],
+      "caption": "도구보다 온도가 침투를 결정한다.",
+      "image_queries": [
+        "man hands face dark moody skincare editorial",
+        "male hands pressing face cinematic dark",
+        "men grooming hands moody close up"
+      ],
+      "image_url": "https://images.pexels.com/photos/6633781/pexels-photo-6633781.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "눈가는 약지 한 손가락",
+      "body": [
+        "검지 압력은 눈가 피부를 늘어뜨린다.",
+        "약지로 두드리듯 — 힘이 빠질수록 정확하다."
+      ],
+      "caption": "다크서클은 압력에서 시작된다.",
+      "image_queries": [
+        "man eye closeup dark moody editorial",
+        "male under eye dark shadow cinematic",
+        "men face eye area moody close up"
+      ],
+      "image_url": "https://images.pexels.com/photos/33362135/pexels-photo-33362135.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "수면 전 보습은 밀봉이다",
+      "body": [
+        "크림은 수분을 바르는 게 아니라 가두는 것.",
+        "얇게 전체 도포 후 콧방울·입술 끝 마감."
+      ],
+      "caption": "마지막 레이어가 밤새 얼굴을 잡는다.",
+      "image_queries": [
+        "man moisturizer dark studio editorial male",
+        "male face cream application moody cinematic",
+        "men skincare night routine dark closeup"
+      ],
+      "image_url": "https://images.pexels.com/photos/24986830/pexels-photo-24986830.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "content",
+      "number": "05",
+      "subhead": "수면 자세가 얼굴을 누른다",
+      "body": [
+        "옆으로 자면 한쪽 볼에 주름이 반복 각인.",
+        "천장 보고 눕는 습관 — 대칭이 유지된다."
+      ],
+      "caption": "루틴 후 자세까지가 루틴이다.",
+      "image_queries": [
+        "man lying bed dark moody editorial cinematic",
+        "male sleep position dark studio shadow",
+        "men resting face dark pillow editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/13146007/pexels-photo-13146007.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 7,
+      "type": "closing",
+      "wordmark": "bodetail",
+      "closing_line": "디테일을 챙기는 남자의 루틴",
+      "series_note": "ROUTINE VOL.01 — 취침 전 7분",
+      "image_queries": [
+        "man dark minimal studio portrait editorial",
+        "male moody shadow cinematic portrait dark",
+        "men silhouette dark background editorial"
+      ],
+      "image_url": ""
+    }
+  ]
+}
