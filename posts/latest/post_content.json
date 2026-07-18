@@ -1,119 +1,152 @@
 {
-  "section_label": "오늘의 루틴",
+  "section_label": "오늘의 PICK",
   "vol": "VOL.01",
-  "caption_full": "취침 전 7분, 내일 아침 얼굴이 달라집니다.\n\n클렌징 30초 연장 / 토너 손바닥 압착 / 약지 눈가 마사지 / 크림 밀봉 / 수면 자세 교정 —\n순서대로 따라하면 7분이 채 안 걸려요.\n\n스킨케어는 재료보다 루틴의 밀도가 결과를 만듭니다.\n내일 아침 거울 앞에서 차이를 확인하세요.\n\n저장해두고 오늘 밤부터 바로 써보세요.\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자루틴 #남자스킨케어 #취침전루틴 #남자그루밍 #남자피부관리 #스킨케어루틴 #남자셀프케어 #피부관리남자 #수면루틴 #남자뷰티 #그루밍 #자기관리 #남자일상 #남자외모관리",
+  "caption_full": "첫 향수, 뭘 사야 할지 모르겠다면.\n\n수십 가지 중에 고르는 건 처음부터 무리다.\n계열 하나만 잡고 들어가면 실패가 없다.\n\n시트러스 계열이 끌린다면 아쿠아 디 파르마.\n아무 향이나 써도 안 튀고 싶다면 불가리.\n부담 없이 시작하고 싶다면 아이소이.\n알아보는 사람만 아는 향을 원한다면 조 말론.\n습관부터 들이고 싶다면 니베아 딥 블랙.\n\n향수는 첫 병이 제일 어렵다.\n이 다섯 개 안에서 고르면, 그 어려움은 끝난다.",
+  "hashtags": "#bodetail #남자향수 #첫향수 #향수추천 #남자그루밍 #남성향수 #향수입문 #그루밍 #남자패션 #남자뷰티 #향수입문자 #아쿠아디파르마 #불가리향수 #조말론 #니베아맨 #남자선물 #향수선물 #데일리향수 #퍼퓸 #남성퍼퓸",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "잠들기 전 7분이 내일의 첫인상을 만든다",
+      "headline_sub": "처음이라면, 이 다섯 개면 충분하다",
       "headline_main": [
-        "취침 전 7분"
+        "첫 향수,",
+        "이걸로 골라요"
       ],
-      "headline_serif": "얼굴은 밤에 완성된다",
+      "headline_serif": "이달의 추천 5선",
       "image_queries": [
-        "man dark studio moody portrait closeup",
-        "male editorial night skincare dark",
-        "men face shadow moody cinematic"
+        "men cologne bottle cinematic dark moody",
+        "perfume bottle dark background editorial",
+        "men fragrance luxury ink black gold"
       ],
-      "image_url": "https://images.pexels.com/photos/21369560/pexels-photo-21369560.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/12562773/pexels-photo-12562773.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
-      "type": "content",
+      "type": "pick",
       "number": "01",
-      "subhead": "클렌징은 30초 더",
+      "product_name": "아쿠아 디 파르마 콜로니아 (Acqua di Parma Colonia)",
+      "price": "약 120,000원 / 100ml",
+      "stars": 5,
+      "one_line": "클래식의 기준점",
       "body": [
-        "잔여물 30초 추가 제거로 모공 막힘 차단.",
-        "자기 전 피부 흡수율은 낮보다 2배 높다."
+        "베르가못·레몬·로즈마리의 깔끔한 시트러스 우디 계열 — 계절 불문 무난하게 통한다",
+        "향의 지속력은 3~4시간으로 가볍지만, 그 '가벼움'이 오히려 첫 향수에 딱 맞다"
       ],
-      "caption": "클렌징이 스킨케어의 80%다.",
+      "caption": "무엇을 살지 모르겠다면, 이게 정답이다.",
       "image_queries": [
-        "man washing face dark moody bathroom",
-        "male skincare closeup editorial dark",
-        "men face cleansing moody cinematic"
+        "Acqua di Parma Colonia bottle dark moody editorial",
+        "men cologne citrus woody dark background cinematic",
+        "italian fragrance bottle ink black luxury"
       ],
-      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/28664165/pexels-photo-28664165.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
-      "type": "content",
+      "type": "pick",
       "number": "02",
-      "subhead": "토너는 손바닥으로",
+      "product_name": "불가리 프리 옴므 (Bvlgari Pour Homme)",
+      "price": "약 85,000원 / 100ml",
+      "stars": 4,
+      "one_line": "무난함의 교과서",
       "body": [
-        "화장솜 대신 손바닥 압착으로 흡수율 상승.",
-        "5초 밀착 후 손 떼기 — 층이 쌓인다."
+        "누가 맡아도 거슬리지 않는 은은한 우디 머스크 — 사무실·캠퍼스 어디든 어색하지 않다",
+        "가성비 대비 병 퀄리티가 높아 첫 향수로 '사진발'도 챙길 수 있다"
       ],
-      "caption": "도구보다 온도가 침투를 결정한다.",
+      "caption": "센스 없어 보이지 않을 가장 안전한 선택.",
       "image_queries": [
-        "man hands face dark moody skincare editorial",
-        "male hands pressing face cinematic dark",
-        "men grooming hands moody close up"
+        "Bvlgari Pour Homme bottle dark cinematic moody",
+        "men woody musk fragrance dark editorial",
+        "bvlgari perfume bottle black background luxury"
       ],
-      "image_url": "https://images.pexels.com/photos/6633781/pexels-photo-6633781.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7270665/pexels-photo-7270665.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
-      "type": "content",
+      "type": "pick",
       "number": "03",
-      "subhead": "눈가는 약지 한 손가락",
+      "product_name": "아이소이 포맨 시그니처 퍼퓸 (ISOI for Men Signature Perfume)",
+      "price": "약 38,000원 / 50ml",
+      "stars": 4,
+      "one_line": "부담 없는 시작",
       "body": [
-        "검지 압력은 눈가 피부를 늘어뜨린다.",
-        "약지로 두드리듯 — 힘이 빠질수록 정확하다."
+        "국내 브랜드 특유의 깔끔한 머스크 베이스 — 과하지 않아 향수 처음 쓰는 사람에게 심리적 부담이 적다",
+        "3만원대 가격에 지속력 4시간 이상, 첫 향수로 투자 대비 손해 없는 선택"
       ],
-      "caption": "다크서클은 압력에서 시작된다.",
+      "caption": "향수가 어렵게 느껴질 때, 이걸로 시작한다.",
       "image_queries": [
-        "man eye closeup dark moody editorial",
-        "male under eye dark shadow cinematic",
-        "men face eye area moody close up"
+        "korean men perfume bottle dark moody editorial",
+        "minimalist fragrance bottle dark background cinematic",
+        "men grooming perfume dark ink black"
       ],
-      "image_url": "https://images.pexels.com/photos/33362135/pexels-photo-33362135.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/14402569/pexels-photo-14402569.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
-      "type": "content",
+      "type": "pick",
       "number": "04",
-      "subhead": "수면 전 보습은 밀봉이다",
+      "product_name": "조 말론 우드 세이지 앤 씨 솔트 (Jo Malone Wood Sage & Sea Salt)",
+      "price": "약 145,000원 / 100ml",
+      "stars": 5,
+      "one_line": "한 끗 다른 선택",
       "body": [
-        "크림은 수분을 바르는 게 아니라 가두는 것.",
-        "얇게 전체 도포 후 콧방울·입술 끝 마감."
+        "씨솔트 특유의 미네랄·건조한 우디감 — '향수 쓰는 것 같지 않은 향수'를 찾는다면 이게 답이다",
+        "남녀 구분 없이 통하는 유니섹스 계열, 누군가 먼저 알아봐 줄 확률이 높다"
       ],
-      "caption": "마지막 레이어가 밤새 얼굴을 잡는다.",
+      "caption": "디테일을 아는 사람들이 먼저 알아보는 향.",
       "image_queries": [
-        "man moisturizer dark studio editorial male",
-        "male face cream application moody cinematic",
-        "men skincare night routine dark closeup"
+        "Jo Malone Wood Sage Sea Salt bottle dark moody",
+        "unisex fragrance editorial cinematic dark background",
+        "jo malone cologne bottle ink black luxury editorial"
       ],
-      "image_url": "https://images.pexels.com/photos/24986830/pexels-photo-24986830.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/34536331/pexels-photo-34536331.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
-      "type": "content",
+      "type": "pick",
       "number": "05",
-      "subhead": "수면 자세가 얼굴을 누른다",
+      "product_name": "니베아 맨 퍼퓸 딥 블랙 (NIVEA Men Parfum Deep Black)",
+      "price": "약 22,000원 / 150ml",
+      "stars": 3,
+      "one_line": "가성비의 끝판왕",
       "body": [
-        "옆으로 자면 한쪽 볼에 주름이 반복 각인.",
-        "천장 보고 눕는 습관 — 대칭이 유지된다."
+        "우디 앰버 계열의 두껍고 묵직한 향 — 2만원대에 이 밀도는 가성비 논의가 의미 없는 레벨",
+        "향 지속력 5시간 이상, 데일리로 아낌없이 쓸 수 있어 향수 습관을 들이는 데 최적"
       ],
-      "caption": "루틴 후 자세까지가 루틴이다.",
+      "caption": "향수 습관, 여기서 시작해도 늦지 않다.",
       "image_queries": [
-        "man lying bed dark moody editorial cinematic",
-        "male sleep position dark studio shadow",
-        "men resting face dark pillow editorial"
+        "NIVEA Men deep black perfume bottle dark moody",
+        "men body fragrance dark cinematic editorial",
+        "affordable men cologne dark background luxury feel"
       ],
-      "image_url": "https://images.pexels.com/photos/13146007/pexels-photo-13146007.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/27357175/pexels-photo-27357175.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 7,
-      "type": "closing",
-      "wordmark": "bodetail",
-      "closing_line": "디테일을 챙기는 남자의 루틴",
-      "series_note": "ROUTINE VOL.01 — 취침 전 7분",
+      "type": "summary",
+      "headline_main": "결국 이 한 줄",
+      "body": [
+        "첫 향수는 '정답'이 없다. 단, 계열만 잡고 들어가면 실패가 없다.",
+        "시트러스 → 아쿠아 디 파르마 / 무난한 우디 → 불가리 / 부담 없는 시작 → 아이소이",
+        "한 끗 차이 → 조 말론 / 습관 들이기 → 니베아 딥 블랙"
+      ],
+      "caption": "향수는 첫 병이 제일 어렵다. 고르는 법을 알면, 그 다음은 쉽다.",
       "image_queries": [
-        "man dark minimal studio portrait editorial",
-        "male moody shadow cinematic portrait dark",
-        "men silhouette dark background editorial"
+        "five perfume bottles flat lay dark moody editorial",
+        "men fragrance collection dark ink black cinematic",
+        "cologne lineup dark background luxury editorial"
+      ],
+      "image_url": ""
+    },
+    {
+      "slide_num": 8,
+      "type": "outro",
+      "wordmark": "bodetail",
+      "tagline": "디테일을 챙기는 남자의 안목",
+      "closing_line": "다음 PICK도 놓치지 마세요.",
+      "image_queries": [
+        "dark ink black minimal editorial men grooming",
+        "black background gold accent men lifestyle cinematic",
+        "men detail magazine dark moody outro"
       ],
       "image_url": ""
     }
