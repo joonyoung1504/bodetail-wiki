@@ -1,152 +1,106 @@
 {
-  "section_label": "오늘의 PICK",
+  "section_label": "오늘의 지식",
   "vol": "VOL.01",
-  "caption_full": "첫 향수, 뭘 사야 할지 모르겠다면.\n\n수십 가지 중에 고르는 건 처음부터 무리다.\n계열 하나만 잡고 들어가면 실패가 없다.\n\n시트러스 계열이 끌린다면 아쿠아 디 파르마.\n아무 향이나 써도 안 튀고 싶다면 불가리.\n부담 없이 시작하고 싶다면 아이소이.\n알아보는 사람만 아는 향을 원한다면 조 말론.\n습관부터 들이고 싶다면 니베아 딥 블랙.\n\n향수는 첫 병이 제일 어렵다.\n이 다섯 개 안에서 고르면, 그 어려움은 끝난다.",
-  "hashtags": "#bodetail #남자향수 #첫향수 #향수추천 #남자그루밍 #남성향수 #향수입문 #그루밍 #남자패션 #남자뷰티 #향수입문자 #아쿠아디파르마 #불가리향수 #조말론 #니베아맨 #남자선물 #향수선물 #데일리향수 #퍼퓸 #남성퍼퓸",
+  "caption_full": "레티놀, 아무거나 바르다간 피부가 오히려 나빠진다.\n\n'좋다'는 말만 듣고 시작했다면\n지금 당장 루틴을 점검해야 한다.\n\n농도 · 타이밍 · 조합 — 이 세 가지가 틀리면\n레티놀은 독이 된다.\n\n— 이번 카드 저장해두고, 다음 레티놀 바르기 전에 한 번 더 확인해요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #레티놀 #남자스킨케어 #남자그루밍 #피부루틴 #스킨케어루틴 #그루밍 #남성뷰티 #레티놀사용법 #피부관리 #성분스킨케어 #남자피부 #안티에이징 #피부트러블 #스킨케어팁",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "처음이라면, 이 다섯 개면 충분하다",
+      "headline_sub": "레티놀, 잘못 쓰면 피부가 무너진다",
       "headline_main": [
-        "첫 향수,",
-        "이걸로 골라요"
+        "레티놀의",
+        "7가지 오해"
       ],
-      "headline_serif": "이달의 추천 5선",
+      "headline_serif": "쓰기 전에 알아야 할 것들",
       "image_queries": [
-        "men cologne bottle cinematic dark moody",
-        "perfume bottle dark background editorial",
-        "men fragrance luxury ink black gold"
+        "man dark studio portrait moody skin closeup",
+        "male editorial dark face shadow",
+        "men moody portrait ink black background"
       ],
-      "image_url": "https://images.pexels.com/photos/12562773/pexels-photo-12562773.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/10330176/pexels-photo-10330176.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
-      "type": "pick",
+      "type": "content",
       "number": "01",
-      "product_name": "아쿠아 디 파르마 콜로니아 (Acqua di Parma Colonia)",
-      "price": "약 120,000원 / 100ml",
-      "stars": 5,
-      "one_line": "클래식의 기준점",
+      "subhead": "농도 높을수록 좋다는 착각",
       "body": [
-        "베르가못·레몬·로즈마리의 깔끔한 시트러스 우디 계열 — 계절 불문 무난하게 통한다",
-        "향의 지속력은 3~4시간으로 가볍지만, 그 '가벼움'이 오히려 첫 향수에 딱 맞다"
+        "0.1%부터 시작해야 자극 없이 적응된다.",
+        "1% 이상은 전문가 처방 기준이다."
       ],
-      "caption": "무엇을 살지 모르겠다면, 이게 정답이다.",
+      "caption": "숫자가 높다고 효과도 높지 않다.",
       "image_queries": [
-        "Acqua di Parma Colonia bottle dark moody editorial",
-        "men cologne citrus woody dark background cinematic",
-        "italian fragrance bottle ink black luxury"
+        "man hands dark closeup skincare moody",
+        "male grooming editorial dark ink",
+        "men face skin texture dark studio"
       ],
-      "image_url": "https://images.pexels.com/photos/28664165/pexels-photo-28664165.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/18782639/pexels-photo-18782639.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
-      "type": "pick",
+      "type": "content",
       "number": "02",
-      "product_name": "불가리 프리 옴므 (Bvlgari Pour Homme)",
-      "price": "약 85,000원 / 100ml",
-      "stars": 4,
-      "one_line": "무난함의 교과서",
+      "subhead": "매일 밤 바르는 게 정답이 아니다",
       "body": [
-        "누가 맡아도 거슬리지 않는 은은한 우디 머스크 — 사무실·캠퍼스 어디든 어색하지 않다",
-        "가성비 대비 병 퀄리티가 높아 첫 향수로 '사진발'도 챙길 수 있다"
+        "처음 2주는 주 2회로 피부 장벽을 지킨다.",
+        "박리와 당김은 과용의 첫 신호다."
       ],
-      "caption": "센스 없어 보이지 않을 가장 안전한 선택.",
+      "caption": "덜 쓰는 것이 더 빠른 결과를 만든다.",
       "image_queries": [
-        "Bvlgari Pour Homme bottle dark cinematic moody",
-        "men woody musk fragrance dark editorial",
-        "bvlgari perfume bottle black background luxury"
+        "man night skincare routine dark moody editorial",
+        "male face closeup dark shadow moody",
+        "men bathroom dark mirror portrait editorial"
       ],
-      "image_url": "https://images.pexels.com/photos/7270665/pexels-photo-7270665.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/6633794/pexels-photo-6633794.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
-      "type": "pick",
+      "type": "content",
       "number": "03",
-      "product_name": "아이소이 포맨 시그니처 퍼퓸 (ISOI for Men Signature Perfume)",
-      "price": "약 38,000원 / 50ml",
-      "stars": 4,
-      "one_line": "부담 없는 시작",
+      "subhead": "낮에 바르면 독이 된다",
       "body": [
-        "국내 브랜드 특유의 깔끔한 머스크 베이스 — 과하지 않아 향수 처음 쓰는 사람에게 심리적 부담이 적다",
-        "3만원대 가격에 지속력 4시간 이상, 첫 향수로 투자 대비 손해 없는 선택"
+        "자외선과 만나면 활성산소를 역으로 생성한다.",
+        "레티놀은 반드시 저녁 루틴에 넣어야 한다."
       ],
-      "caption": "향수가 어렵게 느껴질 때, 이걸로 시작한다.",
+      "caption": "타이밍이 틀리면 성분이 적이 된다.",
       "image_queries": [
-        "korean men perfume bottle dark moody editorial",
-        "minimalist fragrance bottle dark background cinematic",
-        "men grooming perfume dark ink black"
+        "man dark window shadow portrait moody",
+        "male editorial dark side light face",
+        "men moody dusk portrait ink black"
       ],
-      "image_url": "https://images.pexels.com/photos/14402569/pexels-photo-14402569.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/20380590/pexels-photo-20380590.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
-      "type": "pick",
+      "type": "content",
       "number": "04",
-      "product_name": "조 말론 우드 세이지 앤 씨 솔트 (Jo Malone Wood Sage & Sea Salt)",
-      "price": "약 145,000원 / 100ml",
-      "stars": 5,
-      "one_line": "한 끗 다른 선택",
+      "subhead": "AHA·BHA와 같은 날 금지",
       "body": [
-        "씨솔트 특유의 미네랄·건조한 우디감 — '향수 쓰는 것 같지 않은 향수'를 찾는다면 이게 답이다",
-        "남녀 구분 없이 통하는 유니섹스 계열, 누군가 먼저 알아봐 줄 확률이 높다"
+        "산 성분과 혼용하면 자극이 배가된다.",
+        "레티놀 날과 각질 케어 날을 분리해서 써라."
       ],
-      "caption": "디테일을 아는 사람들이 먼저 알아보는 향.",
+      "caption": "조합이 틀리면 효과가 아니라 염증이 온다.",
       "image_queries": [
-        "Jo Malone Wood Sage Sea Salt bottle dark moody",
-        "unisex fragrance editorial cinematic dark background",
-        "jo malone cologne bottle ink black luxury editorial"
+        "man hands holding dark bottle moody editorial",
+        "male grooming dark desk skincare flat lay moody",
+        "men dark closeup hand product ink background"
       ],
-      "image_url": "https://images.pexels.com/photos/34536331/pexels-photo-34536331.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/5027621/pexels-photo-5027621.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
-      "type": "pick",
-      "number": "05",
-      "product_name": "니베아 맨 퍼퓸 딥 블랙 (NIVEA Men Parfum Deep Black)",
-      "price": "약 22,000원 / 150ml",
-      "stars": 3,
-      "one_line": "가성비의 끝판왕",
-      "body": [
-        "우디 앰버 계열의 두껍고 묵직한 향 — 2만원대에 이 밀도는 가성비 논의가 의미 없는 레벨",
-        "향 지속력 5시간 이상, 데일리로 아낌없이 쓸 수 있어 향수 습관을 들이는 데 최적"
+      "type": "closing",
+      "headline_main": [
+        "dialed in.",
+        ""
       ],
-      "caption": "향수 습관, 여기서 시작해도 늦지 않다.",
-      "image_queries": [
-        "NIVEA Men deep black perfume bottle dark moody",
-        "men body fragrance dark cinematic editorial",
-        "affordable men cologne dark background luxury feel"
-      ],
-      "image_url": "https://images.pexels.com/photos/27357175/pexels-photo-27357175.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    },
-    {
-      "slide_num": 7,
-      "type": "summary",
-      "headline_main": "결국 이 한 줄",
-      "body": [
-        "첫 향수는 '정답'이 없다. 단, 계열만 잡고 들어가면 실패가 없다.",
-        "시트러스 → 아쿠아 디 파르마 / 무난한 우디 → 불가리 / 부담 없는 시작 → 아이소이",
-        "한 끗 차이 → 조 말론 / 습관 들이기 → 니베아 딥 블랙"
-      ],
-      "caption": "향수는 첫 병이 제일 어렵다. 고르는 법을 알면, 그 다음은 쉽다.",
-      "image_queries": [
-        "five perfume bottles flat lay dark moody editorial",
-        "men fragrance collection dark ink black cinematic",
-        "cologne lineup dark background luxury editorial"
-      ],
-      "image_url": ""
-    },
-    {
-      "slide_num": 8,
-      "type": "outro",
+      "closing_message": "레티놀은 아는 만큼 피부가 달라진다.",
       "wordmark": "bodetail",
-      "tagline": "디테일을 챙기는 남자의 안목",
-      "closing_line": "다음 PICK도 놓치지 마세요.",
       "image_queries": [
-        "dark ink black minimal editorial men grooming",
-        "black background gold accent men lifestyle cinematic",
-        "men detail magazine dark moody outro"
+        "man dark studio portrait side profile moody editorial",
+        "male ink black background portrait shadow",
+        "men minimal dark editorial portrait sharp"
       ],
       "image_url": ""
     }

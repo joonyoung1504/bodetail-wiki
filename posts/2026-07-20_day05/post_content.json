@@ -1,0 +1,108 @@
+{
+  "section_label": "오늘의 지식",
+  "vol": "VOL.01",
+  "caption_full": "레티놀, 아무거나 바르다간 피부가 오히려 나빠진다.\n\n'좋다'는 말만 듣고 시작했다면\n지금 당장 루틴을 점검해야 한다.\n\n농도 · 타이밍 · 조합 — 이 세 가지가 틀리면\n레티놀은 독이 된다.\n\n— 이번 카드 저장해두고, 다음 레티놀 바르기 전에 한 번 더 확인해요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #레티놀 #남자스킨케어 #남자그루밍 #피부루틴 #스킨케어루틴 #그루밍 #남성뷰티 #레티놀사용법 #피부관리 #성분스킨케어 #남자피부 #안티에이징 #피부트러블 #스킨케어팁",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "레티놀, 잘못 쓰면 피부가 무너진다",
+      "headline_main": [
+        "레티놀의",
+        "7가지 오해"
+      ],
+      "headline_serif": "쓰기 전에 알아야 할 것들",
+      "image_queries": [
+        "man dark studio portrait moody skin closeup",
+        "male editorial dark face shadow",
+        "men moody portrait ink black background"
+      ],
+      "image_url": "https://images.pexels.com/photos/10330176/pexels-photo-10330176.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "농도 높을수록 좋다는 착각",
+      "body": [
+        "0.1%부터 시작해야 자극 없이 적응된다.",
+        "1% 이상은 전문가 처방 기준이다."
+      ],
+      "caption": "숫자가 높다고 효과도 높지 않다.",
+      "image_queries": [
+        "man hands dark closeup skincare moody",
+        "male grooming editorial dark ink",
+        "men face skin texture dark studio"
+      ],
+      "image_url": "https://images.pexels.com/photos/18782639/pexels-photo-18782639.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "매일 밤 바르는 게 정답이 아니다",
+      "body": [
+        "처음 2주는 주 2회로 피부 장벽을 지킨다.",
+        "박리와 당김은 과용의 첫 신호다."
+      ],
+      "caption": "덜 쓰는 것이 더 빠른 결과를 만든다.",
+      "image_queries": [
+        "man night skincare routine dark moody editorial",
+        "male face closeup dark shadow moody",
+        "men bathroom dark mirror portrait editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/6633794/pexels-photo-6633794.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "낮에 바르면 독이 된다",
+      "body": [
+        "자외선과 만나면 활성산소를 역으로 생성한다.",
+        "레티놀은 반드시 저녁 루틴에 넣어야 한다."
+      ],
+      "caption": "타이밍이 틀리면 성분이 적이 된다.",
+      "image_queries": [
+        "man dark window shadow portrait moody",
+        "male editorial dark side light face",
+        "men moody dusk portrait ink black"
+      ],
+      "image_url": "https://images.pexels.com/photos/20380590/pexels-photo-20380590.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "AHA·BHA와 같은 날 금지",
+      "body": [
+        "산 성분과 혼용하면 자극이 배가된다.",
+        "레티놀 날과 각질 케어 날을 분리해서 써라."
+      ],
+      "caption": "조합이 틀리면 효과가 아니라 염증이 온다.",
+      "image_queries": [
+        "man hands holding dark bottle moody editorial",
+        "male grooming dark desk skincare flat lay moody",
+        "men dark closeup hand product ink background"
+      ],
+      "image_url": "https://images.pexels.com/photos/5027621/pexels-photo-5027621.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "closing",
+      "headline_main": [
+        "dialed in.",
+        ""
+      ],
+      "closing_message": "레티놀은 아는 만큼 피부가 달라진다.",
+      "wordmark": "bodetail",
+      "image_queries": [
+        "man dark studio portrait side profile moody editorial",
+        "male ink black background portrait shadow",
+        "men minimal dark editorial portrait sharp"
+      ],
+      "image_url": ""
+    }
+  ]
+}
