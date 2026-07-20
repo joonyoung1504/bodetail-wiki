@@ -1,106 +1,111 @@
 {
-  "section_label": "오늘의 지식",
+  "section_label": "오늘의 스타일",
   "vol": "VOL.01",
-  "caption_full": "레티놀, 아무거나 바르다간 피부가 오히려 나빠진다.\n\n'좋다'는 말만 듣고 시작했다면\n지금 당장 루틴을 점검해야 한다.\n\n농도 · 타이밍 · 조합 — 이 세 가지가 틀리면\n레티놀은 독이 된다.\n\n— 이번 카드 저장해두고, 다음 레티놀 바르기 전에 한 번 더 확인해요.\n\n@bodetail_official",
-  "hashtags": "#bodetail #레티놀 #남자스킨케어 #남자그루밍 #피부루틴 #스킨케어루틴 #그루밍 #남성뷰티 #레티놀사용법 #피부관리 #성분스킨케어 #남자피부 #안티에이징 #피부트러블 #스킨케어팁",
+  "caption_full": "센스 있는 남자들은 옷보다 몸을 먼저 완성한다.\n\n아무리 좋은 옷도 자세가 무너지면 핏이 죽는다.\n네크라인이 흐트러지면 얼굴 전체 인상이 흔들린다.\n손끝 하나로 관리의 온도가 읽힌다.\n\n오늘 카드에서 다룬 3가지는 돈 한 푼 안 드는 스타일링 기본기.\n내일 아침 5분이면 전부 챙길 수 있다.\n\n저장해두고, 옷 입기 전에 한 번씩 꺼내 보세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자스타일링 #남자그루밍 #남자옷 #옷잘입는법 #남자자기관리 #자세교정 #남자패션 #그루밍팁 #스타일팁 #남자향수 #디테일 #남자코디 #패션매거진 #selfcare",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "레티놀, 잘못 쓰면 피부가 무너진다",
+      "headline_sub": "옷을 입기 전, 먼저 완성해야 할 것",
       "headline_main": [
-        "레티놀의",
-        "7가지 오해"
+        "실루엣은",
+        "몸이 만든다"
       ],
-      "headline_serif": "쓰기 전에 알아야 할 것들",
+      "headline_serif": "3가지 디테일로 완성되는 남자의 기본기",
       "image_queries": [
-        "man dark studio portrait moody skin closeup",
-        "male editorial dark face shadow",
-        "men moody portrait ink black background"
+        "man dark studio portrait editorial moody",
+        "male fashion dark minimal suit moody",
+        "men silhouette dark dramatic lighting"
       ],
-      "image_url": "https://images.pexels.com/photos/10330176/pexels-photo-10330176.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/17689277/pexels-photo-17689277.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "content",
       "number": "01",
-      "subhead": "농도 높을수록 좋다는 착각",
+      "subhead": "자세가 핏을 결정한다",
       "body": [
-        "0.1%부터 시작해야 자극 없이 적응된다.",
-        "1% 이상은 전문가 처방 기준이다."
+        "같은 옷도 자세 하나로 핏이 달라진다.",
+        "어깨를 뒤로 3cm, 턱을 수평으로."
       ],
-      "caption": "숫자가 높다고 효과도 높지 않다.",
+      "caption": "자세는 가장 저렴한 스타일링.",
       "image_queries": [
-        "man hands dark closeup skincare moody",
-        "male grooming editorial dark ink",
-        "men face skin texture dark studio"
+        "man upright posture dark studio moody",
+        "male back shoulders dark editorial",
+        "men standing tall dark dramatic portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/18782639/pexels-photo-18782639.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/31585356/pexels-photo-31585356.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
       "type": "content",
       "number": "02",
-      "subhead": "매일 밤 바르는 게 정답이 아니다",
+      "subhead": "네크라인이 얼굴을 만든다",
       "body": [
-        "처음 2주는 주 2회로 피부 장벽을 지킨다.",
-        "박리와 당김은 과용의 첫 신호다."
+        "수염과 목선은 옷깃보다 먼저 눈에 들어온다.",
+        "2일에 한 번, 목선만 정리해도 다르다."
       ],
-      "caption": "덜 쓰는 것이 더 빠른 결과를 만든다.",
+      "caption": "깔끔한 목선 = 전체 룩의 프레임.",
       "image_queries": [
-        "man night skincare routine dark moody editorial",
-        "male face closeup dark shadow moody",
-        "men bathroom dark mirror portrait editorial"
+        "man neck jawline dark moody closeup portrait",
+        "male grooming neckline dark editorial",
+        "men beard jawline dramatic dark lighting"
       ],
-      "image_url": "https://images.pexels.com/photos/6633794/pexels-photo-6633794.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/4730941/pexels-photo-4730941.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "03",
-      "subhead": "낮에 바르면 독이 된다",
+      "subhead": "손끝이 인상을 닫는다",
       "body": [
-        "자외선과 만나면 활성산소를 역으로 생성한다.",
-        "레티놀은 반드시 저녁 루틴에 넣어야 한다."
+        "악수 한 번으로 관리 여부가 드러난다.",
+        "큐티클 정리와 짧은 손톱, 5분이면 충분."
       ],
-      "caption": "타이밍이 틀리면 성분이 적이 된다.",
+      "caption": "디테일을 챙기는 남자는 손에서 완성된다.",
       "image_queries": [
-        "man dark window shadow portrait moody",
-        "male editorial dark side light face",
-        "men moody dusk portrait ink black"
+        "man hands dark moody closeup editorial",
+        "male hands dark minimal dramatic lighting",
+        "men fist dark studio moody portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/20380590/pexels-photo-20380590.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/6187424/pexels-photo-6187424.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
-      "number": "04",
-      "subhead": "AHA·BHA와 같은 날 금지",
+      "number": "BONUS",
+      "subhead": "향은 기억에 남는 마지막 레이어",
       "body": [
-        "산 성분과 혼용하면 자극이 배가된다.",
-        "레티놀 날과 각질 케어 날을 분리해서 써라."
+        "향수는 목·손목 말고 팔꿈치 안쪽에도 뿌려라.",
+        "체온이 낮아 지속력이 30% 이상 높아진다."
       ],
-      "caption": "조합이 틀리면 효과가 아니라 염증이 온다.",
+      "caption": "기억되는 남자는 향으로 마무리한다.",
       "image_queries": [
-        "man hands holding dark bottle moody editorial",
-        "male grooming dark desk skincare flat lay moody",
-        "men dark closeup hand product ink background"
+        "man applying fragrance dark moody editorial",
+        "male wrist dark minimal studio portrait",
+        "men cologne dark dramatic close up"
       ],
-      "image_url": "https://images.pexels.com/photos/5027621/pexels-photo-5027621.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/20011541/pexels-photo-20011541.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
       "type": "closing",
       "headline_main": [
-        "dialed in.",
-        ""
+        "bodetail"
       ],
-      "closing_message": "레티놀은 아는 만큼 피부가 달라진다.",
-      "wordmark": "bodetail",
+      "headline_sub": "디테일을 챙기는 남자의 안목",
+      "summary_list": [
+        "01 자세 — 어깨 뒤로, 턱 수평",
+        "02 네크라인 — 2일에 한 번 정리",
+        "03 손끝 — 큐티클·손톱 5분 루틴",
+        "BONUS 향 — 팔꿈치 안쪽 레이어링"
+      ],
+      "cta_text": "저장해두고 내일 아침부터.",
       "image_queries": [
-        "man dark studio portrait side profile moody editorial",
-        "male ink black background portrait shadow",
-        "men minimal dark editorial portrait sharp"
+        "man dark ink background minimal editorial",
+        "male dark moody studio low key portrait",
+        "men shadow dark dramatic silhouette editorial"
       ],
       "image_url": ""
     }
