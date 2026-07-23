@@ -1,104 +1,127 @@
 {
-  "section_label": "오늘의 준비",
-  "vol": "VOL.01",
-  "caption_full": "데이트 직전 30분, 이 순서대로만 해도 인상이 달라집니다.\n\n막연하게 '잘 차려입어야지'가 아니라\n샤워 타이밍 → 피부 신호 정리 → 손 끝 → 향 순서.\n각 단계에 이유가 있고, 순서가 어긋나면 효과도 어긋납니다.\n\n디테일을 챙기는 사람은 따로 있는 게 아니라\n순서를 알고 있는 사람입니다.\n\n저장해두고 다음 데이트 30분 전에 꺼내 보세요.\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자그루밍 #남자셀프케어 #데이트준비 #남자향수 #그루밍루틴 #남자피부관리 #남자스킨케어 #데이트코디 #남자패션 #자기관리 #남자자기관리 #그루밍 #남성그루밍 #인상관리",
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.02",
+  "caption_full": "관리 잘 하는 남자들에겐 공통점이 있다.\n화려한 루틴이 아니라, 작고 정확한 습관.\n\n✔ 기준을 먼저 정한다\n✔ 전날 밤 5분을 쓴다\n✔ 손·목을 빠뜨리지 않는다\n✔ 향을 상황에 맞춰 바꾼다\n✔ 자세를 의식적으로 교정한다\n\n저장해두고 내일부터 하나씩.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자그루밍 #자기관리 #남자루틴 #그루밍팁 #남자향수 #남자피부관리 #자세교정 #남자패션 #남자디테일 #관리하는남자 #남자일상 #에디토리얼 #멘즈그루밍 #habitsofmen",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "데이트 30분 전, 순서가 결과를 바꾼다",
+      "headline_sub": "관리하는 사람에겐 이유가 있다",
       "headline_main": [
-        "30분의",
-        "루틴"
+        "관리하는 남자",
+        "8가지 습관"
       ],
-      "headline_serif": "6단계로 완성되는 그날의 인상",
+      "headline_serif": "당신이 아직 모르는 공통점",
       "image_queries": [
-        "man dark studio mirror reflection moody",
-        "male editorial getting ready dark cinematic",
-        "men grooming preparation moody portrait"
+        "man dark studio portrait editorial moody",
+        "male grooming dark mirror reflection moody",
+        "men morning routine dark cinematic"
       ],
-      "image_url": "https://images.pexels.com/photos/21369550/pexels-photo-21369550.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/14630666/pexels-photo-14630666.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "content",
       "number": "01",
-      "subhead": "샤워는 출발 35분 전에 끝낸다",
+      "subhead": "기준을 먼저 정한다",
       "body": [
-        "향수는 건조한 피부에 바로 닿으면 날아간다.",
-        "샤워 직후 수분이 남은 피부에 뿌려야 잔향이 유지된다."
+        "옷·향수·피부 — 매일 선택 기준을 갖는다.",
+        "기준 없는 루틴은 며칠 못 간다."
       ],
-      "caption": "타이밍이 향의 밀도를 결정한다.",
+      "caption": "센스는 기준에서 시작된다.",
       "image_queries": [
-        "man shower steam dark bathroom moody",
-        "male skin wet dark editorial",
-        "men bathroom dark cinematic portrait"
+        "man dark wardrobe closet moody editorial",
+        "male hands organizing dark cinematic",
+        "men minimalist desk dark moody"
       ],
-      "image_url": "https://images.pexels.com/photos/16762656/pexels-photo-16762656.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/38688417/pexels-photo-38688417.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
       "type": "content",
       "number": "02",
-      "subhead": "눈 밑·입꼬리부터 정리한다",
+      "subhead": "전날 밤 5분을 쓴다",
       "body": [
-        "피로 신호는 눈 밑 다크서클과 처진 입꼬리에서 먼저 읽힌다.",
-        "아이크림 두드린 뒤 입꼬리 근육 스트레칭 30초."
+        "내일 입을 옷·가방 속 물건을 미리 정한다.",
+        "아침의 여유는 전날 밤이 만든다."
       ],
-      "caption": "표정이 정돈되면 전체 인상이 당겨진다.",
+      "caption": "준비된 아침이 태도를 만든다.",
       "image_queries": [
-        "man face dark closeup editorial moody",
-        "male eyes dark studio skincare",
-        "men face detail dark cinematic"
+        "man dark bedroom night moody cinematic",
+        "male folding clothes dark editorial",
+        "men preparing outfit dark studio"
       ],
-      "image_url": "https://images.pexels.com/photos/21369375/pexels-photo-21369375.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/16248631/pexels-photo-16248631.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "03",
-      "subhead": "손 끝·손톱은 마지막 1분이 아니다",
+      "subhead": "손과 목 관리를 빠뜨리지 않는다",
       "body": [
-        "식사 자리에서 손은 반드시 시야에 들어온다.",
-        "큐티클 오일 한 방울, 손톱 끝 정리는 출발 전 필수."
+        "얼굴만 챙기면 손·목이 전체를 무너뜨린다.",
+        "핸드크림·넥 케어는 2분이면 충분하다."
       ],
-      "caption": "손을 보면 그 사람의 밀도가 보인다.",
+      "caption": "시선은 디테일로 흘러 내려간다.",
       "image_queries": [
         "man hands dark moody editorial closeup",
-        "male hands groomed dark studio",
-        "men hands detail dark cinematic"
+        "male wrist watch dark cinematic portrait",
+        "men grooming hands dark studio close"
       ],
-      "image_url": "https://images.pexels.com/photos/36815527/pexels-photo-36815527.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "04",
-      "subhead": "향수는 옷 위가 아니라 맥박 위에",
+      "subhead": "향은 TPO에 맞춰 바꾼다",
       "body": [
-        "목·손목·귀 뒤, 체온이 오르는 세 곳에 한 번씩.",
-        "옷에 뿌리면 향이 섞이고 얼룩 리스크가 생긴다."
+        "출근·데이트·운동 — 상황마다 향이 다르다.",
+        "향 하나로 분위기 전환이 된다."
       ],
-      "caption": "향이 머무는 자리를 알면 밀도가 달라진다.",
+      "caption": "공간에 남는 인상은 향이 결정한다.",
       "image_queries": [
-        "man neck dark moody editorial portrait",
-        "male perfume dark cinematic studio",
-        "men fragrance apply dark moody"
+        "man perfume dark moody editorial",
+        "male fragrance bottle dark cinematic closeup",
+        "men applying cologne dark studio"
       ],
-      "image_url": "https://images.pexels.com/photos/37900999/pexels-photo-37900999.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/3434530/pexels-photo-3434530.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
-      "type": "closing",
-      "headline_serif": "디테일이 인상을 완성한다",
-      "body": "순서가 결과를 바꾼다. 오늘도 한 끗.",
-      "wordmark": "bodetail",
-      "tagline": "남자의 디테일을 다룹니다",
+      "type": "content",
+      "number": "05",
+      "subhead": "자세를 의식적으로 교정한다",
+      "body": [
+        "앉을 때마다 허리·어깨를 한 번씩 재정렬한다.",
+        "자세는 옷보다 먼저 눈에 들어온다."
+      ],
+      "caption": "태도는 척추에서 시작된다.",
       "image_queries": [
-        "man dark jacket editorial moody full body",
-        "male dark cinematic portrait studio confident",
-        "men dark silhouette editorial fashion"
+        "man sitting upright dark moody editorial",
+        "male posture dark cinematic portrait",
+        "men standing confident dark studio"
+      ],
+      "image_url": "https://images.pexels.com/photos/3827677/pexels-photo-3827677.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 7,
+      "type": "outro",
+      "headline_serif": "디테일이 격을 만든다",
+      "body_summary": [
+        "01 기준 먼저 정하기",
+        "02 전날 밤 5분 준비",
+        "03 손·목 케어 2분",
+        "04 상황별 향 교체",
+        "05 자세 의식적 교정"
+      ],
+      "wordmark": "bodetail",
+      "cta_label": "저장해두고 내일부터 하나씩.",
+      "image_queries": [
+        "man dark editorial full body moody studio",
+        "male minimalist dark cinematic portrait",
+        "men confident dark shadow editorial"
       ],
       "image_url": ""
     }
