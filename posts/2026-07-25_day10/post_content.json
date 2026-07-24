@@ -1,0 +1,108 @@
+{
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.02",
+  "caption_full": "칫솔질만 하고 있다면, 구취의 진짜 원인을 아직 모르는 것.\n\n입 냄새는 치약으로 덮는 게 아니라 원인을 끊어야 한다.\n\n✔ 혀 백태 — 스크레이퍼 1회\n✔ 구강 건조 — 기상 직후 물 한 컵\n✔ 치간 잔여물 — 치실 저녁 1회\n✔ 편도 결석 — 소금물 가글 주 3회\n\n오늘부터 루틴에 하나씩 추가해 보세요.\n저장해두면 내일 아침 쓸 수 있어요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #구취제거 #남자그루밍 #구강케어 #남자루틴 #입냄새원인 #혀클리너 #남자위생 #그루밍팁 #남자자기관리 #구강건강 #데일리루틴 #남자필수템 #치간칫솔 #bodetailofficial",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "칫솔질만 한다면, 아직 반도 안 한 것",
+      "headline_main": [
+        "구취, 4곳이",
+        "문제다"
+      ],
+      "headline_serif": "입 냄새를 끊는 4가지 진짜 원인",
+      "image_queries": [
+        "man dark studio portrait moody editorial",
+        "male face close up dark ink background",
+        "men grooming dark cinematic portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/36914000/pexels-photo-36914000.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "혀 위의 백태",
+      "body": [
+        "구취 원인의 90%는 혀 표면 세균막.",
+        "칫솔질 후 혀 스크레이퍼 1회, 필수."
+      ],
+      "caption": "칫솔은 혀를 닦지 않는다.",
+      "image_queries": [
+        "man bathroom mirror dark moody editorial",
+        "male grooming sink dark cinematic",
+        "men morning routine dark studio"
+      ],
+      "image_url": "https://images.pexels.com/photos/15184036/pexels-photo-15184036.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "구강 건조",
+      "body": [
+        "침이 줄면 세균이 폭발적으로 증식.",
+        "기상 직후 물 한 컵이 가장 빠른 해법."
+      ],
+      "caption": "아침 입 냄새는 수분 부족 신호.",
+      "image_queries": [
+        "man drinking water dark moody closeup",
+        "male hands glass water dark editorial",
+        "men morning hydration dark cinematic"
+      ],
+      "image_url": "https://images.pexels.com/photos/28683246/pexels-photo-28683246.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "치간 잔여물",
+      "body": [
+        "칫솔이 닿지 않는 틈새가 악취 진원지.",
+        "치실 또는 워터픽, 하루 1회 저녁 필수."
+      ],
+      "caption": "틈새를 비워야 냄새가 끊긴다.",
+      "image_queries": [
+        "man jaw neck dark moody editorial portrait",
+        "male face profile dark ink cinematic",
+        "men close up chin dark studio editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/23948822/pexels-photo-23948822.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "편도 결석",
+      "body": [
+        "목 안쪽 하얀 알갱이, 냄새의 숨은 주범.",
+        "소금물 가글 30초, 주 3회로 예방."
+      ],
+      "caption": "보이지 않는 곳이 냄새를 만든다.",
+      "image_queries": [
+        "man dark portrait neck jaw moody closeup",
+        "male profile dark editorial cinematic shadow",
+        "men grooming dark studio ink tone"
+      ],
+      "image_url": "https://images.pexels.com/photos/34833289/pexels-photo-34833289.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "outro",
+      "headline_main": [
+        "디테일이",
+        "인상을 바꾼다"
+      ],
+      "wordmark": "bodetail",
+      "tagline": "남자의 디테일을 읽는 매거진",
+      "image_queries": [
+        "man dark editorial full body moody studio",
+        "male silhouette dark ink background cinematic",
+        "men fashion dark minimal editorial portrait"
+      ],
+      "image_url": ""
+    }
+  ]
+}
