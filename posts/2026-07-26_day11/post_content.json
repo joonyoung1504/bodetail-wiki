@@ -1,0 +1,113 @@
+{
+  "section_label": "오늘의 루틴",
+  "vol": "VOL.02",
+  "caption_full": "기초 화장품, 순서 틀리면 다 헛수고입니다.\n\n아무리 비싼 세럼도 순서가 잘못되면 피부에 흡수되지 않아요. 오늘부터 딱 이 순서 하나만 지켜보세요.\n\n① 클렌징 → ② 토너 → ③ 세럼 → ④ 모이스처라이저\n\n작은 디테일이 피부의 결과를 바꿉니다. 저장해두고 내일 아침부터 적용해보세요.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자기초화장품 #남자스킨케어 #남자루틴 #기초케어순서 #남자피부관리 #그루밍 #남자화장품 #스킨케어루틴 #남자기초루틴 #피부관리남자 #남자뷰티 #기초화장순서 #남자셀프케어 #skincareroutine",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "순서 하나가 피부의 결과를 바꾼다",
+      "headline_main": [
+        "기초 4단계"
+      ],
+      "headline_serif": "바르는 순서만 지켜도 달라진다",
+      "image_queries": [
+        "man dark moody studio portrait closeup skin",
+        "male editorial skincare dark background",
+        "men face moody cinematic portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/31637722/pexels-photo-31637722.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "클렌징 — 토대가 전부다",
+      "body": [
+        "잔여물 위에 쌓으면 다음 단계 효과 없음.",
+        "30초, 거품으로 밀어내듯 닦아낸다."
+      ],
+      "caption": "클렌징이 루틴의 시작이자 결과다.",
+      "image_queries": [
+        "man washing face dark moody bathroom",
+        "male hands water splash dark editorial",
+        "men skincare cleanser moody closeup"
+      ],
+      "image_url": "https://images.pexels.com/photos/29277276/pexels-photo-29277276.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "토너 — 흡수 통로를 연다",
+      "body": [
+        "손바닥으로 가볍게 눌러 스며들게 한다.",
+        "화장솜은 마찰로 자극. 손이 정답."
+      ],
+      "caption": "다음 단계를 위한 준비, 토너가 결정한다.",
+      "image_queries": [
+        "man applying toner dark studio moody",
+        "male face skincare routine dark editorial",
+        "men hands face moisturizer dark cinematic"
+      ],
+      "image_url": "https://images.pexels.com/photos/6633793/pexels-photo-6633793.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "세럼 — 가장 얇게, 가장 먼저",
+      "body": [
+        "분자 작은 세럼은 반드시 에센스 앞에.",
+        "한 방울로 충분. 겹칠수록 뭉친다."
+      ],
+      "caption": "세럼은 순서가 틀리면 그냥 막힌다.",
+      "image_queries": [
+        "man serum dropper dark moody product closeup",
+        "male hands serum dark editorial skincare",
+        "men grooming dark studio cinematic closeup"
+      ],
+      "image_url": "https://images.pexels.com/photos/6633786/pexels-photo-6633786.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "모이스처라이저 — 마지막 봉인",
+      "body": [
+        "수분 증발 막는 막을 마지막에 씌운다.",
+        "턱선까지, 방향은 항상 아래서 위로."
+      ],
+      "caption": "뚜껑을 덮어야 루틴이 완성된다.",
+      "image_queries": [
+        "man moisturizer apply dark moody bathroom mirror",
+        "male face cream skincare dark cinematic editorial",
+        "men grooming moisturizer dark studio closeup"
+      ],
+      "image_url": "https://images.pexels.com/photos/12031203/pexels-photo-12031203.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "closing",
+      "headline_main": [
+        "순서가",
+        "피부를 만든다"
+      ],
+      "body_summary": [
+        "01 클렌징 — 잔여물 제거",
+        "02 토너 — 흡수 통로 열기",
+        "03 세럼 — 가장 얇게, 먼저",
+        "04 모이스처라이저 — 마지막 봉인"
+      ],
+      "wordmark": "bodetail",
+      "closing_label": "ROUTINE VOL.03",
+      "image_queries": [
+        "man dark moody studio portrait editorial skin",
+        "male cinematic dark portrait grooming",
+        "men minimal dark editorial face closeup"
+      ],
+      "image_url": ""
+    }
+  ]
+}
