@@ -1,115 +1,109 @@
 {
   "section_label": "오늘의 디테일",
   "vol": "VOL.01",
-  "caption_full": "여자와 같은 제품 써도 결과가 다른 이유, 피부 구조에 있었다.\n\n이 카드 저장해두면 루틴 정리할 때 기준이 생겨요.\n\n① 피지 2배 → BHA 클렌저 주 2~3회\n② 각질층 두꺼움 → 세안 30초 이내 도포\n③ 면도 후 장벽 손상 → 2분 이내 판테놀 진정\n④ 남성 전용 필수 아님 → 성분표(나이아신아마이드·세라마이드) 먼저\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자피부 #남자스킨케어 #남자그루밍 #피부루틴 #남성케어 #스킨케어루틴 #그루밍 #남자화장품 #피부관리 #남자뷰티 #스킨케어팁 #면도후관리 #남성피부 #피지관리",
+  "caption_full": "세럼 옆에 앰플까지 샀는데 뭐가 다른지 몰랐다면 저장.\n\n농도 차이가 쓰는 때를 결정한다.\n앰플은 매일이 아니라 피부가 무너진 날 꺼내는 것.\n세럼 하나면 충분한 날이 더 많다.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자스킨케어 #세럼앰플차이 #남자루틴 #남자그루밍 #스킨케어순서 #나이아신아마이드 #판테놀 #남자화장품 #그루밍",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "같은 세안, 다른 결과가 나오는 이유",
+      "headline_sub": "세럼 옆에 앰플, 둘 다 살 필요 없다",
       "headline_main": [
-        "남자 피부",
-        "4가지 차이"
+        "세럼 vs",
+        "앰플"
       ],
-      "headline_serif": "당신의 루틴이 틀린 게 아니라, 기준이 달랐다",
+      "headline_serif": "농도가 다르면 쓰는 때도 다르다",
       "image_queries": [
-        "man dark studio portrait moody editorial",
-        "male face closeup dramatic shadow ink black",
-        "men grooming dark cinematic portrait"
+        "man dark studio skincare portrait moody",
+        "male editorial dark bathroom mirror",
+        "men grooming moody ink black"
       ],
-      "image_url": "https://images.pexels.com/photos/23879362/pexels-photo-23879362.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/9363421/pexels-photo-9363421.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "content",
       "number": "01",
-      "subhead": "피지가 2배 많다 — 클렌저 선택부터 갈린다",
+      "subhead": "순서는 농도순, 이유는 하나",
       "body": [
-        "남성 피지 분비량은 여성의 약 2배. 모공이 막히는 속도도 그만큼 빠르다.",
-        "지성이면 BHA(살리실산) 성분 저자극 클렌저로 주 2~3회 각질 케어.",
-        "건성이라도 거품 풍성한 제품은 피한다 — 세정력보다 보습막 유지가 우선."
+        "토너→에센스→세럼→앰플→크림, 묽을수록 먼저",
+        "점도 높은 걸 먼저 바르면 다음 성분이 각질층 못 뚫는다"
       ],
-      "caption": "피지량이 다르면 클렌저 기준도 달라야 한다.",
+      "caption": "묽은 것이 먼저, 규칙은 하나다.",
       "image_queries": [
-        "man face skin pores dark moody closeup",
-        "male grooming cleanser dark editorial",
-        "men skincare dark studio moody"
+        "male hands skincare products dark moody closeup",
+        "men grooming editorial dark bottles",
+        "man skincare routine moody ink black"
       ],
-      "image_url": "https://images.pexels.com/photos/4812723/pexels-photo-4812723.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/6634174/pexels-photo-6634174.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
       "type": "content",
       "number": "02",
-      "subhead": "각질층이 두껍다 — 흡수 타이밍을 바꿔라",
+      "subhead": "세럼과 앰플, 농도 차이",
       "body": [
-        "남성 각질층은 여성보다 평균 20~30% 두꺼워 성분 흡수가 더디다.",
-        "세안 직후 물기 살짝 남은 상태(30초 이내)에 토너·세럼을 얹어야 흡수율이 오른다.",
-        "완전히 건조된 뒤 바르면 각질층 위에서 대부분 증발한다 — 순서가 아니라 타이밍이 핵심."
+        "앰플은 세럼보다 유효성분 농도가 2~5배 높다",
+        "질감도 더 진해 1~2방울로 세럼 한 펌프와 맞먹는다"
       ],
-      "caption": "두꺼운 각질층, 흡수 창을 놓치면 제품 효과가 반으로 줄어든다.",
+      "caption": "앰플은 세럼의 농축판이다.",
       "image_queries": [
-        "man face water drops dark moody editorial",
-        "male skincare serum dark cinematic closeup",
-        "men face texture dark studio portrait"
+        "man dark moody serum dropper closeup editorial",
+        "male hands ampoule dark studio",
+        "men skincare dark ink black product closeup"
       ],
-      "image_url": "https://images.pexels.com/photos/28683249/pexels-photo-28683249.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/4812639/pexels-photo-4812639.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "03",
-      "subhead": "pH가 낮다 — 면도 후 장벽이 무너진다",
+      "subhead": "앰플은 매일 쓰는 게 아니다",
       "body": [
-        "남성 피부 pH는 4.5~5.5로 여성보다 약산성이 강하다. 면도 자체가 각질층을 0.1mm 단위로 깎아낸다.",
-        "면도 직후 알코올 함량 높은 애프터쉐이브는 장벽을 추가 손상 — 판테놀·알란토인 성분 진정 제품으로 교체.",
-        "면도 후 2분 이내 보습 도포. 이 타이밍을 놓치면 수분 손실량이 3배까지 올라간다."
+        "환절기·야근 후·피부 자극받은 날 집중 2~3주 단기 사용",
+        "매일 쓰면 피부 적응으로 효과 반감, 필요할 때만 꺼낸다"
       ],
-      "caption": "면도는 매일 하는 미세 박피다. 복구 루틴이 없으면 장벽은 계속 얇아진다.",
+      "caption": "앰플은 평상시가 아닌 집중 케어용.",
       "image_queries": [
-        "man shaving dark moody editorial closeup",
-        "male face razor dark cinematic portrait",
-        "men grooming aftershave dark studio"
+        "man dark moody tired face editorial portrait",
+        "male grooming night skincare dark studio",
+        "men face closeup moody ink black"
       ],
-      "image_url": "https://images.pexels.com/photos/7020247/pexels-photo-7020247.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/5891036/pexels-photo-5891036.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "04",
-      "subhead": "남성 전용 제품, 꼭 필요할까 — 솔직한 답",
+      "subhead": "세럼 하나만 쓴다면 이걸 고른다",
       "body": [
-        "성분 기준으로는 '남성 전용' 라벨이 필수가 아니다. 여성용 세럼·보습제를 써도 효과는 동일하다.",
-        "단, 남성 제품은 피지·두꺼운 각질에 맞춰 점도가 낮고 무향·무착색 비율이 높아 자극이 적다.",
-        "향·색 첨가물에 민감하다면 남성 전용 또는 젠더뉴트럴 제품이 현실적으로 유리하다."
+        "나이아신아마이드·판테놀 함유 세럼 — 트러블·장벽 동시 커버",
+        "건성이면 히알루론산, 지성이면 나이아신아마이드 단독이 낫다"
       ],
-      "caption": "성분을 보고 고르면 라벨은 참고사항일 뿐이다.",
+      "caption": "성분 하나가 고민을 줄인다.",
       "image_queries": [
-        "man skincare products dark moody editorial flatlay",
-        "male grooming products ink black background",
-        "men beauty minimal dark aesthetic product shot"
+        "male hands holding serum bottle dark editorial moody",
+        "men grooming product dark studio closeup",
+        "man skincare niacinamide dark moody"
       ],
-      "image_url": "https://images.pexels.com/photos/8360452/pexels-photo-8360452.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/8160449/pexels-photo-8160449.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
       "type": "content",
-      "number": "정리",
-      "subhead": "오늘부터 바꾸는 4가지 행동",
+      "number": "05",
+      "subhead": "쓸 필요 없는 조합",
       "body": [
-        "① 지성: BHA 클렌저 주 2회 / 건성: 저자극 크림 클렌저로 교체.",
-        "② 세안 후 30초 이내, 물기 남은 상태에 토너·세럼 도포.",
-        "③ 면도 후 2분 이내 판테놀·알란토인 성분 진정 크림 or 로션 한 번.",
-        "④ '남성 전용' 대신 성분표 보는 습관 — 나이아신아마이드·판테놀·세라마이드 순으로 우선 확인."
+        "세럼+앰플 동시 매일 사용 — 성분 과부하로 트러블 역효과",
+        "둘 중 하나만 고르되, 피부 상태로 번갈아 쓰는 게 정석이다"
       ],
-      "caption": "기준이 생기면 제품 선택이 단순해진다.",
+      "caption": "많이 바를수록 좋다는 건 착각이다.",
       "image_queries": [
-        "man grooming routine dark moody editorial",
-        "male skincare minimal dark cinematic",
-        "men face care dark studio close portrait"
+        "man dark studio minimal skincare editorial moody",
+        "male face dark ink black portrait grooming",
+        "men skincare less is more dark moody editorial"
       ],
-      "image_url": "https://images.pexels.com/photos/7320179/pexels-photo-7320179.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/12322951/pexels-photo-12322951.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "type": "closing",

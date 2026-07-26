@@ -1,0 +1,114 @@
+{
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.01",
+  "caption_full": "세럼 옆에 앰플까지 샀는데 뭐가 다른지 몰랐다면 저장.\n\n농도 차이가 쓰는 때를 결정한다.\n앰플은 매일이 아니라 피부가 무너진 날 꺼내는 것.\n세럼 하나면 충분한 날이 더 많다.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자스킨케어 #세럼앰플차이 #남자루틴 #남자그루밍 #스킨케어순서 #나이아신아마이드 #판테놀 #남자화장품 #그루밍",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "세럼 옆에 앰플, 둘 다 살 필요 없다",
+      "headline_main": [
+        "세럼 vs",
+        "앰플"
+      ],
+      "headline_serif": "농도가 다르면 쓰는 때도 다르다",
+      "image_queries": [
+        "man dark studio skincare portrait moody",
+        "male editorial dark bathroom mirror",
+        "men grooming moody ink black"
+      ],
+      "image_url": "https://images.pexels.com/photos/9363421/pexels-photo-9363421.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "content",
+      "number": "01",
+      "subhead": "순서는 농도순, 이유는 하나",
+      "body": [
+        "토너→에센스→세럼→앰플→크림, 묽을수록 먼저",
+        "점도 높은 걸 먼저 바르면 다음 성분이 각질층 못 뚫는다"
+      ],
+      "caption": "묽은 것이 먼저, 규칙은 하나다.",
+      "image_queries": [
+        "male hands skincare products dark moody closeup",
+        "men grooming editorial dark bottles",
+        "man skincare routine moody ink black"
+      ],
+      "image_url": "https://images.pexels.com/photos/6634174/pexels-photo-6634174.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "02",
+      "subhead": "세럼과 앰플, 농도 차이",
+      "body": [
+        "앰플은 세럼보다 유효성분 농도가 2~5배 높다",
+        "질감도 더 진해 1~2방울로 세럼 한 펌프와 맞먹는다"
+      ],
+      "caption": "앰플은 세럼의 농축판이다.",
+      "image_queries": [
+        "man dark moody serum dropper closeup editorial",
+        "male hands ampoule dark studio",
+        "men skincare dark ink black product closeup"
+      ],
+      "image_url": "https://images.pexels.com/photos/4812639/pexels-photo-4812639.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "03",
+      "subhead": "앰플은 매일 쓰는 게 아니다",
+      "body": [
+        "환절기·야근 후·피부 자극받은 날 집중 2~3주 단기 사용",
+        "매일 쓰면 피부 적응으로 효과 반감, 필요할 때만 꺼낸다"
+      ],
+      "caption": "앰플은 평상시가 아닌 집중 케어용.",
+      "image_queries": [
+        "man dark moody tired face editorial portrait",
+        "male grooming night skincare dark studio",
+        "men face closeup moody ink black"
+      ],
+      "image_url": "https://images.pexels.com/photos/5891036/pexels-photo-5891036.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "04",
+      "subhead": "세럼 하나만 쓴다면 이걸 고른다",
+      "body": [
+        "나이아신아마이드·판테놀 함유 세럼 — 트러블·장벽 동시 커버",
+        "건성이면 히알루론산, 지성이면 나이아신아마이드 단독이 낫다"
+      ],
+      "caption": "성분 하나가 고민을 줄인다.",
+      "image_queries": [
+        "male hands holding serum bottle dark editorial moody",
+        "men grooming product dark studio closeup",
+        "man skincare niacinamide dark moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/8160449/pexels-photo-8160449.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "content",
+      "number": "05",
+      "subhead": "쓸 필요 없는 조합",
+      "body": [
+        "세럼+앰플 동시 매일 사용 — 성분 과부하로 트러블 역효과",
+        "둘 중 하나만 고르되, 피부 상태로 번갈아 쓰는 게 정석이다"
+      ],
+      "caption": "많이 바를수록 좋다는 건 착각이다.",
+      "image_queries": [
+        "man dark studio minimal skincare editorial moody",
+        "male face dark ink black portrait grooming",
+        "men skincare less is more dark moody editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/12322951/pexels-photo-12322951.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "type": "closing",
+      "image_url": "",
+      "slide_num": 7
+    }
+  ]
+}
