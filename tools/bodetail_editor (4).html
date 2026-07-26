@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bodetail 편집기</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0C0C0C; --ink2:#161513; --gold:#B0844A; --gold-b:#C89A5C;
+  --cream:#EDE6D8; --white:#F5F4F0; --body-c:#E2DDD2;
+  --line:#2a2826; --danger:#9c4a3c;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0a0a0a;color:var(--cream);font-family:"Noto Sans KR",-apple-system,sans-serif;min-height:100vh;}
+
+/* ── 탭 네비 ── */
+.nav{
+  position:sticky;top:0;z-index:200;
+  background:#080808;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 20px;gap:0;
+}
+.nav-brand{
+  font-size:15px;font-weight:800;color:var(--gold-b);
+  padding:14px 20px 14px 0;border-right:1px solid var(--line);margin-right:16px;
+  white-space:nowrap;
+}
+.tab{
+  padding:14px 20px;font-size:13px;font-weight:600;cursor:pointer;
+  color:#666;border-bottom:2px solid transparent;transition:.15s;
+  white-space:nowrap;
+}
+.tab:hover{color:var(--cream);}
+.tab.active{color:var(--gold-b);border-bottom-color:var(--gold-b);}
+
+/* ── 페이지 ── */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ════════════════════════════════
+   릴스 편집기
+════════════════════════════════ */
+/* 툴바 */
+.r-toolbar{
+  background:var(--ink2);border-bottom:1px solid var(--line);
+  padding:10px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+}
+.btn{
+  background:var(--gold);color:#1a1408;border:none;border-radius:6px;
+  padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;
+}
+.btn:hover{background:var(--gold-b);}
+.btn.ghost{background:transparent;color:var(--cream);border:1px solid var(--line);}
+.btn.ghost:hover{border-color:var(--gold);}
+.hint{font-size:11px;color:#555;margin-left:auto;}
+input[type=file]{display:none;}
+
+/* 릴스 레이아웃 */
+.r-layout{display:flex;}
+.r-stage{
+  flex:0 0 auto;padding:20px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  border-right:1px solid var(--line);
+}
+.vwrap{
+  position:relative;width:360px;height:640px;
+  background:#111;border-radius:14px;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.7);
+}
+.vwrap video{width:100%;height:100%;object-fit:cover;display:block;}
+.subbox{
+  position:absolute;background:#ffffff;color:#0f0f0f;
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  text-align:center;font-weight:900;cursor:grab;user-select:none;
+  line-height:1.2;box-shadow:0 0 0 2px rgba(176,132,74,0);transition:box-shadow .12s;overflow:hidden;
+}
+.subbox.active{box-shadow:0 0 0 2.5px var(--gold-b);}
+.subbox.dragging{cursor:grabbing;opacity:.88;}
+.subbox.hidden{opacity:0;pointer-events:none;}
+.subbox .handle{position:absolute;display:none;z-index:10;}
+.subbox.active .handle{display:block;}
+.subbox .handle.hl,.subbox .handle.hr{top:0;width:14px;height:100%;cursor:ew-resize;}
+.subbox .handle.hl{left:-7px;}.subbox .handle.hr{right:-7px;}
+.subbox .handle.hl::after,.subbox .handle.hr::after{
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:4px;height:36%;background:var(--gold-b);border-radius:2px;
+}
+.subbox .handle.ht,.subbox .handle.hb{left:0;height:12px;width:100%;cursor:ns-resize;}
+.subbox .handle.ht{top:-6px;}.subbox .handle.hb{bottom:-6px;}
+.subbox .handle.ht::after,.subbox .handle.hb::after{
+  content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  height:4px;width:36%;background:var(--gold-b);border-radius:2px;
+}
+.scrub{width:100%;margin:6px 0 2px;cursor:pointer;accent-color:var(--gold);}
+.tlabel{font-size:11px;color:#8a857c;text-align:center;}
+.vol-row{display:flex;gap:8px;align-items:center;}
+.vol-row label{font-size:11px;color:#8a857c;}
+.vol-row input{width:90px;accent-color:var(--gold);}
+
+/* 릴스 패널 */
+.r-panel{flex:1;padding:20px 24px;overflow-y:auto;max-height:calc(100vh - 100px);}
+.r-panel h2{font-size:13px;color:var(--gold-b);margin-bottom:12px;font-weight:700;}
+.r-hint{
+  font-size:11px;color:#666;line-height:1.7;margin:0 0 16px;
+  padding:10px 12px;background:var(--ink2);border-radius:6px;border-left:2px solid var(--gold);
+}
+.r-hint b{color:var(--cream);}
+.seg{background:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px;transition:border-color .15s;}
+.seg.active{border-color:var(--gold);}
+.seg.saved{border-color:#3a7a3c;}
+.seg-idx{font-size:11px;color:var(--gold-b);font-weight:700;margin-bottom:5px;}
+.seg-en{font-size:10px;color:#6b6760;margin-bottom:6px;font-style:italic;}
+.seg textarea{
+  width:100%;background:var(--ink);color:var(--cream);border:1px solid var(--line);
+  border-radius:5px;padding:7px 9px;font-size:13px;font-family:inherit;font-weight:700;
+  resize:vertical;min-height:34px;
+}
+.seg textarea:focus{outline:none;border-color:var(--gold);}
+.times{display:flex;gap:8px;margin-top:8px;align-items:flex-end;flex-wrap:wrap;}
+.times label{font-size:11px;color:#8a857c;display:flex;flex-direction:column;gap:2px;}
+.times input[type=number]{width:64px;background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:4px 7px;font-size:12px;}
+.times input[type=number]:focus{outline:none;border-color:var(--gold);}
+.btn-jump{font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;background:var(--gold);color:#1a1408;border:none;font-weight:700;align-self:flex-end;}
+.btn-jump:hover{background:var(--gold-b);}
+.btn-save{font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;background:#2a5a2c;color:#b8e0b9;border:none;font-weight:700;align-self:flex-end;}
+.btn-save:hover{background:#3a7a3c;}
+.seg-actions{display:flex;gap:6px;margin-top:8px;}
+.mini{font-size:11px;padding:3px 9px;border-radius:5px;cursor:pointer;background:transparent;border:1px solid var(--line);color:#9a958c;}
+.mini:hover{border-color:var(--gold);color:var(--cream);}
+.mini.del:hover{border-color:var(--danger);color:#e0a0a0;}
+.r-footer{margin-top:20px;display:flex;gap:10px;}
+
+/* ════════════════════════════════
+   게시물 편집기
+════════════════════════════════ */
+.p-toolbar{
+  background:var(--ink2);border-bottom:1px solid var(--line);
+  padding:10px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+}
+.p-layout{display:flex;gap:0;}
+.slides-area{display:flex;flex-wrap:wrap;gap:24px;padding:24px;justify-content:center;flex:1;}
+.card{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.card-label{font-size:11px;color:#777;font-weight:600;display:flex;gap:6px;align-items:center;}
+.card-label span{background:var(--gold);color:#1a1408;border-radius:3px;padding:2px 7px;font-size:10px;font-weight:700;}
+.slide{position:relative;width:324px;height:432px;overflow:hidden;border-radius:4px;box-shadow:0 4px 24px rgba(0,0,0,.8);background:var(--ink);}
+.slide img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;filter:brightness(0.28) saturate(0.65);}
+.slide .scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(8,6,4,0) 0%,rgba(8,6,4,0.2) 40%,rgba(8,6,4,0.75) 75%,rgba(8,6,4,0.95) 100%);}
+.slide .content{position:absolute;inset:0;display:flex;flex-direction:column;padding:24px 24px 18px;}
+[contenteditable]{
+  outline:none;cursor:text;border-radius:2px;transition:background .12s;
+  white-space:pre-wrap;word-break:break-word;
+  display:block;overflow:hidden;
+  position:relative;
+  min-width:40px;min-height:1em;
+}
+[contenteditable]:hover{background:rgba(255,255,255,.06);}
+[contenteditable]:focus{
+  background:rgba(255,255,255,.10);
+  box-shadow:0 0 0 1px rgba(176,132,74,.5);
+}
+/* ★ 텍스트박스 리사이즈 핸들 */
+.ce-wrap{position:relative;display:block;}
+.ce-wrap .ce-handle{
+  position:absolute;width:10px;height:10px;
+  background:var(--gold-b);border-radius:50%;
+  z-index:20;display:none;cursor:nwse-resize;
+}
+.ce-wrap:hover .ce-handle,
+.ce-wrap:focus-within .ce-handle{display:block;}
+.ce-wrap .ce-handle.r {right:-5px;top:50%;transform:translateY(-50%);cursor:ew-resize;}
+.ce-wrap .ce-handle.l {left:-5px;top:50%;transform:translateY(-50%);cursor:ew-resize;}
+.ce-wrap .ce-handle.t {top:-5px;left:50%;transform:translateX(-50%);cursor:ns-resize;}
+.ce-wrap .ce-handle.b {bottom:-5px;left:50%;transform:translateX(-50%);cursor:ns-resize;}
+.s-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.s-sec{font-size:10px;font-weight:500;color:var(--gold);white-space:nowrap;}
+.s-line{flex:1;height:1px;background:rgba(176,132,74,.4);}
+.s-vol{font-size:8px;color:rgba(237,230,216,.6);white-space:nowrap;}
+.s-badge{display:inline-block;border:1px solid rgba(237,230,216,.25);border-radius:2px;padding:2px 7px;font-size:7px;color:rgba(237,230,216,.5);margin-bottom:12px;}
+.cover-sub{font-size:10px;color:rgba(237,230,216,.8);font-weight:300;margin-bottom:8px;margin-top:auto;}
+.cover-main{font-size:23px;font-weight:900;color:var(--white);line-height:1.14;margin-bottom:6px;}
+.cover-serif{font-size:12px;color:var(--gold-b);font-style:italic;margin-top:3px;}
+.c-numbox{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:#1a1408;font-size:16px;font-weight:900;padding:4px 10px;border-radius:2px;margin-bottom:10px;align-self:flex-start;}
+.c-subhead{font-size:17px;font-weight:700;color:var(--white);line-height:1.25;margin-bottom:8px;}
+.c-body{font-size:12px;color:var(--body-c);line-height:1.6;margin-bottom:auto;}
+.c-caption-box{background:rgba(8,6,4,.7);border-left:3px solid var(--gold);padding:8px 10px;margin-top:8px;}
+.c-caption{font-size:11px;color:var(--white);line-height:1.5;}
+.outro-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;}
+.outro-bar{width:24px;height:1.5px;background:var(--gold);margin:8px auto;}
+.outro-wm{font-size:34px;color:var(--cream);font-family:"Noto Serif CJK KR","Noto Serif",serif;font-weight:700;}
+.outro-copy{font-size:11px;color:rgba(150,140,124,.8);margin-top:2px;}
+.outro-cta{font-size:10px;color:var(--gold-b);font-weight:600;}
+.s-sig{text-align:center;font-size:8px;color:rgba(237,230,216,.5);font-family:"Noto Serif CJK KR","Noto Serif",serif;margin-top:6px;}
+.img-btn{position:absolute;top:6px;right:6px;z-index:10;background:rgba(0,0,0,.65);color:var(--cream);border:1px solid rgba(176,132,74,.5);border-radius:3px;font-size:9px;padding:3px 7px;cursor:pointer;}
+.img-btn:hover{background:rgba(176,132,74,.3);}
+.p-side{width:280px;flex:0 0 280px;background:#0d0d0d;border-left:1px solid var(--line);padding:16px;overflow-y:auto;height:calc(100vh - 100px);}
+.p-side h2{font-size:12px;color:var(--gold-b);margin-bottom:10px;font-weight:700;}
+.p-side textarea{width:100%;height:200px;background:var(--ink2);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:9px;font-size:11px;line-height:1.6;resize:vertical;font-family:inherit;}
+.p-side textarea:focus{outline:none;border-color:var(--gold);}
+.side-sep{height:1px;background:var(--line);margin:12px 0;}
+.side-note{font-size:10px;color:#666;line-height:1.65;}
+.empty-msg{color:#555;font-size:13px;padding:60px 20px;text-align:center;width:100%;}
+
+/* ════════════════════════════════
+   카테고리 A 릴스 편집기
+════════════════════════════════ */
+.a-toolbar{
+  background:var(--ink2);border-bottom:1px solid var(--line);
+  padding:10px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+}
+.a-layout{display:flex;}
+.a-stage{
+  flex:0 0 auto;padding:20px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  border-right:1px solid var(--line);
+}
+.a-vwrap{
+  position:relative;width:360px;height:640px;
+  background:#111;border-radius:14px;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.7);
+}
+.a-vwrap video{width:100%;height:100%;object-fit:cover;display:block;}
+.a-subline{
+  position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  text-align:center;pointer-events:none;padding:0 20px;
+}
+.a-subline span{
+  display:inline-block;color:#fff;text-shadow:0 3px 10px rgba(0,0,0,.7);
+  -webkit-text-stroke:2px rgba(0,0,0,.55);
+  line-height:1.1;word-break:keep-all;
+}
+.a-subline span.bold{font-family:'Anton',sans-serif;font-size:44px;text-transform:uppercase;letter-spacing:.5px;}
+.a-subline span.italic{font-family:'Playfair Display',serif;font-style:italic;font-size:38px;}
+.a-subline span.emph{color:var(--gold-b);-webkit-text-stroke:2px rgba(0,0,0,.55);}
+.a-panel{flex:1;padding:20px 24px;overflow-y:auto;max-height:calc(100vh - 100px);}
+.a-panel h2{font-size:13px;color:var(--gold-b);margin-bottom:12px;font-weight:700;}
+.a-section{margin-bottom:22px;}
+.a-drop-row{display:flex;gap:10px;align-items:center;background:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;flex-wrap:wrap;}
+.a-drop-row label{font-size:11px;color:#8a857c;}
+.a-drop-row input[type=number]{width:80px;background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:5px 8px;font-size:12px;}
+.a-imggrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.a-imgcell{position:relative;aspect-ratio:2/3;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--ink2);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px;}
+.a-imgcell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.a-imgcell .a-imgidx{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.7);color:var(--gold-b);font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;z-index:2;}
+.a-imgcell .a-imgbtn{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.7);color:var(--cream);border:1px solid rgba(176,132,74,.5);border-radius:3px;font-size:9px;padding:3px 6px;cursor:pointer;z-index:2;}
+.a-imgcell .a-imgbtn:hover{background:rgba(176,132,74,.3);}
+.a-imgcell .a-imgname{font-size:8px;color:#666;margin-top:4px;word-break:break-all;}
+.a-wordrow{display:flex;gap:8px;align-items:center;background:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;margin-bottom:6px;flex-wrap:wrap;}
+.a-wordrow.active{border-color:var(--gold);}
+.a-wordrow input[type=text]{flex:1;min-width:80px;background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:4px;padding:4px 7px;font-size:12px;font-family:inherit;font-weight:700;}
+.a-wordrow input[type=number]{width:58px;background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:4px;padding:4px 6px;font-size:11px;}
+.a-wordrow label.a-emph{display:flex;align-items:center;gap:4px;font-size:10px;color:#8a857c;white-space:nowrap;}
+.a-wordrow label.a-emph input{accent-color:var(--gold);}
+.a-footer{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<!-- 탭 네비 -->
+<nav class="nav">
+  <div class="nav-brand">bodetail</div>
+  <div class="tab active" onclick="switchTab('reels')">🎬 릴스 자막 편집기</div>
+  <div class="tab" onclick="switchTab('post')">📸 게시물 편집기</div>
+  <div class="tab" onclick="switchTab('catA')">🅰️ 카테고리 A 릴스</div>
+</nav>
+
+<!-- ══════════════════════════════
+     릴스 편집기
+══════════════════════════════ -->
+<div id="page-reels" class="page active">
+  <div class="r-toolbar">
+    <label class="btn" for="r-jsonFile">① subtitles.json 열기</label>
+    <input type="file" id="r-jsonFile" accept=".json">
+    <label class="btn ghost" for="r-videoFile">② normalized.mp4 열기</label>
+    <input type="file" id="r-videoFile" accept="video/*">
+    <button class="btn ghost" onclick="r_exportJSON()">③ 내보내기</button>
+    <button class="btn ghost" onclick="r_addSub()">+ 자막 추가</button>
+    <span class="hint">드래그=이동 · 핸들=크기 · 저장버튼으로 시간 확정</span>
+  </div>
+  <div class="r-layout">
+    <div class="r-stage">
+      <div class="vwrap" id="r-vwrap">
+        <video id="r-video" playsinline></video>
+      </div>
+      <input type="range" class="scrub" id="r-scrub" min="0" max="100" value="0" step="0.05">
+      <div class="tlabel" id="r-tlabel">0.0s / 0.0s</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn ghost" id="r-ppBtn" style="min-width:80px;">▶ 재생</button>
+      </div>
+      <div class="vol-row">
+        <label>🔊</label>
+        <input type="range" id="r-vol" min="0" max="1" step="0.05" value="1">
+      </div>
+    </div>
+    <div class="r-panel">
+      <h2>자막 목록</h2>
+      <div class="r-hint">
+        <b>① subtitles.json + ② normalized.mp4 모두 열기</b> (reels/latest/ 에서 다운로드)<br>
+        드래그=이동 / 좌우핸들=폭 / 상하핸들=높이 / <b>▶ 이 위치로</b>=그 시점 이동<br>
+        시간 수정 후 <b>✔ 저장</b> 눌러야 그 시간에만 박스 뜸 / 다 되면 <b>③ 내보내기</b>
+      </div>
+      <div id="r-segList"><div style="color:#555;font-size:12px;padding:20px 0;">JSON을 불러오세요.</div></div>
+      <div class="r-footer">
+        <button class="btn" style="background:var(--cream);color:var(--ink);" onclick="r_exportJSON()">③ subtitles.json 내보내기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     게시물 편집기
+══════════════════════════════ -->
+<div id="page-post" class="page">
+  <div class="p-toolbar">
+    <label class="btn" for="p-jsonFile">① JSON 불러오기</label>
+    <input type="file" id="p-jsonFile" accept=".json">
+    <label class="btn ghost" for="p-pngFiles" title="Actions에서 받은 PNG 5장을 한꺼번에 선택">🖼️ PNG 배경 불러오기</label>
+    <input type="file" id="p-pngFiles" accept="image/png,image/jpeg" multiple>
+    <button class="btn ghost" onclick="p_exportJSON()">② JSON 저장</button>
+    <button class="btn" onclick="p_downloadAllPNG()" style="background:var(--cream);color:var(--ink);">③ PNG 전체 저장</button>
+    <button class="btn" onclick="p_toReel()" id="pr-btn" style="background:var(--gold);">🎞️ 즉석 변환(webm)</button>
+    <button class="btn" onclick="p_toReelMp4()" id="prm-btn" style="background:#2a5a2c;color:#cde8cd;">🚀 릴스 mp4 (GitHub)</button>
+    <span style="font-size:11px;color:#8a857c;">표지<input type="number" id="pr-cover" value="1.5" step="0.1" style="width:52px;background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:4px;padding:3px 5px;margin:0 6px 0 4px;">본문<input type="number" id="pr-slide" value="1.9" step="0.1" style="width:52px;background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:4px;padding:3px 5px;margin:0 0 0 4px;">초</span>
+    <button class="btn ghost" onclick="p_loadSample()">샘플</button>
+    <span class="hint">① JSON → 🖼️ PNG 배경 → 텍스트 수정 → ③ PNG 전체 저장</span>
+  </div>
+  <div class="p-layout">
+    <div class="slides-area" id="p-slidesArea">
+      <div class="empty-msg">📂 JSON 불러오기 또는 샘플 로드를 눌러주세요.</div>
+    </div>
+    <div class="p-side">
+      <h2>📝 캡션</h2>
+      <textarea id="p-captionText" placeholder="JSON 불러오면 자동으로 채워집니다."></textarea>
+      <div class="side-sep"></div>
+      <h2>사용법</h2>
+      <div class="side-note">
+        <b style="color:var(--cream)">① JSON 불러오기</b><br>Actions 완료 후 posts/latest/post_content.json 다운로드 → 불러오기<br><br>
+        <b style="color:var(--cream)">🖼️ PNG 배경 불러오기</b><br>posts/latest/ 의 PNG 5장을 한꺼번에 선택하면 자동으로 각 슬라이드 배경에 적용됨<br><br>
+        <b style="color:var(--cream)">텍스트 수정</b><br>슬라이드 위 텍스트 클릭 → 바로 수정<br><br>
+        <b style="color:var(--cream)">📷 버튼</b><br>개별 슬라이드 배경만 교체할 때<br><br>
+        <b style="color:var(--cream)">③ PNG 전체 저장</b><br>버튼 하나로 슬라이드 전체 PNG 자동 다운로드
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     카테고리 A 릴스 편집기
+══════════════════════════════ -->
+<div id="page-catA" class="page">
+  <div class="a-toolbar">
+    <label class="btn" for="a-jsonFile">① direction_edit.json 열기</label>
+    <input type="file" id="a-jsonFile" accept=".json">
+    <label class="btn ghost" for="a-videoFile">② clip.mp4 열기 (assets/clip.mp4)</label>
+    <input type="file" id="a-videoFile" accept="video/*">
+    <label class="btn ghost" for="a-imgFiles" title="assets/images 폴더의 이미지들을 한꺼번에 선택">🖼️ 이미지 일괄 불러오기</label>
+    <input type="file" id="a-imgFiles" accept="image/*" multiple>
+    <button class="btn ghost" onclick="a_exportJSON()">③ JSON 내보내기</button>
+    <button class="btn" onclick="a_downloadAllImages()" style="background:var(--cream);color:var(--ink);">④ 이미지 전체 저장</button>
+    <span class="hint">이미지 교체→④ 저장→GitHub assets/images/에 같은 파일명 재업로드→③ JSON도 재업로드→"카테고리 A 재렌더" 실행</span>
+  </div>
+  <div class="a-layout">
+    <div class="a-stage">
+      <div class="a-vwrap" id="a-vwrap">
+        <video id="a-video" playsinline></video>
+        <div class="a-subline" id="a-subline"></div>
+      </div>
+      <input type="range" class="scrub" id="a-scrub" min="0" max="100" value="0" step="0.05">
+      <div class="tlabel" id="a-tlabel">0.0s / 0.0s</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn ghost" id="a-ppBtn" style="min-width:80px;">▶ 재생</button>
+      </div>
+      <div class="vol-row">
+        <label>🔊</label>
+        <input type="range" id="a-vol" min="0" max="1" step="0.05" value="1">
+      </div>
+    </div>
+    <div class="a-panel">
+      <div class="a-section">
+        <h2>효과 타입 (클라이맥스 시점에 적용될 효과)</h2>
+        <div class="a-drop-row">
+          <label>효과</label>
+          <select id="a-effectType" style="background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:5px;padding:5px 8px;font-size:12px;">
+            <option value="montage">몽타주 (이미지 교차편집)</option>
+            <option value="bw">흑백 전환</option>
+            <option value="outro">아웃트로 (로고 카드)</option>
+          </select>
+          <label style="margin-left:12px;">아웃트로 길이(초)</label>
+          <input type="number" id="a-outroSecInput" step="0.5" value="2.5" style="width:70px;">
+        </div>
+      </div>
+
+      <div class="a-section">
+        <h2>효과 시점 · BGM 구간 (명대사 끝 → 음성·자막 꺼짐 + BGM 하이라이트 점프)</h2>
+        <div class="a-drop-row">
+          <label>효과 시점(초, 릴스 기준)</label>
+          <input type="number" id="a-dropInput" step="0.05" value="0">
+          <button class="btn-jump" id="a-jumpDrop">▶ 효과 위치로</button>
+        </div>
+        <div class="a-drop-row" style="margin-top:8px;">
+          <label>BGM 인트로 시작(트랙 초)</label>
+          <input type="number" id="a-bgmStartInput" step="0.5" value="0">
+          <label style="margin-left:12px;">BGM 하이라이트 지점(트랙 초)</label>
+          <input type="number" id="a-bgmClimaxInput" step="0.5" value="0">
+        </div>
+        <div class="a-drop-row" style="margin-top:8px;">
+          <label>자막 세로 위치</label>
+          <input type="range" id="a-subYInput" min="10" max="90" step="1" value="50" style="width:180px;accent-color:var(--gold);">
+          <span id="a-subYLabel" style="font-size:11px;color:#8a857c;">50% (정중앙)</span>
+        </div>
+        <div class="r-hint" style="margin-top:8px;">
+          구조: <b>효과 시점</b>에 음성·자막이 완전히 꺼지고, BGM이 트랙의 <b>하이라이트 지점</b>으로
+          점프하며 크게 터지고, 선택한 효과가 시작돼. <b>인트로 시작</b>은 효과 전까지 작게 깔리는
+          BGM이 트랙의 어디서부터 재생될지. 세 값 모두 여기서 수정 → ③ JSON 내보내기 →
+          재업로드 → "카테고리 A 재렌더" 실행하면 그대로 반영됨.
+        </div>
+      </div>
+
+      <div class="a-section">
+        <h2>B롤 이미지 (montage=효과 후 교차편집 / cutaway=말 도중 강조어 순간 삽입)</h2>
+        <div class="r-hint">cutaway 모드일 땐 아래 자막 목록에서 <b>강조(골드) 체크한 단어의 타이밍</b>에 이미지가 순서대로 삽입돼 — 강조 체크를 바꾸고 재렌더하면 컷어웨이 위치도 따라 바뀜.</div>
+        <div class="a-imggrid" id="a-imgGrid"></div>
+      </div>
+
+      <div class="a-section">
+        <h2>자막 단어 (실제 목소리 타이밍 기준 · Anton 볼드 / Playfair 이탤릭 자동 교차)</h2>
+        <div class="r-hint" id="a-silentNote" style="display:none;">
+          <b>음성 없는 영상</b>으로 생성됨 — 자동 자막이 없어. 아래 "+ 자막 추가"로
+          원하는 타이밍에 직접 텍스트를 넣어줘. (영상 재생하며 ▶로 시점 확인 후 시작/끝 초 입력)
+        </div>
+        <div id="a-wordList"><div style="color:#555;font-size:12px;padding:10px 0;">JSON을 불러오세요.</div></div>
+        <button class="btn ghost" onclick="a_addWord()" style="margin-top:8px;">+ 자막 추가</button>
+      </div>
+
+      <div class="a-footer">
+        <button class="btn" style="background:var(--cream);color:var(--ink);" onclick="a_exportJSON()">③ direction_edit.json 내보내기</button>
+        <button class="btn ghost" onclick="a_downloadAllImages()">④ 이미지 전체 저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════ 탭 전환 ════════════ */
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['reels','post','catA'][i]===tab);
+  });
+  document.getElementById('page-reels').classList.toggle('active',tab==='reels');
+  document.getElementById('page-post').classList.toggle('active',tab==='post');
+  document.getElementById('page-catA').classList.toggle('active',tab==='catA');
+}
+
+/* ════════════════════════════════════
+   릴스 편집기
+════════════════════════════════════ */
+let R_DATA=null, R_SUBS=[], R_ACTIVE=-1;
+const CW=1080,CH=1920;
+const rv=document.getElementById('r-video');
+const rvw=document.getElementById('r-vwrap');
+const rsl=document.getElementById('r-segList');
+const rsc=document.getElementById('r-scrub');
+const rtl=document.getElementById('r-tlabel');
+const rpp=document.getElementById('r-ppBtn');
+
+const rsx=()=>rvw.clientWidth/CW;
+const rsy=()=>rvw.clientHeight/CH;
+
+rpp.onclick=()=>{rv.muted=false;rv.paused?rv.play().catch(()=>{}):rv.pause();};
+rv.addEventListener('play',()=>rpp.textContent='■ 정지');
+rv.addEventListener('pause',()=>rpp.textContent='▶ 재생');
+rv.addEventListener('ended',()=>rpp.textContent='▶ 재생');
+document.getElementById('r-vol').addEventListener('input',e=>{rv.volume=parseFloat(e.target.value);rv.muted=false;});
+
+document.getElementById('r-jsonFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{R_DATA=JSON.parse(r.result);R_SUBS=R_DATA.subtitles||[];r_renderAll();}catch(err){alert('JSON 오류: '+err.message);}};
+  r.readAsText(f);
+});
+document.getElementById('r-videoFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  rv.src=URL.createObjectURL(f);rv.muted=false;rv.volume=1;
+  rv.addEventListener('loadedmetadata',()=>{rsc.max=rv.duration;rtl.textContent=`0.0s / ${rv.duration.toFixed(1)}s`;r_renderBoxes();},{once:true});
+});
+
+function r_renderAll(){r_renderList();r_renderBoxes();}
+
+function r_renderBoxes(){
+  rvw.querySelectorAll('.subbox').forEach(el=>el.remove());
+  R_SUBS.forEach((s,i)=>{
+    const box=document.createElement('div');
+    box.className='subbox';box.dataset.idx=i;
+    box.style.left=(s.box_x*rsx())+'px';box.style.top=(s.box_y*rsy())+'px';
+    box.style.width=(s.box_w*rsx())+'px';box.style.height=(s.box_h*rsy())+'px';
+    box.style.fontSize=Math.max(7,(R_DATA&&R_DATA.font_size||60)*rsy()*0.82)+'px';
+    box.style.borderRadius=(10*rsy()+3)+'px';
+    const sp=document.createElement('span');
+    sp.style.cssText='pointer-events:none;display:block;width:100%;padding:0 5px;';
+    sp.textContent=s.text_ko||s.text_en||'';box.appendChild(sp);
+    ['hl','hr','ht','hb'].forEach(c=>{const h=document.createElement('div');h.className='handle '+c;box.appendChild(h);});
+    r_makeDrag(box,i);['hl','hr','ht','hb'].forEach(c=>r_makeResize(box,i,c));
+    rvw.appendChild(box);
+  });
+  r_syncVis();
+}
+
+function r_makeDrag(box,i){
+  let sx,sy,ox,oy,d=false;
+  box.addEventListener('mousedown',e=>{if(e.target.classList.contains('handle'))return;d=true;box.classList.add('dragging');r_setActive(i);sx=e.clientX;sy=e.clientY;ox=parseFloat(box.style.left);oy=parseFloat(box.style.top);e.preventDefault();});
+  window.addEventListener('mousemove',e=>{if(!d)return;let nx=ox+(e.clientX-sx),ny=oy+(e.clientY-sy);nx=Math.max(0,Math.min(nx,rvw.clientWidth-box.offsetWidth));ny=Math.max(0,Math.min(ny,rvw.clientHeight-box.offsetHeight));box.style.left=nx+'px';box.style.top=ny+'px';R_SUBS[i].box_x=Math.round(nx/rsx());R_SUBS[i].box_y=Math.round(ny/rsy());});
+  window.addEventListener('mouseup',()=>{if(d){d=false;box.classList.remove('dragging');}});
+}
+
+function r_makeResize(box,i,cls){
+  const h=box.querySelector('.handle.'+cls);
+  let s0,o0w,o0h,o0l,o0t,res=false;
+  h.addEventListener('mousedown',e=>{res=true;r_setActive(i);s0=(cls==='hl'||cls==='hr')?e.clientX:e.clientY;o0w=box.offsetWidth;o0h=box.offsetHeight;o0l=parseFloat(box.style.left);o0t=parseFloat(box.style.top);e.preventDefault();e.stopPropagation();});
+  window.addEventListener('mousemove',e=>{if(!res)return;const d=(cls==='hl'||cls==='hr')?(e.clientX-s0):(e.clientY-s0);if(cls==='hr'){const nw=Math.max(40,Math.min(o0w+d,rvw.clientWidth-o0l));box.style.width=nw+'px';R_SUBS[i].box_w=Math.round(nw/rsx());}else if(cls==='hl'){const nw=Math.max(40,o0w-d);const nl=Math.max(0,o0l+(o0w-nw));box.style.left=nl+'px';box.style.width=nw+'px';R_SUBS[i].box_x=Math.round(nl/rsx());R_SUBS[i].box_w=Math.round(nw/rsx());}else if(cls==='hb'){const nh=Math.max(20,Math.min(o0h+d,rvw.clientHeight-o0t));box.style.height=nh+'px';R_SUBS[i].box_h=Math.round(nh/rsy());}else if(cls==='ht'){const nh=Math.max(20,o0h-d);const nt=Math.max(0,o0t+(o0h-nh));box.style.top=nt+'px';box.style.height=nh+'px';R_SUBS[i].box_y=Math.round(nt/rsy());R_SUBS[i].box_h=Math.round(nh/rsy());}});
+  window.addEventListener('mouseup',()=>{res=false;});
+}
+
+function r_syncVis(){
+  const t=rv.currentTime||0;
+  rvw.querySelectorAll('.subbox').forEach(box=>{
+    const i=+box.dataset.idx;if(!R_SUBS[i]){box.classList.add('hidden');return;}
+    const s=R_SUBS[i];const inRange=(t>=s.start&&t<s.end);const isActive=(i===R_ACTIVE);
+    const show=s.saved?inRange:(inRange||isActive);
+    box.classList.toggle('hidden',!show);
+  });
+}
+
+function r_setActive(i){
+  R_ACTIVE=i;
+  rvw.querySelectorAll('.subbox').forEach(b=>b.classList.toggle('active',+b.dataset.idx===i));
+  rsl.querySelectorAll('.seg').forEach((s,idx)=>s.classList.toggle('active',idx===i));
+  r_syncVis();
+}
+
+function r_renderList(){
+  if(!R_SUBS.length){rsl.innerHTML='<div style="color:#555;font-size:12px;padding:20px 0;">자막이 없습니다.</div>';return;}
+  rsl.innerHTML='';
+  R_SUBS.forEach((s,i)=>{
+    const seg=document.createElement('div');
+    seg.className='seg'+(R_ACTIVE===i?' active':'')+(s.saved?' saved':'');
+    seg.dataset.i=i;
+    seg.innerHTML=`<div class="seg-idx">자막 ${i+1}${s.saved?' <span style="color:#6abf69;font-size:9px;">✔</span>':''}</div>
+      <div class="seg-en">${esc(s.text_en||'')}</div>
+      <textarea data-i="${i}" class="rko">${esc(s.text_ko||'')}</textarea>
+      <div class="times">
+        <label>시작<input type="number" step="0.05" class="rst" data-i="${i}" value="${s.start}"></label>
+        <label>끝<input type="number" step="0.05" class="ren" data-i="${i}" value="${s.end}"></label>
+        <button class="btn-jump" data-i="${i}">▶ 이 위치로</button>
+        <button class="btn-save" data-i="${i}">✔ 저장</button>
+      </div>
+      <div class="seg-actions"><button class="mini del" data-i="${i}">삭제</button></div>`;
+    rsl.appendChild(seg);
+  });
+  rsl.querySelectorAll('textarea.rko').forEach(t=>{
+    t.addEventListener('input',e=>{const i=+e.target.dataset.i;R_SUBS[i].text_ko=e.target.value;R_SUBS[i].saved=false;r_refreshSaved(i);const box=rvw.querySelector(`.subbox[data-idx="${i}"]`);if(box){const sp=box.querySelector('span');if(sp)sp.textContent=e.target.value;}});
+    t.addEventListener('focus',e=>r_setActive(+e.target.dataset.i));
+  });
+  rsl.querySelectorAll('input.rst').forEach(inp=>inp.addEventListener('input',e=>{R_SUBS[+e.target.dataset.i].start=parseFloat(e.target.value)||0;R_SUBS[+e.target.dataset.i].saved=false;r_refreshSaved(+e.target.dataset.i);r_syncVis();}));
+  rsl.querySelectorAll('input.ren').forEach(inp=>inp.addEventListener('input',e=>{R_SUBS[+e.target.dataset.i].end=parseFloat(e.target.value)||0;R_SUBS[+e.target.dataset.i].saved=false;r_refreshSaved(+e.target.dataset.i);r_syncVis();}));
+  rsl.querySelectorAll('.btn-jump').forEach(b=>b.addEventListener('click',e=>{const i=+e.target.dataset.i;r_setActive(i);rv.currentTime=Math.max(0,R_SUBS[i].start);r_syncVis();}));
+  rsl.querySelectorAll('.btn-save').forEach(b=>b.addEventListener('click',e=>{const i=+e.target.dataset.i;R_SUBS[i].saved=true;r_syncVis();r_refreshSaved(i);}));
+  rsl.querySelectorAll('.del').forEach(b=>b.addEventListener('click',e=>{const i=+e.target.dataset.i;if(confirm(`자막 ${i+1} 삭제?`)){R_SUBS.splice(i,1);R_ACTIVE=-1;r_renderAll();}}));
+}
+
+function r_refreshSaved(i){
+  const seg=rsl.querySelector(`.seg[data-i="${i}"]`);if(!seg)return;
+  seg.classList.toggle('saved',!!R_SUBS[i].saved);
+  const idx=seg.querySelector('.seg-idx');
+  if(idx)idx.innerHTML=`자막 ${i+1}${R_SUBS[i].saved?' <span style="color:#6abf69;font-size:9px;">✔</span>':''}`;
+}
+
+rv.addEventListener('timeupdate',()=>{if(!rsc.matches(':active'))rsc.value=rv.currentTime;rtl.textContent=`${rv.currentTime.toFixed(1)}s / ${(rv.duration||0).toFixed(1)}s`;r_syncVis();});
+rsc.addEventListener('input',()=>{rv.currentTime=parseFloat(rsc.value);r_syncVis();});
+
+function r_addSub(){
+  R_SUBS.push({text_en:'',text_ko:'새 자막',start:0,end:2,box_x:240,box_y:300,box_w:600,box_h:130,saved:false});
+  if(!R_DATA)R_DATA={canvas:{w:CW,h:CH},font_size:60,subtitles:R_SUBS};
+  r_renderAll();
+}
+
+function r_exportJSON(){
+  if(!R_DATA){alert('먼저 JSON을 불러오세요.');return;}
+  R_DATA.subtitles=R_SUBS.map(s=>{const{saved,...rest}=s;return rest;});
+  const blob=new Blob([JSON.stringify(R_DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='subtitles.json';a.click();a.remove();
+}
+
+window.addEventListener('resize',()=>{if(R_SUBS.length)r_renderBoxes();});
+
+/* ════════════════════════════════════
+   게시물 편집기
+════════════════════════════════════ */
+let P_DATA=null,P_SUBS=[];
+
+document.getElementById('p-jsonFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{P_DATA=JSON.parse(r.result);P_SUBS=P_DATA.slides||[];p_renderAll();}catch(err){alert('JSON 오류: '+err.message);}};
+  r.readAsText(f);
+});
+
+/* ── PNG 배경 일괄 로드 ──
+   posts/latest/ 에서 받은 PNG 5장을 선택하면
+   파일명 앞 숫자(슬라이드 번호)로 매칭해서 각 슬라이드 배경에 자동 적용 */
+document.getElementById('p-pngFiles').addEventListener('change',e=>{
+  const files=Array.from(e.target.files);
+  if(!P_SUBS.length){alert('먼저 JSON을 불러오세요.');return;}
+  let matched=0;
+  files.forEach(f=>{
+    const url=URL.createObjectURL(f);
+    // 파일명에서 앞 숫자 추출 (01_커버.png → 1, 02_01.png → 2)
+    const m=f.name.match(/^(\d+)/);
+    if(!m)return;
+    const fileNum=parseInt(m[1]);
+    // 슬라이드 번호 순서로 매칭
+    const idx=fileNum-1;
+    if(idx<0||idx>=P_SUBS.length)return;
+    P_SUBS[idx].image_url=url;
+    // 이미 렌더된 bg 이미지 즉시 교체
+    const bgEl=document.querySelector(`#p-slidesArea .slide[data-idx="${idx}"] img.bg`);
+    if(bgEl){bgEl.src=url; matched++;}
+  });
+  if(matched>0) alert(`✅ ${matched}장 배경 적용됨`);
+  else alert('매칭 실패. 파일명이 01_, 02_... 으로 시작하는지 확인해줘.');
+});
+
+function p_loadSample(){
+  P_DATA={section_label:'오늘의 디테일',vol:'VOL.01',
+    caption_full:'손이 모든 걸 결정한다.\n\n(광고 아님 · 저장 추천 🔖)\n\n① 손톱 길이: 3mm 이하\n② 큐티클: 밀기만 해도 달라진다\n③ 보습: 손 씻은 직후\n\nStart Every Detail with Awareness Now\n—\n내 외모의 최고 버전이 궁금하다면? @bodetail_official',
+    hashtags:'#bodetail #남자그루밍 #손관리',
+    slides:[
+      {slide_num:1,type:'cover',headline_sub:'아무도 안 알려준',headline_main:['손이','모든 걸','결정한다'],headline_serif:'오늘부터 바꾸는 손 디테일 3',image_url:''},
+      {slide_num:2,type:'content',number:'01',subhead:'손톱 길이, 3mm 이하',body:['짧게 유지하는 것만으로도','첫인상이 달라진다'],caption:'손끝이 곧 디테일이다.',image_url:''},
+      {slide_num:3,type:'content',number:'02',subhead:'큐티클은 밀기만 해도',body:['자르지 않아도 된다','밀기만 해도 깔끔해진다'],caption:'작은 차이가 인상을 만든다.',image_url:''},
+      {slide_num:4,type:'content',number:'03',subhead:'보습은 손 씻은 직후',body:['흡수율이 2배 높다','핸드크림 하나로 끝낸다'],caption:'루틴이 습관이 되면 결과가 따른다.',image_url:''},
+      {slide_num:5,type:'closing',image_url:''}
+    ]};
+  P_SUBS=P_DATA.slides;p_renderAll();
+}
+
+function p_renderAll(){
+  if(!P_DATA)return;
+  document.getElementById('p-captionText').value=P_DATA.caption_full||'';
+  const area=document.getElementById('p-slidesArea');area.innerHTML='';
+  P_SUBS.forEach((s,i)=>area.appendChild(p_buildCard(s,i)));
+}
+
+function p_normType(s){const t=String(s.type||'').toLowerCase();
+  if(['outro','ending','final','end','brand','closing','마무리'].includes(t))s.type='closing';
+  else if(['summary','recap','정리'].includes(t))s.type='content';}
+function p_buildCard(s,i){p_normType(s);
+  const labels={cover:'표지',content:'본문',pick:'PICK',closing:'마무리'};
+  const wrap=document.createElement('div');wrap.className='card';
+  wrap.innerHTML=`<div class="card-label"><span>${s.slide_num||i+1}</span>${labels[s.type]||s.type}</div>`;
+  wrap.appendChild(p_buildSlide(s,i));return wrap;
+}
+
+function p_buildSlide(s,i){
+  const sl=document.createElement('div');sl.className='slide';sl.dataset.idx=i;
+  const bg=document.createElement('img');bg.className='bg';if(s.image_url)bg.src=s.image_url;sl.appendChild(bg);
+  const scrim=document.createElement('div');scrim.className='scrim';sl.appendChild(scrim);
+  const imgBtn=document.createElement('button');imgBtn.className='img-btn';imgBtn.textContent='📷';
+  imgBtn.onclick=()=>{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);bg.src=url;s.image_url=url;};inp.click();};
+  sl.appendChild(imgBtn);
+  const cnt=document.createElement('div');cnt.className='content';
+  if(s.type==='closing'){cnt.appendChild(p_makeOutro());}
+  else{cnt.appendChild(p_makeHeader(s));if(s.type==='cover')cnt.appendChild(p_makeCover(s));else if(s.type==='pick')cnt.appendChild(p_makePick(s));else cnt.appendChild(p_makeContent(s));cnt.appendChild(p_makeSig());}
+  sl.appendChild(cnt);return sl;
+}
+
+function p_makeHeader(s){
+  const d=document.createElement('div');d.className='s-header';
+  d.innerHTML=`<div class="s-sec" contenteditable data-g="section_label">${esc(P_DATA.section_label||'오늘의 디테일')}</div><div class="s-line"></div><div class="s-vol" contenteditable data-g="vol">${esc(P_DATA.vol||'VOL.01')}</div>`;
+  d.querySelectorAll('[data-g]').forEach(el=>el.addEventListener('input',()=>{P_DATA[el.dataset.g]=el.textContent;}));
+  return d;
+}
+function p_makeCover(s){
+  const d=document.createElement('div');d.style.marginTop='auto';
+  d.innerHTML=`<div class="s-badge">DETAIL INDEX</div>`;
+  d.appendChild(pce('div','cover-sub',s.headline_sub||'',e=>s.headline_sub=e.textContent));
+  d.appendChild(pce('div','cover-main',(s.headline_main||[]).join('\n'),e=>{s.headline_main=e.textContent.split('\n').filter(Boolean);}));
+  d.appendChild(pce('div','cover-serif',s.headline_serif||'',e=>s.headline_serif=e.textContent));
+  return d;
+}
+function p_makeContent(s){
+  const d=document.createElement('div');
+  if(s.number){const nb=document.createElement('div');nb.className='c-numbox';nb.textContent=s.number;d.appendChild(nb);}
+  d.appendChild(pce('div','c-subhead',s.subhead||'',e=>s.subhead=e.textContent));
+  const body=pce('div','c-body',(s.body||[]).join('\n'),e=>{s.body=e.textContent.split('\n').filter(Boolean);});
+  body.style.marginBottom='auto';d.appendChild(body);
+  if(s.caption){const box=document.createElement('div');box.className='c-caption-box';box.appendChild(pce('div','c-caption',s.caption,e=>s.caption=e.textContent));d.appendChild(box);}
+  return d;
+}
+function p_makePick(s){
+  const d=document.createElement('div');
+  if(s.number){const nb=document.createElement('div');nb.className='c-numbox';nb.textContent=s.number;d.appendChild(nb);}
+  d.appendChild(pce('div','c-subhead',s.product_name||'',e=>s.product_name=e.textContent));
+  const st=document.createElement('div');st.style.cssText='font-size:14px;color:#B0844A;margin-bottom:5px;';st.textContent='★'.repeat(parseInt(s.stars||4))+'☆'.repeat(5-parseInt(s.stars||4));d.appendChild(st);
+  const pr=pce('div','c-body',(s.price||'')+' · '+(s.one_line||''),()=>{});pr.style.marginBottom='6px';d.appendChild(pr);
+  const body=pce('div','c-body',(s.body||[]).map(b=>'— '+b).join('\n'),e=>{s.body=e.textContent.split('\n').map(l=>l.replace(/^—\s*/,'')).filter(Boolean);});body.style.marginBottom='auto';d.appendChild(body);
+  if(s.caption){const box=document.createElement('div');box.className='c-caption-box';box.appendChild(pce('div','c-caption',s.caption,e=>s.caption=e.textContent));d.appendChild(box);}
+  return d;
+}
+function p_makeOutro(){
+  const d=document.createElement('div');d.className='outro-wrap';
+  const b1=document.createElement('div');b1.className='outro-bar';
+  const wm=pce('div','outro-wm','bodetail',()=>{});
+  const b2=document.createElement('div');b2.className='outro-bar';
+  const cp=pce('div','outro-copy','남들이 놓치는 한 끗',()=>{});
+  const ct=pce('div','outro-cta','@bodetail_official 팔로우',()=>{});
+  [b1,wm,b2,cp,ct].forEach(el=>d.appendChild(el));return d;
+}
+function p_makeSig(){const d=document.createElement('div');d.className='s-sig';d.textContent='bodetail';return d;}
+function pce(tag,cls,text,onInput){
+  const el=document.createElement(tag);
+  el.className=cls;el.contentEditable='true';
+  el.textContent=text;
+  el.addEventListener('input',()=>onInput(el));
+
+  // ★ ce-wrap으로 감싸서 8방향 핸들 추가
+  const wrap=document.createElement('div');
+  wrap.className='ce-wrap';
+  wrap.appendChild(el);
+
+  ['t','r','b','l'].forEach(dir=>{
+    const h=document.createElement('div');
+    h.className='ce-handle '+dir;
+    wrap.appendChild(h);
+    let sx,sy,ow,oh,res=false;
+    h.addEventListener('mousedown',e=>{
+      res=true; e.preventDefault(); e.stopPropagation();
+      sx=e.clientX; sy=e.clientY;
+      ow=el.offsetWidth||el.getBoundingClientRect().width;
+      oh=el.offsetHeight||el.getBoundingClientRect().height;
+    });
+    window.addEventListener('mousemove',e=>{
+      if(!res)return;
+      const dx=e.clientX-sx, dy=e.clientY-sy;
+      // 가로 조절
+      if(dir.includes('r')) el.style.width=Math.max(40,ow+dx)+'px';
+      if(dir.includes('l')) el.style.width=Math.max(40,ow-dx)+'px';
+      // 세로 조절
+      if(dir.includes('b')) el.style.height=Math.max(20,oh+dy)+'px';
+      if(dir==='t'||dir.includes('t')&&!dir.includes('r')&&!dir.includes('l'))
+        el.style.height=Math.max(20,oh-dy)+'px';
+      if(dir==='tl'||dir==='tr') el.style.height=Math.max(20,oh-dy)+'px';
+    });
+    window.addEventListener('mouseup',()=>{ res=false; });
+  });
+
+  // el 대신 wrap을 반환 — 호출부에서 appendChild할 때 wrap이 들어감
+  wrap._ceEl=el;  // 필요시 내부 el 접근용
+  return wrap;
+}
+
+function p_exportJSON(){
+  if(!P_DATA){alert('먼저 JSON을 불러오세요.');return;}
+  P_DATA.caption_full=document.getElementById('p-captionText').value;
+  P_DATA.slides=P_SUBS;
+  const blob=new Blob([JSON.stringify(P_DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='post_content.json';a.click();a.remove();
+}
+
+/* ── PNG 전체 저장 (html2canvas) ── */
+async function p_downloadAllPNG(){
+  if(!P_SUBS.length){alert('먼저 JSON을 불러오세요.');return;}
+  // html2canvas 동적 로드
+  if(!window.html2canvas){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload=res; s.onerror=()=>rej(new Error('html2canvas 로드 실패'));
+      document.head.appendChild(s);
+    }).catch(e=>{alert('PNG 저장 라이브러리 로드 실패.\n인터넷 연결을 확인해줘.\n\n대안: Win+Shift+S 로 각 슬라이드 캡처');return null;});
+    if(!window.html2canvas)return;
+  }
+  const slides=document.querySelectorAll('#p-slidesArea .slide');
+  if(!slides.length){alert('슬라이드가 없습니다.');return;}
+
+  const btn=document.querySelector('button[onclick="p_downloadAllPNG()"]');
+  const orig=btn.textContent; btn.textContent='저장 중...'; btn.disabled=true;
+
+  try{
+    for(let i=0;i<slides.length;i++){
+      const sl=slides[i];
+      const canvas=await html2canvas(sl,{
+        scale:3,              // 3배 → 약 1080px급 출력
+        useCORS:true,
+        allowTaint:true,
+        backgroundColor:null,
+        logging:false,
+      });
+      const a=document.createElement('a');
+      a.href=canvas.toDataURL('image/png');
+      // 파일명: 01_커버, 02_본문1 ...
+      const label=document.querySelectorAll('#p-slidesArea .card-label')[i];
+      const name=label?label.textContent.trim().replace(/\s+/g,'_'):`slide_${i+1}`;
+      a.download=`${String(i+1).padStart(2,'0')}_${name}.png`;
+      a.click(); a.remove();
+      await new Promise(r=>setTimeout(r,400)); // 다운로드 간격
+    }
+    btn.textContent='✅ 저장 완료!';
+    setTimeout(()=>{btn.textContent=orig;btn.disabled=false;},2000);
+  }catch(err){
+    btn.textContent=orig; btn.disabled=false;
+    alert('PNG 저장 중 오류: '+err.message);
+  }
+}
+
+function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ════════════════════════════════════
+   카테고리 A 릴스 편집기
+════════════════════════════════════ */
+let A_DATA=null, A_WORDS=[], A_IMAGES=[], A_ACTIVE_WORD=-1;
+const CONNECTOR_WORDS=new Set(['because','and','but','so','if','when','while','since','as','that','which','who','the','of','to','is','was','are','were','be','been','with','for','in','on','at','or','not','no','yet','then','than','you','your','i','it','its','a','an']);
+
+const av=document.getElementById('a-video');
+const avw=document.getElementById('a-vwrap');
+const asc=document.getElementById('a-scrub');
+const atl=document.getElementById('a-tlabel');
+const app_=document.getElementById('a-ppBtn');
+const asubline=document.getElementById('a-subline');
+const aWordList=document.getElementById('a-wordList');
+const aImgGrid=document.getElementById('a-imgGrid');
+const aDropInput=document.getElementById('a-dropInput');
+const aBgmStartInput=document.getElementById('a-bgmStartInput');
+const aBgmClimaxInput=document.getElementById('a-bgmClimaxInput');
+const aSubYInput=document.getElementById('a-subYInput');
+const aSubYLabel=document.getElementById('a-subYLabel');
+const aEffectType=document.getElementById('a-effectType');
+const aOutroSecInput=document.getElementById('a-outroSecInput');
+
+function a_applySubY(){
+  const y=parseFloat(aSubYInput.value)||50;
+  asubline.style.top=y+'%';
+  aSubYLabel.textContent=y+'%'+(y===50?' (정중앙)':'');
+  if(A_DATA)A_DATA.sub_y=y;
+}
+
+app_.onclick=()=>{av.muted=false;av.paused?av.play().catch(()=>{}):av.pause();};
+av.addEventListener('play',()=>app_.textContent='■ 정지');
+av.addEventListener('pause',()=>app_.textContent='▶ 재생');
+av.addEventListener('ended',()=>app_.textContent='▶ 재생');
+document.getElementById('a-vol').addEventListener('input',e=>{av.volume=parseFloat(e.target.value);av.muted=false;});
+
+document.getElementById('a-jsonFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      A_DATA=JSON.parse(r.result);
+      A_WORDS=A_DATA.words||[];
+      A_IMAGES=(A_DATA.images||[]).map(name=>({name,url:''}));
+      // effect_t가 새 필드명, drop_at_rel은 구버전 호환
+      aDropInput.value=(A_DATA.effect_t!==undefined?A_DATA.effect_t:A_DATA.drop_at_rel)||0;
+      aBgmStartInput.value=A_DATA.bgm_start||0;
+      aBgmClimaxInput.value=(A_DATA.bgm_climax!==undefined&&A_DATA.bgm_climax!==null)?A_DATA.bgm_climax:0;
+      aSubYInput.value=A_DATA.sub_y!==undefined?A_DATA.sub_y:50;
+      a_applySubY();
+      aEffectType.value=A_DATA.effect_type||(A_DATA.montage?'montage':'bw');
+      aOutroSecInput.value=A_DATA.outro_sec!==undefined?A_DATA.outro_sec:2.5;
+      document.getElementById('a-silentNote').style.display=
+        (A_DATA.voice_present===false || A_WORDS.length===0) ? 'block' : 'none';
+      a_renderWordList();
+      a_renderImgGrid();
+    }catch(err){alert('JSON 오류: '+err.message);}
+  };
+  r.readAsText(f);
+});
+
+document.getElementById('a-videoFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  av.src=URL.createObjectURL(f);av.muted=false;av.volume=1;
+  av.addEventListener('loadedmetadata',()=>{asc.max=av.duration;atl.textContent=`0.0s / ${av.duration.toFixed(1)}s`;},{once:true});
+});
+
+/* 이미지 일괄 불러오기: img_00.jpg, img_01.jpg... 파일명으로 매칭 */
+document.getElementById('a-imgFiles').addEventListener('change',e=>{
+  const files=Array.from(e.target.files);
+  if(!A_IMAGES.length){alert('먼저 direction_edit.json을 불러오세요.');return;}
+  let matched=0;
+  files.forEach(f=>{
+    const idx=A_IMAGES.findIndex(im=>im.name===f.name);
+    if(idx===-1)return;
+    A_IMAGES[idx].url=URL.createObjectURL(f);
+    A_IMAGES[idx].file=f;
+    matched++;
+  });
+  a_renderImgGrid();
+  if(matched>0) alert(`✅ ${matched}장 불러옴`);
+  else alert('매칭 실패. 파일명이 img_00.jpg 형식(JSON의 images 배열과 동일)인지 확인해줘.');
+});
+
+function a_renderImgGrid(){
+  aImgGrid.innerHTML='';
+  A_IMAGES.forEach((im,i)=>{
+    const cell=document.createElement('div');
+    cell.className='a-imgcell';
+    if(im.url){
+      cell.innerHTML=`<img src="${im.url}"><div class="a-imgidx">${i+1}</div><button class="a-imgbtn">📷 교체</button>`;
+    }else{
+      cell.innerHTML=`<div class="a-imgidx">${i+1}</div><div style="font-size:10px;color:#666;">미리보기 없음</div><div class="a-imgname">${esc(im.name)}</div><button class="a-imgbtn" style="position:static;margin-top:6px;">📷 불러오기</button>`;
+    }
+    const btn=cell.querySelector('.a-imgbtn');
+    btn.onclick=()=>{
+      const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+      inp.onchange=ev=>{
+        const f=ev.target.files[0];if(!f)return;
+        A_IMAGES[i].url=URL.createObjectURL(f);
+        A_IMAGES[i].file=f;
+        a_renderImgGrid();
+      };
+      inp.click();
+    };
+    aImgGrid.appendChild(cell);
+  });
+}
+
+function a_renderWordList(){
+  if(!A_WORDS.length){aWordList.innerHTML='<div style="color:#555;font-size:12px;padding:10px 0;">단어가 없습니다. 아래 "+ 자막 추가"로 직접 넣어줘.</div>';return;}
+  aWordList.innerHTML='';
+  A_WORDS.forEach((w,i)=>{
+    const row=document.createElement('div');
+    row.className='a-wordrow'+(A_ACTIVE_WORD===i?' active':'');
+    const isEmph=(A_DATA.emphasis_words||[]).includes(w.w.toLowerCase().replace(/[.,!?]/g,''));
+    row.innerHTML=`
+      <input type="text" class="a-wtext" data-i="${i}" value="${esc(w.w)}">
+      <label>시작<input type="number" step="0.01" class="a-wstart" data-i="${i}" value="${w.t}"></label>
+      <label>끝<input type="number" step="0.01" class="a-wend" data-i="${i}" value="${w.e}"></label>
+      <label class="a-emph"><input type="checkbox" class="a-wemph" data-i="${i}" ${isEmph?'checked':''}>강조(골드)</label>
+      <button class="btn-jump a-wjump" data-i="${i}">▶</button>
+      <button class="mini del a-wdel" data-i="${i}">삭제</button>`;
+    aWordList.appendChild(row);
+  });
+  aWordList.querySelectorAll('.a-wtext').forEach(inp=>inp.addEventListener('input',e=>{A_WORDS[+e.target.dataset.i].w=e.target.value;}));
+  aWordList.querySelectorAll('.a-wstart').forEach(inp=>inp.addEventListener('input',e=>{A_WORDS[+e.target.dataset.i].t=parseFloat(e.target.value)||0;}));
+  aWordList.querySelectorAll('.a-wend').forEach(inp=>inp.addEventListener('input',e=>{A_WORDS[+e.target.dataset.i].e=parseFloat(e.target.value)||0;}));
+  aWordList.querySelectorAll('.a-wemph').forEach(inp=>inp.addEventListener('change',e=>{
+    const i=+e.target.dataset.i;
+    const clean=A_WORDS[i].w.toLowerCase().replace(/[.,!?]/g,'');
+    if(!A_DATA.emphasis_words)A_DATA.emphasis_words=[];
+    const idx=A_DATA.emphasis_words.indexOf(clean);
+    if(e.target.checked){if(idx===-1)A_DATA.emphasis_words.push(clean);}
+    else{if(idx!==-1)A_DATA.emphasis_words.splice(idx,1);}
+  }));
+  aWordList.querySelectorAll('.a-wjump').forEach(b=>b.addEventListener('click',e=>{
+    const i=+e.target.dataset.i;A_ACTIVE_WORD=i;
+    av.currentTime=A_WORDS[i].t;a_renderVideoOverlay();a_renderWordList();
+  }));
+  aWordList.querySelectorAll('.a-wdel').forEach(b=>b.addEventListener('click',e=>{
+    const i=+e.target.dataset.i;
+    A_WORDS.splice(i,1);A_ACTIVE_WORD=-1;a_renderWordList();
+  }));
+}
+
+/* 무음 영상용: 현재 재생 위치 기준으로 새 자막 단어를 수동 추가
+   (음성 인식이 없으니 자동으로 채워진 단어가 0개인 경우를 위한 기능) */
+function a_addWord(){
+  if(!A_DATA){alert('먼저 direction_edit.json을 불러오세요.');return;}
+  const t=av.currentTime||0;
+  A_WORDS.push({t:Math.round(t*100)/100, e:Math.round((t+0.6)*100)/100, w:'텍스트'});
+  A_WORDS.sort((a,b)=>a.t-b.t);
+  a_renderWordList();
+}
+
+/* 비디오 위 자막 오버레이 프리뷰 (Anton 볼드 / Playfair 이탤릭 폰트 교차 그대로 재현) */
+function a_currentWordAt(t){
+  for(let i=0;i<A_WORDS.length;i++){
+    const w=A_WORDS[i];
+    const nextT=(i+1<A_WORDS.length)?A_WORDS[i+1].t:w.e+0.3;
+    const end=Math.min(nextT,w.e+0.3);
+    if(t>=w.t && t<end)return w;
+  }
+  return null;
+}
+function a_renderVideoOverlay(){
+  const t=av.currentTime||0;
+  // 실제 렌더와 동일하게: 효과 시점 이후엔 자막 미리보기도 안 뜸
+  const eff=parseFloat(aDropInput.value)||Infinity;
+  if(t>=eff){asubline.innerHTML='';return;}
+  const w=a_currentWordAt(t);
+  if(!w){asubline.innerHTML='';return;}
+  const clean=w.w.toLowerCase().replace(/[.,!?]/g,'');
+  const isConnector=CONNECTOR_WORDS.has(clean);
+  const isEmph=((A_DATA&&A_DATA.emphasis_words)||[]).includes(clean);
+  const cls=(isConnector?'italic':'bold')+(isEmph?' emph':'');
+  const text=isConnector?w.w.toLowerCase():w.w.toUpperCase();
+  // 강조어는 실제 렌더처럼 크게(볼드 138% / 이탤릭 128%)
+  const scale=isEmph?(isConnector?1.28:1.38):1.0;
+  asubline.innerHTML=`<span class="${cls}" style="transform:scale(${scale});display:inline-block;">${esc(text)}</span>`;
+}
+av.addEventListener('timeupdate',()=>{
+  if(!asc.matches(':active'))asc.value=av.currentTime;
+  atl.textContent=`${av.currentTime.toFixed(1)}s / ${(av.duration||0).toFixed(1)}s`;
+  a_renderVideoOverlay();
+});
+asc.addEventListener('input',()=>{av.currentTime=parseFloat(asc.value);a_renderVideoOverlay();});
+
+document.getElementById('a-jumpDrop').addEventListener('click',()=>{
+  av.currentTime=parseFloat(aDropInput.value)||0;a_renderVideoOverlay();
+});
+aDropInput.addEventListener('input',()=>{if(A_DATA)A_DATA.effect_t=parseFloat(aDropInput.value)||0;});
+aBgmStartInput.addEventListener('input',()=>{if(A_DATA)A_DATA.bgm_start=parseFloat(aBgmStartInput.value)||0;});
+aBgmClimaxInput.addEventListener('input',()=>{if(A_DATA)A_DATA.bgm_climax=parseFloat(aBgmClimaxInput.value)||0;});
+aSubYInput.addEventListener('input',a_applySubY);
+aEffectType.addEventListener('change',()=>{if(A_DATA)A_DATA.effect_type=aEffectType.value;});
+aOutroSecInput.addEventListener('input',()=>{if(A_DATA)A_DATA.outro_sec=parseFloat(aOutroSecInput.value)||2.5;});
+
+function a_exportJSON(){
+  if(!A_DATA){alert('먼저 direction_edit.json을 불러오세요.');return;}
+  A_DATA.words=A_WORDS.map(w=>({t:w.t,e:w.e,w:w.w}));
+  A_DATA.effect_t=parseFloat(aDropInput.value)||0;
+  A_DATA.bgm_start=parseFloat(aBgmStartInput.value)||0;
+  A_DATA.bgm_climax=parseFloat(aBgmClimaxInput.value)||0;
+  A_DATA.sub_y=parseFloat(aSubYInput.value)||50;
+  A_DATA.effect_type=aEffectType.value;
+  A_DATA.outro_sec=parseFloat(aOutroSecInput.value)||2.5;
+  A_DATA.montage=(aEffectType.value==='montage');
+  A_DATA.images=A_IMAGES.map(im=>im.name);
+  const blob=new Blob([JSON.stringify(A_DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='direction_edit.json';a.click();a.remove();
+}
+
+/* 이미지 전체 저장: 교체된 것 + 안 바꾼 것 전부 원래 파일명(img_00.jpg...)으로 다운로드
+   → 이 폴더 그대로 GitHub의 reels/latest_a/assets/images/ 에 덮어쓰기 업로드하면 됨 */
+async function a_downloadAllImages(){
+  if(!A_IMAGES.length){alert('먼저 direction_edit.json을 불러오세요.');return;}
+  const loaded=A_IMAGES.filter(im=>im.url);
+  if(!loaded.length){alert('불러온 이미지가 없습니다. 먼저 "🖼️ 이미지 일괄 불러오기"로 assets/images 폴더를 열거나, 개별 📷 버튼으로 교체해줘.');return;}
+  for(const im of loaded){
+    const a=document.createElement('a');
+    a.href=im.url; a.download=im.name; a.click(); a.remove();
+    await new Promise(r=>setTimeout(r,300));
+  }
+  alert('✅ 이미지 저장 완료. 다운로드 폴더의 파일들을 GitHub reels/latest_a/assets/images/ 에 같은 파일명으로 재업로드(덮어쓰기)해줘.');
+}
+</script>
+<script>
+/* ══════════════════════════════════════════════
+   🎞️ 게시물 → 릴스 변환기 v2 (바이럴 하드컷 스타일)
+   현재 편집 상태의 슬라이드를 그대로 캡처해
+   1080×1920 슬라이드쇼 영상(무음)으로 녹화한다.
+   - 효과 없음: 정지 화면 → 하드컷 (전환/줌 제거)
+   - 기본 페이싱: 표지 1.5s / 본문 1.9s / 마지막 +0.3s
+     (읽기보다 살짝 빠르게 → 다시보기 유도 = 재생수 부스트)
+   - mp4 우선, 미지원 브라우저는 webm 폴백
+   - BGM 없음: 인스타 앱에서 트렌딩 오디오를 입히는 게 도달에 유리
+══════════════════════════════════════════════ */
+const PR_W=1080, PR_H=1920, PR_FPS=30;
+
+function pr_overlay(show){
+  let ov=document.getElementById('pr-ov');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='pr-ov';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;';
+    ov.innerHTML='<canvas id="pr-prev" style="height:70vh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.9);"></canvas>'+
+      '<div id="pr-msg" style="color:var(--cream);font-size:13px;">준비 중…</div>'+
+      '<div style="color:#8a857c;font-size:11px;">렌더링 동안 이 탭을 닫거나 최소화하지 마세요 (실시간 녹화 방식)</div>';
+    document.body.appendChild(ov);
+  }
+  ov.style.display=show?'flex':'none';
+  return ov;
+}
+
+function pr_pickMime(){
+  const cands=['video/mp4;codecs=avc1.42E01E','video/mp4',
+               'video/webm;codecs=h264','video/webm;codecs=vp9','video/webm'];
+  for(const m of cands){ if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m)) return m; }
+  return null;
+}
+
+async function p_toReel(){
+  const slideEls=[...document.querySelectorAll('#p-slidesArea .slide')];
+  if(slideEls.length<2){alert('슬라이드가 2장 이상 필요해. 먼저 JSON을 불러오세요.');return;}
+  const mime=pr_pickMime();
+  if(!mime){alert('이 브라우저는 화면 녹화(MediaRecorder)를 지원하지 않아.\n대안: PNG 전체 저장 → reels_input/ 커밋 (Actions 변환기)');return;}
+
+  // html2canvas 로드 (기존 PNG 저장 로직과 동일 CDN)
+  if(!window.html2canvas){
+    try{
+      await new Promise((res,rej)=>{const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        s.onload=res;s.onerror=()=>rej(new Error('load fail'));document.head.appendChild(s);});
+    }catch(e){alert('html2canvas 로드 실패. 인터넷 연결 확인.');return;}
+  }
+
+  const btn=document.getElementById('pr-btn');
+  btn.disabled=true; const orig=btn.textContent; btn.textContent='변환 중…';
+  const ov=pr_overlay(true), msg=document.getElementById('pr-msg');
+
+  try{
+    // ── 1) 슬라이드 캡처 ──
+    const caps=[];
+    for(let i=0;i<slideEls.length;i++){
+      msg.textContent=`슬라이드 캡처 중… ${i+1}/${slideEls.length}`;
+      caps.push(await html2canvas(slideEls[i],{
+        scale:PR_W/slideEls[i].offsetWidth, useCORS:true, allowTaint:true,
+        backgroundColor:null, logging:false}));
+    }
+
+    // ── 2) 슬라이드별 완성 프레임 사전 합성 (블러 배경 + 카드) ──
+    msg.textContent='프레임 합성 중…';
+    const frames=caps.map(c=>{
+      const fr=document.createElement('canvas'); fr.width=PR_W; fr.height=PR_H;
+      const fx=fr.getContext('2d');
+      const s=Math.max(PR_W/c.width, PR_H/c.height)*1.05;
+      fx.filter='blur(28px) brightness(0.45)';
+      fx.drawImage(c,(PR_W-c.width*s)/2,(PR_H-c.height*s)/2,c.width*s,c.height*s);
+      fx.filter='none';
+      const fs=Math.min(PR_W/c.width, PR_H/c.height);
+      fx.drawImage(c,(PR_W-c.width*fs)/2,(PR_H-c.height*fs)/2,c.width*fs,c.height*fs);
+      return fr;
+    });
+
+    // ── 3) 타임라인 (하드컷: 겹침 없음) ──
+    const n=frames.length;
+    const coverS=parseFloat(document.getElementById('pr-cover').value)||1.5;
+    const slideS=parseFloat(document.getElementById('pr-slide').value)||1.9;
+    const lastS=slideS+0.3;
+    const durs=[coverS, ...Array(n-2).fill(slideS), lastS];
+    const starts=[0];
+    for(let i=1;i<n;i++) starts.push(starts[i-1]+durs[i-1]);
+    const total=starts[n-1]+durs[n-1];
+
+    // ── 4) 캔버스 + 레코더 ──
+    const cv=document.getElementById('pr-prev'); cv.width=PR_W; cv.height=PR_H;
+    const cx=cv.getContext('2d');
+    const stream=cv.captureStream(PR_FPS);
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:12000000});
+    const chunks=[]; rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
+    const done=new Promise(res=>{rec.onstop=res;});
+
+    rec.start(250);
+    const t0=performance.now();
+    await new Promise(resolve=>{
+      (function loop(){
+        const T=(performance.now()-t0)/1000;
+        if(T>=total){resolve();return;}
+        let i=0; for(let k=0;k<n;k++){ if(starts[k]<=T) i=k; }
+        cx.drawImage(frames[i],0,0);
+        msg.textContent=`녹화 중… ${T.toFixed(1)}s / ${total.toFixed(1)}s (슬라이드 ${i+1}/${n})`;
+        requestAnimationFrame(loop);
+      })();
+    });
+    rec.stop(); await done;
+
+    // ── 5) 다운로드 ──
+    const isMp4=mime.startsWith('video/mp4');
+    const blob=new Blob(chunks,{type:isMp4?'video/mp4':'video/webm'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`reel_${new Date().toISOString().slice(0,10)}.${isMp4?'mp4':'webm'}`;
+    a.click(); a.remove();
+    msg.textContent='✅ 완료! 다운로드됨';
+    if(!isMp4){
+      alert('이 브라우저는 mp4 녹화를 지원하지 않아 webm으로 저장했어.\n인스타 업로드가 안 되면: PNG 전체 저장 → 리포 reels_input/에 커밋하면 Actions가 mp4로 변환해줘.');
+    }
+    setTimeout(()=>pr_overlay(false),1200);
+  }catch(e){
+    console.error(e);
+    alert('릴스 변환 실패: '+e.message+'\n대안: PNG 전체 저장 → reels_input/ 커밋 (Actions 변환기)');
+    pr_overlay(false);
+  }finally{
+    btn.disabled=false; btn.textContent=orig;
+  }
+}
+</script>
+</body>
+</html>
