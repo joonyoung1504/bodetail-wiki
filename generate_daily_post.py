@@ -229,7 +229,8 @@ PICK_USER = f"""오늘은 제품 추천(PICK) 게시물이야. JSON으로 만들
 주제: {topic['title_main']} / 섹션: PICK
 {QUALITY}
 ★ 실제 존재하는 남성 그루밍 제품만. 확실하지 않은 제품·가격은 쓰지 말고 확실한 것만 써라.
-★ body 2줄 구성 = [이 제품의 구체적 강점(성분·용량·지속력·질감 중 수치 포함), 어떤 사람에게 맞고 어떤 사람에겐 비추인지]
+★ body는 정확히 2줄, 각 줄 26자 이내 = [구체적 강점(성분·용량·지속력 중 수치 포함), 누구에게 맞고 누구에겐 비추인지]
+★ product_name은 24자 이내 (긴 영문 병기는 생략). one_line 15자 이내.
 ★ 최소 1개 제품에는 단점·주의점을 명시해라. 전부 장점만 나열하면 광고로 읽혀 신뢰를 잃는다.
 ★ 별점(stars)은 3~5 사이에서 실제로 차등을 둬라. 전부 5점 금지.
 ★ 가격은 "약 3만원대 / 100ml"처럼 용량과 함께.
@@ -244,8 +245,26 @@ CONTENT_USER = f"""오늘 게시물을 JSON으로 만들어줘.
 주제: {topic['title_main']} / 섹션: {topic['section']} / 후킹: {topic['hook_type']} / 슬라이드: {topic['num_slides']}
 {QUALITY}
 ★ 제목: 선언적·묵직하게. 숫자 포함. 커버 headline_main 한줄 8자이내.
-★ subhead(각 장 소제목): 그 장에서 얻어갈 결론을 한 줄로. 20자 내외.
-★ body: 2~3줄, 각 줄 32자 내외 (자동 줄바꿈되니 정보 밀도를 우선). 위 3개 테스트 통과 필수.
+★★ 분량 상한 (가독성 — 어기면 카드가 글자로 뒤덮여 아무도 안 읽는다)
+   · subhead: 반드시 한 줄, 18자 이내. "—"로 두 문장 잇지 말 것. (✗ "피지가 2배 많다 — 클렌저 선택부터 갈린다" → ○ "피지가 2배, 클렌저부터 다르다")
+   · body: 정확히 2줄. 각 줄 26자 이내. 3줄 이상 금지.
+   · body 첫 줄 = 사실·수치 / 둘째 줄 = 그래서 할 행동. 이 2단 구조를 지켜라.
+   · body 안에 ①②③ 같은 목록 나열 금지 (한 장에 한 메시지).
+   · caption: 22자 이내 한 문장.
+★★ 압축 원칙 — 무엇을 버리고 무엇을 남기는가 (짧게 만들려다 이해를 깨면 실패다)
+   [절대 버리면 안 되는 것]
+     · 비교 기준 — "무엇에 비해"가 없으면 수치가 의미를 잃는다 (여성 대비 / 20대 대비 / 겨울 대비 / 일반 제품 대비)
+     · 수치와 단위, 조건(피부타입·계절·상황), 행동 동사
+   [버려야 하는 것]
+     · 수식어: 평균, 약, 매우, 무려, 상당히
+     · 설명 접속: "~해서 ~하다", "~때문에 ~한다" → 두 줄로 쪼갠다
+     · 중복 주어: 앞 줄에 나온 주어를 뒷줄에서 반복하지 않는다
+   ✗ "남성 각질층은 여성보다 평균 20~30% 두꺼워 성분 흡수가 더디다" (한 덩어리 30자)
+   ✗ "각질층이 20~30% 두껍다" ← 비교 기준을 버려서 무슨 말인지 알 수 없다. 이런 압축은 실패다.
+   ○ "여성보다 각질층이 20~30% 두껍다" (16자) + "세안 30초 안에 발라야 흡수된다" (16자)
+★ 비교 기준을 body에 넣을 자리가 없으면 subhead에 올려라. 슬라이드 안 어딘가에는 반드시 있어야 한다.
+   예: subhead "여자보다 두꺼운 각질층" / body "20~30% 두꺼워 흡수가 느리다" + "세안 30초 안에 도포"
+★ 마지막 본문 장을 '정리' 장으로 만들 경우에도 위 상한 동일 적용 — 4줄 나열 금지, 핵심 2줄로.
 ★ image_queries: man/male/men 필수. 여성·네일아트·반지·꽃 금지. dark/moody 필수.
 ★ slides에는 cover와 content 타입만. summary·outro·closing 등 다른 타입 절대 금지 — 마무리 카드는 시스템이 자동 추가.
 JSON:
@@ -601,30 +620,41 @@ def render_content(slide_data):
     sub_lines=wrap_text(d0,slide_data.get("subhead",""),sbf,max_w)
     body_lines=[]
     for raw in slide_data.get("body",[]): body_lines+=wrap_text(d0,raw,bf,max_w) if raw else [""]
-    y_start=MAR_Y+70; nb_h=96
+
+    # ── 캡션 바 높이를 먼저 계산 (텍스트 하단 정렬의 기준선) ──
+    cap_txt=slide_data.get("caption","")
+    cf=fnt(SANS_MED,33); cap_lines=wrap_text(d0,cap_txt,cf,max_w-44) if cap_txt else []
+    cap_lh=int(33*1.4); cap_h=(len(cap_lines)*cap_lh+30) if cap_lines else 0
+    cap_top=(H-MAR_Y-cap_h-8) if cap_lines else (H-MAR_Y)
+
+    # ── 텍스트 블록: 캡션 바 위에 하단 정렬 (사진 상단을 비워 숨 쉬게) ──
+    nb_h=96 if slide_data.get("number","") else 0
     sub_h=len(sub_lines)*int(52*1.28)
-    body_h=sum(int(37*0.8) if bl=="" else int(37*1.62) for bl in body_lines)
-    text_bottom=y_start+nb_h+sub_h+34+body_h+24
-    img=text_scrim(img,MAR_Y-30,text_bottom,strength=0.58)
+    body_h=sum(int(37*0.8) if bl=="" else int(37*1.70) for bl in body_lines)
+    block_h=nb_h+sub_h+34+body_h
+    GAP_ABOVE_CAP=52
+    y_start=cap_top-GAP_ABOVE_CAP-block_h
+    y_start=max(y_start, MAR_Y+70)          # 내용이 많으면 상단 고정으로 폴백
+
+    img=text_scrim(img,max(0,y_start-70),H,strength=0.62)   # 하단부 전체를 어둡게
     draw=ImageDraw.Draw(img)
     draw_header(draw,content["section_label"],content.get("vol","VOL.01"))
+
     y=y_start; n=slide_data.get("number","")
     if n: y=numbox(draw,n,MAR_X,y)
     for sl in sub_lines: ptext(draw,(MAR_X,y),sl,sbf,WHITE); y+=int(52*1.28)
     y+=34
     for bl in body_lines:
         if bl=="": y+=int(37*0.8); continue
-        ptext(draw,(MAR_X,y),bl,bf,BODY_LIGHT); y+=int(37*1.62)
-    cap_txt=slide_data.get("caption","")
-    if cap_txt:
-        cf=fnt(SANS_MED,33); cap_lines=wrap_text(draw,cap_txt,cf,max_w-44)
-        lh=int(33*1.4); ch=len(cap_lines)*lh+30; cy=H-MAR_Y-ch-8
+        ptext(draw,(MAR_X,y),bl,bf,BODY_LIGHT); y+=int(37*1.70)
+
+    if cap_lines:
         ov=Image.new("RGBA",(W,H),(0,0,0,0)); od=ImageDraw.Draw(ov)
-        od.rectangle([(MAR_X,cy),(W-MAR_X,cy+ch)],fill=(*DARK,185))
-        od.rectangle([(MAR_X,cy),(MAR_X+6,cy+ch)],fill=(*GOLD,255))
+        od.rectangle([(MAR_X,cap_top),(W-MAR_X,cap_top+cap_h)],fill=(*DARK,185))
+        od.rectangle([(MAR_X,cap_top),(MAR_X+6,cap_top+cap_h)],fill=(*GOLD,255))
         img=Image.alpha_composite(img.convert("RGBA"),ov).convert("RGB")
-        draw=ImageDraw.Draw(img); ty=cy+16
-        for cl in cap_lines: ptext(draw,(MAR_X+22,ty),cl,cf,WHITE); ty+=lh
+        draw=ImageDraw.Draw(img); ty=cap_top+16
+        for cl in cap_lines: ptext(draw,(MAR_X+22,ty),cl,cf,WHITE); ty+=cap_lh
     draw_sig(draw); return img
 
 def render_pick(slide_data):
