@@ -1,0 +1,52 @@
+name: bodetail Post-to-Reel Converter
+
+on:
+  push:
+    paths:
+      - 'reels_input/**'
+  workflow_dispatch:
+    inputs:
+      slide_sec:
+        description: '본문 슬라이드 초 (기본 3.2)'
+        required: false
+        default: ''
+      cover_sec:
+        description: '표지 초 (기본 2.4)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: ffmpeg 설치
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ffmpeg
+
+      - name: 패키지 설치
+        run: pip install Pillow
+
+      - name: 릴스 변환
+        env:
+          SLIDE_SEC: ${{ github.event.inputs.slide_sec }}
+          COVER_SEC: ${{ github.event.inputs.cover_sec }}
+        run: python generate_post_reel.py
+
+      - name: 결과물 커밋 + 입력 폴더 비우기
+        run: |
+          git config --local user.email "bot@bodetail.com"
+          git config --local user.name "bodetail-bot"
+          git add reels/
+          git rm -q --ignore-unmatch reels_input/*.png reels_input/*.jpg reels_input/*.jpeg || true
+          git diff --staged --quiet || git commit -m "🎞️ $(date +'%Y-%m-%d') 게시물 릴스 변환"
+          git push
