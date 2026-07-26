@@ -1,114 +1,131 @@
 {
-  "section_label": "오늘의 디테일",
+  "section_label": "오늘의 루틴",
   "vol": "VOL.01",
-  "caption_full": "세럼 옆에 앰플까지 샀는데 뭐가 다른지 몰랐다면 저장.\n\n농도 차이가 쓰는 때를 결정한다.\n앰플은 매일이 아니라 피부가 무너진 날 꺼내는 것.\n세럼 하나면 충분한 날이 더 많다.\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자스킨케어 #세럼앰플차이 #남자루틴 #남자그루밍 #스킨케어순서 #나이아신아마이드 #판테놀 #남자화장품 #그루밍",
+  "caption_full": "두드릴지 펴바를지 몰라서 그냥 비벼왔다면, 이 카드 저장해두세요.\n\n✔ 토너 — 손바닥 or 화장솜, 목적에 따라 선택\n✔ 세럼(나이아신아마이드·레티놀 등) — 2방울, 반드시 두드림\n✔ 세럼 후 1분 대기 — 지성 1분 / 건성 30초\n✔ 로션·크림 — 안쪽→바깥, 얇게 펴바름\n✔ 바쁜 날 최소 루틴 — 토너→로션 2단계\n\n방식 하나 바꾸는 게 제품 바꾸는 것보다 먼저다.\n\n@bodetail_official",
+  "hashtags": "#bodetail #남자스킨케어 #남자루틴 #기초스킨케어 #두드림펴바름 #세럼흡수 #남자그루밍 #스킨케어순서 #남성피부관리 #기초케어 #남자화장품 #피부루틴 #그루밍 #남자뷰티 #스킨케어팁",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "세럼 옆에 앰플, 둘 다 살 필요 없다",
+      "headline_sub": "두드림과 펴바름, 단계마다 정답이 다르다",
       "headline_main": [
-        "세럼 vs",
-        "앰플"
+        "4단계",
+        "정답법"
       ],
-      "headline_serif": "농도가 다르면 쓰는 때도 다르다",
+      "headline_serif": "바르는 순서보다 바르는 방식이 흡수를 결정한다",
       "image_queries": [
-        "man dark studio skincare portrait moody",
-        "male editorial dark bathroom mirror",
-        "men grooming moody ink black"
+        "man dark studio skincare closeup moody",
+        "male grooming editorial ink black",
+        "men face moisturizer dark portrait moody"
       ],
-      "image_url": "https://images.pexels.com/photos/9363421/pexels-photo-9363421.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/28943731/pexels-photo-28943731.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "content",
       "number": "01",
-      "subhead": "순서는 농도순, 이유는 하나",
+      "subhead": "토너 — 화장솜 vs 손바닥",
       "body": [
-        "토너→에센스→세럼→앰플→크림, 묽을수록 먼저",
-        "점도 높은 걸 먼저 바르면 다음 성분이 각질층 못 뚫는다"
+        "화장솜은 각질 밀어내고, 손바닥은 수분만 넣는다",
+        "각질 정리 목적이면 솜, 순수 수분 공급이면 손바닥"
       ],
-      "caption": "묽은 것이 먼저, 규칙은 하나다.",
+      "caption": "목적을 먼저 정하면 도구가 정해진다.",
       "image_queries": [
-        "male hands skincare products dark moody closeup",
-        "men grooming editorial dark bottles",
-        "man skincare routine moody ink black"
+        "man hands toner dark moody closeup",
+        "male skincare cotton pad editorial dark",
+        "men grooming routine hands moody studio"
       ],
-      "image_url": "https://images.pexels.com/photos/6634174/pexels-photo-6634174.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/8131568/pexels-photo-8131568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
       "type": "content",
       "number": "02",
-      "subhead": "세럼과 앰플, 농도 차이",
+      "subhead": "토너 — 양과 대기 타이밍",
       "body": [
-        "앰플은 세럼보다 유효성분 농도가 2~5배 높다",
-        "질감도 더 진해 1~2방울로 세럼 한 펌프와 맞먹는다"
+        "500원 동전 크기, 손바닥에 덜어 가볍게 두드린다",
+        "30초 후 세럼 도포 — 각질층이 젖어 있을 때 흡수율이 오른다"
       ],
-      "caption": "앰플은 세럼의 농축판이다.",
+      "caption": "30초 텀이 다음 단계 효율을 바꾼다.",
       "image_queries": [
-        "man dark moody serum dropper closeup editorial",
-        "male hands ampoule dark studio",
-        "men skincare dark ink black product closeup"
+        "man palms toner drop dark editorial",
+        "male face patting skincare moody closeup",
+        "men grooming dark studio hands face"
       ],
-      "image_url": "https://images.pexels.com/photos/4812639/pexels-photo-4812639.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/36449415/pexels-photo-36449415.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "03",
-      "subhead": "앰플은 매일 쓰는 게 아니다",
+      "subhead": "세럼 — 두드림이 정답인 이유",
       "body": [
-        "환절기·야근 후·피부 자극받은 날 집중 2~3주 단기 사용",
-        "매일 쓰면 피부 적응으로 효과 반감, 필요할 때만 꺼낸다"
+        "나이아신아마이드·레티놀 등 고농도 성분은 마찰 시 활성 저하",
+        "2방울, 이마·볼·턱에 찍고 손가락 끝으로 가볍게 두드려 흡수"
       ],
-      "caption": "앰플은 평상시가 아닌 집중 케어용.",
+      "caption": "세럼은 펴바름이 아니라 두드림이다.",
       "image_queries": [
-        "man dark moody tired face editorial portrait",
-        "male grooming night skincare dark studio",
-        "men face closeup moody ink black"
+        "man serum drop dark moody editorial closeup",
+        "male face serum application dark studio",
+        "men skincare fingers patting moody portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/5891036/pexels-photo-5891036.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/8131586/pexels-photo-8131586.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "04",
-      "subhead": "세럼 하나만 쓴다면 이걸 고른다",
+      "subhead": "세럼 대기 — 1분 텀의 기준",
       "body": [
-        "나이아신아마이드·판테놀 함유 세럼 — 트러블·장벽 동시 커버",
-        "건성이면 히알루론산, 지성이면 나이아신아마이드 단독이 낫다"
+        "세럼 도포 후 1분 대기, 덜 마른 상태에서 로션 쌓으면 뭉친다",
+        "지성이면 1분, 건성이면 30초로 단축해 수분 날리기 전에 잠근다"
       ],
-      "caption": "성분 하나가 고민을 줄인다.",
+      "caption": "피부타입마다 대기 시간이 다르다.",
       "image_queries": [
-        "male hands holding serum bottle dark editorial moody",
-        "men grooming product dark studio closeup",
-        "man skincare niacinamide dark moody"
+        "man dark moody face timer skincare",
+        "male grooming editorial dark skin closeup",
+        "men skincare waiting routine moody studio"
       ],
-      "image_url": "https://images.pexels.com/photos/8160449/pexels-photo-8160449.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/2629277/pexels-photo-2629277.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
       "type": "content",
       "number": "05",
-      "subhead": "쓸 필요 없는 조합",
+      "subhead": "로션·크림 — 펴바름이 정답인 이유",
       "body": [
-        "세럼+앰플 동시 매일 사용 — 성분 과부하로 트러블 역효과",
-        "둘 중 하나만 고르되, 피부 상태로 번갈아 쓰는 게 정석이다"
+        "유분막을 고르게 덮어야 수분 증발을 막아, 두드리면 얼룩진다",
+        "동전 크기 1개 분량, 안쪽에서 바깥으로 얇고 넓게 편다"
       ],
-      "caption": "많이 바를수록 좋다는 건 착각이다.",
+      "caption": "유분 단계는 덮는 것이지 두드리는 게 아니다.",
       "image_queries": [
-        "man dark studio minimal skincare editorial moody",
-        "male face dark ink black portrait grooming",
-        "men skincare less is more dark moody editorial"
+        "man moisturizer application dark editorial moody",
+        "male face cream spread dark studio closeup",
+        "men skincare lotion dark moody portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/12322951/pexels-photo-12322951.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 7,
+      "type": "content",
+      "number": "06",
+      "subhead": "시간 없을 때 생략할 단계",
+      "body": [
+        "로션과 세럼 중 하나만 쓴다면 세럼 생략, 로션으로 수분·유분 동시 처리",
+        "토너→로션 2단계가 최소 루틴, 이 순서와 두드림·펴바름은 그대로 지킨다"
+      ],
+      "caption": "줄여도 순서와 방식은 바꾸지 않는다.",
+      "image_queries": [
+        "man minimal skincare dark moody editorial",
+        "male grooming two step routine dark studio",
+        "men face moisturizer quick routine dark portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "type": "closing",
       "image_url": "",
-      "slide_num": 7
+      "slide_num": 8
     }
   ]
 }
