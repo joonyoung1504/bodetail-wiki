@@ -1,109 +1,114 @@
 {
-  "section_label": "오늘의 PICK",
-  "vol": "VOL.02",
-  "caption_full": "크림 잘못 고르면 루틴이 다 헛수고예요.\n\n피부 타입을 먼저 정리하면 선택이 쉬워져요.\n\n✔ 지성·여름 → 가벼운 젤크림·수분크림 우선. 유분 함량 낮은 것 선택\n✔ 지성·겨울 → 여름 제품보다 한 단계 묵직하게. 단, 여전히 오일 함량 과한 건 피할 것\n✔ 건성 → 로션+크림 둘 다 레이어링 불필요. 크림 한 가지를 스쿠알란·세라마이드 함유로 잘 고르면 로션 생략 가능\n✔ 복합성 → 부위별로 다르게. T존엔 가벼운 제품, 볼엔 건성용 크림을 소량 추가하는 방식\n✔ 가격대별 무난 선택: 2만원대는 닥터자르트 시카페어, 3만원대는 아벤느 크렘 뉘트리티브\n\n이 카드 저장해두면 다음 계절 바뀔 때 크림 갈아탈 기준이 생겨요.\n\n다음 편 — 세럼과 앰플, 뭐가 다른가",
-  "hashtags": "#bodetail #남자스킨케어 #남자크림추천 #지성피부크림 #건성피부크림 #남자그루밍 #남자보습크림 #피부타입 #남자피부관리 #스킨케어루틴 #남자기초케어 #보습크림추천 #닥터자르트 #아벤느 #키엘스",
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.01",
+  "caption_full": "세럼이랑 앰플, 둘 다 있는데 뭘 먼저 써야 하는지 모르겠다면 이 카드 저장해두세요.\n\n✔ 앰플은 세럼보다 유효성분 2~5배 고농도\n✔ 매일 앰플 쓰면 자극·트러블 위험 올라감\n✔ 세럼은 매일 / 앰플은 환절기·트러블 집중 2주 한정\n✔ 순서: 토너 → 세럼 → 앰플 → 크림 (묽은 것부터)\n✔ 세럼 하나만 고른다면 나이아신아마이드·판테놀 함유\n✔ 지성 → BHA 세럼 / 건성 → 히알루론산 세럼\n✔ 같은 계열 세럼+앰플은 중복 구매 불필요\n✔ 세안 30초 안에 세럼 먼저 펴야 흡수율 올라감\n\n루틴 정리할 때 기준 삼기 좋아요.\n\n@bodetail_official\n\n다음 편 — 두드릴까 펴바를까, 4단계 정답",
+  "hashtags": "#bodetail #남자스킨케어 #세럼앰플차이 #남자그루밍 #남자기초케어 #스킨케어루틴 #남자피부관리 #나이아신아마이드 #히알루론산 #판테놀 #그루밍 #남자뷰티 #스킨케어팁 #남자화장품 #피부관리루틴",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "피부타입 잘못 읽으면 크림이 독이 된다",
+      "headline_sub": "둘 다 쓰는 게 정답이 아니다",
       "headline_main": [
-        "지성·건성별",
-        "크림 티어 4"
+        "세럼·앰플",
+        "4가지 차이"
       ],
-      "headline_serif": "이달의 추천 4선",
+      "headline_serif": "농도·목적·순서까지 한 번에",
       "image_queries": [
-        "men face cream luxury dark moody cinematic",
-        "male skincare moisturizer dark bottle editorial",
-        "men grooming cream product ink black gold"
+        "man dark studio skincare portrait moody",
+        "male face closeup editorial ink black",
+        "men grooming dark moody studio"
       ],
-      "image_url": "https://images.pexels.com/photos/31403898/pexels-photo-31403898.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/10500054/pexels-photo-10500054.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
-      "type": "pick",
+      "type": "content",
       "number": "01",
-      "product_name": "닥터자르트 시카페어 크림",
-      "price": "약 2만원대 / 55ml",
-      "stars": 4,
-      "one_line": "지성 입문 최적",
+      "subhead": "농도가 다르다",
       "body": [
-        "시카·판테놀 함유, 수분막 형성 후 번들임 ↓",
-        "지성·복합성 ○, 건성·극건성엔 보습 부족"
+        "앰플은 세럼보다 유효성분 2~5배 고농도다",
+        "매일 쓰면 자극·트러블 위험이 올라간다"
       ],
-      "caption": "지성 피부가 '보습 포기'를 택하는 이유는 크림이 무거워서다. 가볍게 막는 것만으로도 충분한 선택지가 있다.",
+      "caption": "농도 차이가 쓰임새를 가른다.",
       "image_queries": [
-        "Dr Jart Cicapair cream dark moody product shot",
-        "green cream tube editorial dark background",
-        "men skincare moisturizer cinematic ink black"
+        "skincare serum dropper dark closeup moody male",
+        "men hand holding serum bottle black background",
+        "male grooming product dark editorial"
       ],
-      "image_url": "https://images.pexels.com/photos/7020092/pexels-photo-7020092.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
-      "type": "pick",
+      "type": "content",
       "number": "02",
-      "product_name": "이니스프리 블랙티 유스 크림",
-      "price": "약 3만원대 / 50ml",
-      "stars": 4,
-      "one_line": "겨울 지성 픽",
+      "subhead": "목적이 다르다",
       "body": [
-        "발효 블랙티 추출물, 여름엔 묵직함 유의",
-        "계절 전환기·겨울 지성에 ○, 여름 단독 사용 △"
+        "세럼은 매일 수분·장벽 유지용 기본 단계다",
+        "앰플은 피부 트러블·환절기 집중 케어 2주 한정"
       ],
-      "caption": "크림은 계절마다 바꿔야 한다. 여름 지성 피부에 겨울용 크림을 그대로 쓰면 피지 분비가 오히려 늘어난다.",
+      "caption": "앰플은 상비약, 매일 복용은 아니다.",
       "image_queries": [
-        "innisfree black tea cream dark editorial product",
-        "dark amber glass jar skincare moody",
-        "men moisturizer winter dark cinematic"
+        "man dark moody face editorial skincare",
+        "male bathroom mirror dark closeup skin",
+        "men face skin moody studio portrait"
       ],
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
-      "type": "pick",
+      "type": "content",
       "number": "03",
-      "product_name": "아벤느 크렘 뉘트리티브",
-      "price": "약 3만원대 / 50ml",
-      "stars": 5,
-      "one_line": "건성 기본기",
+      "subhead": "바르는 순서가 있다",
       "body": [
-        "아벤느 온천수+스쿠알란, 72시간 보습 임상 검증",
-        "건성·민감성 ○, 지성엔 과보습·트러블 가능성"
+        "토너→세럼→앰플→크림, 묽은 순서로 쌓는다",
+        "역순이면 앞 성분이 피부에 닿지 못한다"
       ],
-      "caption": "건성 피부에 로션과 크림을 둘 다 쓸 필요는 없다. 크림 하나의 유분 함량이 충분하면 로션은 생략해도 된다.",
+      "caption": "묽은 것부터, 이유가 있다.",
       "image_queries": [
-        "Avene cream white jar dark moody editorial",
-        "French skincare product cinematic dark background",
-        "men moisturizer dry skin dark luxury"
+        "skincare products lineup dark flat lay male",
+        "men grooming routine dark studio hands",
+        "male hand skincare product dark moody"
       ],
-      "image_url": "https://images.pexels.com/photos/7281625/pexels-photo-7281625.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
-      "type": "pick",
+      "type": "content",
       "number": "04",
-      "product_name": "키엘 울트라 페이셜 크림",
-      "price": "약 5만원대 / 50ml",
-      "stars": 3,
-      "one_line": "가성비는 물음표",
+      "subhead": "세럼 하나만 고른다면",
       "body": [
-        "글라이세린·스쿠알란, 복합성에 무난 — 성분 단순",
-        "가격 대비 성능 아쉬움. 유사 성분 저가 대안 존재"
+        "나이아신아마이드·판테놀 함유 보습 세럼이 기준이다",
+        "지성이면 BHA 세럼, 건성이면 히알루론산 세럼"
       ],
-      "caption": "비싸다고 무조건 본인 피부에 맞는 건 아니다. 성분 라벨을 먼저 읽는 것, 그게 안목이다.",
+      "caption": "성분명이 곧 선택 기준이다.",
       "image_queries": [
-        "Kiehl's Ultra Facial cream dark moody editorial",
-        "men luxury skincare cream dark gold tone",
-        "premium moisturizer cinematic ink black product"
+        "man dark close up face skin texture moody editorial",
+        "male grooming serum application dark background",
+        "men face skincare dark studio ink black"
+      ],
+      "image_url": "https://images.pexels.com/photos/7269475/pexels-photo-7269475.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "content",
+      "number": "05",
+      "subhead": "중복해서 살 필요 없는 조합",
+      "body": [
+        "세럼+앰플 같은 계열 성분이면 한 가지로 충분하다",
+        "세안 30초 안에 세럼부터 펴야 흡수율이 오른다"
+      ],
+      "caption": "많이 바른다고 좋은 게 아니다.",
+      "image_queries": [
+        "man hands dark editorial product skincare moody",
+        "male grooming minimalist dark ink black studio",
+        "men skincare routine dark moody closeup"
       ],
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "type": "closing",
       "image_url": "",
-      "slide_num": 6
+      "slide_num": 7
     }
   ]
 }
