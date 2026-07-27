@@ -250,6 +250,7 @@ CONTENT_USER = f"""오늘 게시물을 JSON으로 만들어줘.
    · body: 정확히 2줄. 각 줄 26자 이내. 3줄 이상 금지.
    · body 첫 줄 = 사실·수치 / 둘째 줄 = 그래서 할 행동. 이 2단 구조를 지켜라.
    · body 안에 ①②③ 같은 목록 나열 금지 (한 장에 한 메시지).
+   · body에도 "—"로 두 문장을 잇지 말 것. 이으려면 줄을 나눠라.
    · caption: 22자 이내 한 문장.
 ★★ 압축 원칙 — 무엇을 버리고 무엇을 남기는가 (짧게 만들려다 이해를 깨면 실패다)
    [절대 버리면 안 되는 것]
@@ -294,6 +295,21 @@ msg = client.messages.create(
 raw = msg.content[0].text.strip()
 raw = re.sub(r'^```json\s*','',raw); raw = re.sub(r'\s*```$','',raw)
 content = json.loads(raw)
+
+# ── 다음 편 예고: 실제로 다음에 나올 주제를 조회해 주입 (항상 정확) ──
+_total_t = len(schedule["topics"])
+if CUSTOM_TOPIC:
+    try: _last_d = int(json.loads(STATE_FILE.read_text(encoding="utf-8")).get("last_day", 0))
+    except Exception: _last_d = 0
+    _next_d = (_last_d % _total_t) + 1
+else:
+    _next_d = (day_num % _total_t) + 1
+_nt = next((t for t in schedule["topics"] if t["day"] == _next_d), None)
+if _nt:
+    content["next_preview"] = {"title": _nt.get("title_main",""), "sub": _nt.get("title_sub","")}
+    _cap = (content.get("caption_full") or "").rstrip()
+    content["caption_full"] = _cap + f"\n\n다음 편 — {_nt.get('title_main','')}"
+    print(f"🔮 다음 편 예고: DAY {_next_d} {_nt.get('title_main','')}")
 content["section_label"] = topic["section_label_ko"]
 content["vol"] = topic["vol_no"]
 print("✅ 콘텐츠 생성 완료")
@@ -707,6 +723,28 @@ def render_closing():
     draw.text((cx-cgw//2-cbb[0],bot_bar_y+22),ct,font=cf,fill=(150,140,124))
     ctaf=fnt(SANS_MED,30); ctab=draw.textbbox((0,0),cta,font=ctaf); ctaw=ctab[2]-ctab[0]
     draw.text((cx-ctaw//2-ctab[0],bot_bar_y+22+46),cta,font=ctaf,fill=GOLD_BRIGHT)
+
+    # ── 다음 편 예고 (카드 하단, 브랜드 블록과 분리) ──
+    npv = content.get("next_preview") or {}
+    n_title = (npv.get("title") or "").strip()
+    if n_title:
+        n_sub = (npv.get("sub") or "").strip()
+        lf=fnt(SANS_MED,25); tf=fnt(SANS_BOLD,42); sf=fnt(SANS_LT,26)
+        mw = W-MAR_X*2-40
+        t_lines = wrap_text(draw, n_title, tf, mw)
+        s_lines = wrap_text(draw, n_sub, sf, mw) if n_sub else []
+        blk = 36 + len(t_lines)*int(42*1.30) + len(s_lines)*int(26*1.45)
+        top = H - MAR_Y - blk - 16
+        draw.rectangle([(cx-32,top-30),(cx+32,top-29)], fill=GOLD)
+        lb=draw.textbbox((0,0),"NEXT",font=lf); lw=lb[2]-lb[0]
+        draw.text((cx-lw//2-lb[0],top),"NEXT",font=lf,fill=GOLD_BRIGHT)
+        yy = top+36
+        for tl in t_lines:
+            b=draw.textbbox((0,0),tl,font=tf); w_=b[2]-b[0]
+            draw.text((cx-w_//2-b[0],yy),tl,font=tf,fill=CREAM); yy+=int(42*1.30)
+        for sl in s_lines:
+            b=draw.textbbox((0,0),sl,font=sf); w_=b[2]-b[0]
+            draw.text((cx-w_//2-b[0],yy),sl,font=sf,fill=(150,140,124)); yy+=int(26*1.45)
     return img
 
 # ══════════════════════════════════════════════════════════════
