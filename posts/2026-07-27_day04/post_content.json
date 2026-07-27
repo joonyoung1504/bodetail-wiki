@@ -1,0 +1,109 @@
+{
+  "section_label": "오늘의 PICK",
+  "vol": "VOL.02",
+  "caption_full": "크림 잘못 고르면 루틴이 다 헛수고예요.\n\n피부 타입을 먼저 정리하면 선택이 쉬워져요.\n\n✔ 지성·여름 → 가벼운 젤크림·수분크림 우선. 유분 함량 낮은 것 선택\n✔ 지성·겨울 → 여름 제품보다 한 단계 묵직하게. 단, 여전히 오일 함량 과한 건 피할 것\n✔ 건성 → 로션+크림 둘 다 레이어링 불필요. 크림 한 가지를 스쿠알란·세라마이드 함유로 잘 고르면 로션 생략 가능\n✔ 복합성 → 부위별로 다르게. T존엔 가벼운 제품, 볼엔 건성용 크림을 소량 추가하는 방식\n✔ 가격대별 무난 선택: 2만원대는 닥터자르트 시카페어, 3만원대는 아벤느 크렘 뉘트리티브\n\n이 카드 저장해두면 다음 계절 바뀔 때 크림 갈아탈 기준이 생겨요.\n\n다음 편 — 세럼과 앰플, 뭐가 다른가",
+  "hashtags": "#bodetail #남자스킨케어 #남자크림추천 #지성피부크림 #건성피부크림 #남자그루밍 #남자보습크림 #피부타입 #남자피부관리 #스킨케어루틴 #남자기초케어 #보습크림추천 #닥터자르트 #아벤느 #키엘스",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "피부타입 잘못 읽으면 크림이 독이 된다",
+      "headline_main": [
+        "지성·건성별",
+        "크림 티어 4"
+      ],
+      "headline_serif": "이달의 추천 4선",
+      "image_queries": [
+        "men face cream luxury dark moody cinematic",
+        "male skincare moisturizer dark bottle editorial",
+        "men grooming cream product ink black gold"
+      ],
+      "image_url": "https://images.pexels.com/photos/31403898/pexels-photo-31403898.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "pick",
+      "number": "01",
+      "product_name": "닥터자르트 시카페어 크림",
+      "price": "약 2만원대 / 55ml",
+      "stars": 4,
+      "one_line": "지성 입문 최적",
+      "body": [
+        "시카·판테놀 함유, 수분막 형성 후 번들임 ↓",
+        "지성·복합성 ○, 건성·극건성엔 보습 부족"
+      ],
+      "caption": "지성 피부가 '보습 포기'를 택하는 이유는 크림이 무거워서다. 가볍게 막는 것만으로도 충분한 선택지가 있다.",
+      "image_queries": [
+        "Dr Jart Cicapair cream dark moody product shot",
+        "green cream tube editorial dark background",
+        "men skincare moisturizer cinematic ink black"
+      ],
+      "image_url": "https://images.pexels.com/photos/7020092/pexels-photo-7020092.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "pick",
+      "number": "02",
+      "product_name": "이니스프리 블랙티 유스 크림",
+      "price": "약 3만원대 / 50ml",
+      "stars": 4,
+      "one_line": "겨울 지성 픽",
+      "body": [
+        "발효 블랙티 추출물, 여름엔 묵직함 유의",
+        "계절 전환기·겨울 지성에 ○, 여름 단독 사용 △"
+      ],
+      "caption": "크림은 계절마다 바꿔야 한다. 여름 지성 피부에 겨울용 크림을 그대로 쓰면 피지 분비가 오히려 늘어난다.",
+      "image_queries": [
+        "innisfree black tea cream dark editorial product",
+        "dark amber glass jar skincare moody",
+        "men moisturizer winter dark cinematic"
+      ],
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "pick",
+      "number": "03",
+      "product_name": "아벤느 크렘 뉘트리티브",
+      "price": "약 3만원대 / 50ml",
+      "stars": 5,
+      "one_line": "건성 기본기",
+      "body": [
+        "아벤느 온천수+스쿠알란, 72시간 보습 임상 검증",
+        "건성·민감성 ○, 지성엔 과보습·트러블 가능성"
+      ],
+      "caption": "건성 피부에 로션과 크림을 둘 다 쓸 필요는 없다. 크림 하나의 유분 함량이 충분하면 로션은 생략해도 된다.",
+      "image_queries": [
+        "Avene cream white jar dark moody editorial",
+        "French skincare product cinematic dark background",
+        "men moisturizer dry skin dark luxury"
+      ],
+      "image_url": "https://images.pexels.com/photos/7281625/pexels-photo-7281625.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "pick",
+      "number": "04",
+      "product_name": "키엘 울트라 페이셜 크림",
+      "price": "약 5만원대 / 50ml",
+      "stars": 3,
+      "one_line": "가성비는 물음표",
+      "body": [
+        "글라이세린·스쿠알란, 복합성에 무난 — 성분 단순",
+        "가격 대비 성능 아쉬움. 유사 성분 저가 대안 존재"
+      ],
+      "caption": "비싸다고 무조건 본인 피부에 맞는 건 아니다. 성분 라벨을 먼저 읽는 것, 그게 안목이다.",
+      "image_queries": [
+        "Kiehl's Ultra Facial cream dark moody editorial",
+        "men luxury skincare cream dark gold tone",
+        "premium moisturizer cinematic ink black product"
+      ],
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "type": "closing",
+      "image_url": "",
+      "slide_num": 6
+    }
+  ]
+}

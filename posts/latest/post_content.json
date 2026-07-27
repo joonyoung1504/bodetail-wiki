@@ -1,131 +1,109 @@
 {
-  "section_label": "오늘의 루틴",
-  "vol": "VOL.01",
-  "caption_full": "두드릴지 펴바를지 몰라서 그냥 비벼왔다면, 이 카드 저장해두세요.\n\n✔ 토너 — 손바닥 or 화장솜, 목적에 따라 선택\n✔ 세럼(나이아신아마이드·레티놀 등) — 2방울, 반드시 두드림\n✔ 세럼 후 1분 대기 — 지성 1분 / 건성 30초\n✔ 로션·크림 — 안쪽→바깥, 얇게 펴바름\n✔ 바쁜 날 최소 루틴 — 토너→로션 2단계\n\n방식 하나 바꾸는 게 제품 바꾸는 것보다 먼저다.\n\n@bodetail_official",
-  "hashtags": "#bodetail #남자스킨케어 #남자루틴 #기초스킨케어 #두드림펴바름 #세럼흡수 #남자그루밍 #스킨케어순서 #남성피부관리 #기초케어 #남자화장품 #피부루틴 #그루밍 #남자뷰티 #스킨케어팁",
+  "section_label": "오늘의 PICK",
+  "vol": "VOL.02",
+  "caption_full": "크림 잘못 고르면 루틴이 다 헛수고예요.\n\n피부 타입을 먼저 정리하면 선택이 쉬워져요.\n\n✔ 지성·여름 → 가벼운 젤크림·수분크림 우선. 유분 함량 낮은 것 선택\n✔ 지성·겨울 → 여름 제품보다 한 단계 묵직하게. 단, 여전히 오일 함량 과한 건 피할 것\n✔ 건성 → 로션+크림 둘 다 레이어링 불필요. 크림 한 가지를 스쿠알란·세라마이드 함유로 잘 고르면 로션 생략 가능\n✔ 복합성 → 부위별로 다르게. T존엔 가벼운 제품, 볼엔 건성용 크림을 소량 추가하는 방식\n✔ 가격대별 무난 선택: 2만원대는 닥터자르트 시카페어, 3만원대는 아벤느 크렘 뉘트리티브\n\n이 카드 저장해두면 다음 계절 바뀔 때 크림 갈아탈 기준이 생겨요.\n\n다음 편 — 세럼과 앰플, 뭐가 다른가",
+  "hashtags": "#bodetail #남자스킨케어 #남자크림추천 #지성피부크림 #건성피부크림 #남자그루밍 #남자보습크림 #피부타입 #남자피부관리 #스킨케어루틴 #남자기초케어 #보습크림추천 #닥터자르트 #아벤느 #키엘스",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "두드림과 펴바름, 단계마다 정답이 다르다",
+      "headline_sub": "피부타입 잘못 읽으면 크림이 독이 된다",
       "headline_main": [
-        "4단계",
-        "정답법"
+        "지성·건성별",
+        "크림 티어 4"
       ],
-      "headline_serif": "바르는 순서보다 바르는 방식이 흡수를 결정한다",
+      "headline_serif": "이달의 추천 4선",
       "image_queries": [
-        "man dark studio skincare closeup moody",
-        "male grooming editorial ink black",
-        "men face moisturizer dark portrait moody"
+        "men face cream luxury dark moody cinematic",
+        "male skincare moisturizer dark bottle editorial",
+        "men grooming cream product ink black gold"
       ],
-      "image_url": "https://images.pexels.com/photos/28943731/pexels-photo-28943731.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/31403898/pexels-photo-31403898.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
-      "type": "content",
+      "type": "pick",
       "number": "01",
-      "subhead": "토너 — 화장솜 vs 손바닥",
+      "product_name": "닥터자르트 시카페어 크림",
+      "price": "약 2만원대 / 55ml",
+      "stars": 4,
+      "one_line": "지성 입문 최적",
       "body": [
-        "화장솜은 각질 밀어내고, 손바닥은 수분만 넣는다",
-        "각질 정리 목적이면 솜, 순수 수분 공급이면 손바닥"
+        "시카·판테놀 함유, 수분막 형성 후 번들임 ↓",
+        "지성·복합성 ○, 건성·극건성엔 보습 부족"
       ],
-      "caption": "목적을 먼저 정하면 도구가 정해진다.",
+      "caption": "지성 피부가 '보습 포기'를 택하는 이유는 크림이 무거워서다. 가볍게 막는 것만으로도 충분한 선택지가 있다.",
       "image_queries": [
-        "man hands toner dark moody closeup",
-        "male skincare cotton pad editorial dark",
-        "men grooming routine hands moody studio"
+        "Dr Jart Cicapair cream dark moody product shot",
+        "green cream tube editorial dark background",
+        "men skincare moisturizer cinematic ink black"
       ],
-      "image_url": "https://images.pexels.com/photos/8131568/pexels-photo-8131568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7020092/pexels-photo-7020092.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
-      "type": "content",
+      "type": "pick",
       "number": "02",
-      "subhead": "토너 — 양과 대기 타이밍",
+      "product_name": "이니스프리 블랙티 유스 크림",
+      "price": "약 3만원대 / 50ml",
+      "stars": 4,
+      "one_line": "겨울 지성 픽",
       "body": [
-        "500원 동전 크기, 손바닥에 덜어 가볍게 두드린다",
-        "30초 후 세럼 도포 — 각질층이 젖어 있을 때 흡수율이 오른다"
+        "발효 블랙티 추출물, 여름엔 묵직함 유의",
+        "계절 전환기·겨울 지성에 ○, 여름 단독 사용 △"
       ],
-      "caption": "30초 텀이 다음 단계 효율을 바꾼다.",
+      "caption": "크림은 계절마다 바꿔야 한다. 여름 지성 피부에 겨울용 크림을 그대로 쓰면 피지 분비가 오히려 늘어난다.",
       "image_queries": [
-        "man palms toner drop dark editorial",
-        "male face patting skincare moody closeup",
-        "men grooming dark studio hands face"
-      ],
-      "image_url": "https://images.pexels.com/photos/36449415/pexels-photo-36449415.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    },
-    {
-      "slide_num": 4,
-      "type": "content",
-      "number": "03",
-      "subhead": "세럼 — 두드림이 정답인 이유",
-      "body": [
-        "나이아신아마이드·레티놀 등 고농도 성분은 마찰 시 활성 저하",
-        "2방울, 이마·볼·턱에 찍고 손가락 끝으로 가볍게 두드려 흡수"
-      ],
-      "caption": "세럼은 펴바름이 아니라 두드림이다.",
-      "image_queries": [
-        "man serum drop dark moody editorial closeup",
-        "male face serum application dark studio",
-        "men skincare fingers patting moody portrait"
-      ],
-      "image_url": "https://images.pexels.com/photos/8131586/pexels-photo-8131586.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    },
-    {
-      "slide_num": 5,
-      "type": "content",
-      "number": "04",
-      "subhead": "세럼 대기 — 1분 텀의 기준",
-      "body": [
-        "세럼 도포 후 1분 대기, 덜 마른 상태에서 로션 쌓으면 뭉친다",
-        "지성이면 1분, 건성이면 30초로 단축해 수분 날리기 전에 잠근다"
-      ],
-      "caption": "피부타입마다 대기 시간이 다르다.",
-      "image_queries": [
-        "man dark moody face timer skincare",
-        "male grooming editorial dark skin closeup",
-        "men skincare waiting routine moody studio"
-      ],
-      "image_url": "https://images.pexels.com/photos/2629277/pexels-photo-2629277.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    },
-    {
-      "slide_num": 6,
-      "type": "content",
-      "number": "05",
-      "subhead": "로션·크림 — 펴바름이 정답인 이유",
-      "body": [
-        "유분막을 고르게 덮어야 수분 증발을 막아, 두드리면 얼룩진다",
-        "동전 크기 1개 분량, 안쪽에서 바깥으로 얇고 넓게 편다"
-      ],
-      "caption": "유분 단계는 덮는 것이지 두드리는 게 아니다.",
-      "image_queries": [
-        "man moisturizer application dark editorial moody",
-        "male face cream spread dark studio closeup",
-        "men skincare lotion dark moody portrait"
+        "innisfree black tea cream dark editorial product",
+        "dark amber glass jar skincare moody",
+        "men moisturizer winter dark cinematic"
       ],
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
-      "slide_num": 7,
-      "type": "content",
-      "number": "06",
-      "subhead": "시간 없을 때 생략할 단계",
+      "slide_num": 4,
+      "type": "pick",
+      "number": "03",
+      "product_name": "아벤느 크렘 뉘트리티브",
+      "price": "약 3만원대 / 50ml",
+      "stars": 5,
+      "one_line": "건성 기본기",
       "body": [
-        "로션과 세럼 중 하나만 쓴다면 세럼 생략, 로션으로 수분·유분 동시 처리",
-        "토너→로션 2단계가 최소 루틴, 이 순서와 두드림·펴바름은 그대로 지킨다"
+        "아벤느 온천수+스쿠알란, 72시간 보습 임상 검증",
+        "건성·민감성 ○, 지성엔 과보습·트러블 가능성"
       ],
-      "caption": "줄여도 순서와 방식은 바꾸지 않는다.",
+      "caption": "건성 피부에 로션과 크림을 둘 다 쓸 필요는 없다. 크림 하나의 유분 함량이 충분하면 로션은 생략해도 된다.",
       "image_queries": [
-        "man minimal skincare dark moody editorial",
-        "male grooming two step routine dark studio",
-        "men face moisturizer quick routine dark portrait"
+        "Avene cream white jar dark moody editorial",
+        "French skincare product cinematic dark background",
+        "men moisturizer dry skin dark luxury"
+      ],
+      "image_url": "https://images.pexels.com/photos/7281625/pexels-photo-7281625.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "pick",
+      "number": "04",
+      "product_name": "키엘 울트라 페이셜 크림",
+      "price": "약 5만원대 / 50ml",
+      "stars": 3,
+      "one_line": "가성비는 물음표",
+      "body": [
+        "글라이세린·스쿠알란, 복합성에 무난 — 성분 단순",
+        "가격 대비 성능 아쉬움. 유사 성분 저가 대안 존재"
+      ],
+      "caption": "비싸다고 무조건 본인 피부에 맞는 건 아니다. 성분 라벨을 먼저 읽는 것, 그게 안목이다.",
+      "image_queries": [
+        "Kiehl's Ultra Facial cream dark moody editorial",
+        "men luxury skincare cream dark gold tone",
+        "premium moisturizer cinematic ink black product"
       ],
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "type": "closing",
       "image_url": "",
-      "slide_num": 8
+      "slide_num": 6
     }
   ]
 }
