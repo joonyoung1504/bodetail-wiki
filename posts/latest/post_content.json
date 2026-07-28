@@ -1,34 +1,34 @@
 {
-  "section_label": "오늘의 루틴",
+  "section_label": "오늘의 지식",
   "vol": "VOL.01",
-  "caption_full": "토너는 두드리고, 크림은 누른다는 건 알았다.\n그런데 세럼은 두드려야 할까 펴야 할까?\n단계마다 손 쓰는 법이 다른 이유가 있다.\n\n1️⃣ 토너 — 손바닥 두드리기, 동전 크기\n2️⃣ 세럼 — 두드리고 30초 대기 필수\n3️⃣ 로션 — 안쪽→바깥 펴바름\n4️⃣ 크림 — 손바닥에 데워서 눌러 마무리\n\n이 카드 저장해두면 매번 손이 멈추는 일 없어요. @bodetail_official\n\n다음 편 — 남자 토너 티어리스트",
-  "hashtags": "#bodetail #남자스킨케어 #남자기초화장품 #스킨케어루틴 #남자루틴 #토너세럼로션크림 #흡수율 #남자그루밍 #기초케어 #피부관리남자",
+  "caption_full": "피부 타입 모르면서 세럼부터 고르고 있진 않나요.\n기름진다고 지성이 아닐 수 있습니다. 수분이 부족해도 유분이 나옵니다.\n\n1️⃣ 세안 후 30분 기다리기\n2️⃣ T존·볼 부위별 체크\n3️⃣ 5가지 타입 판정 기준\n4️⃣ 계절마다 타입이 바뀐다\n5️⃣ 타입별 첫 번째 제품\n\n저장해두면 계절 바뀔 때마다 기준이 생깁니다. @bodetail_official\n\n다음 편 — 피부타입별 첫 세럼 5",
+  "hashtags": "#bodetail #남자피부타입 #남자스킨케어 #피부타입테스트 #지성피부 #건성피부 #복합피부 #수분부족지성 #민감피부 #남자그루밍 #남성뷰티 #스킨케어루틴 #남자기초케어 #피부관리 #그루밍",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "두드릴지 펴바를지, 매번 헷갈렸다면",
+      "headline_sub": "세안 후 30분, 피부가 말한다",
       "headline_main": [
-        "4단계",
-        "정답"
+        "피부타입",
+        "5가지"
       ],
-      "headline_serif": "단계마다 손 쓰는 법이 다르다",
+      "headline_serif": "30분 테스트로 오늘 끝낸다",
       "image_queries": [
-        "man dark studio portrait moody skincare",
-        "male hands face editorial dark",
-        "men grooming dark closeup moody"
+        "man dark studio portrait close up face",
+        "male editorial moody skin closeup dark background",
+        "men face dark cinematic portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/35964824/pexels-photo-35964824.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/23879312/pexels-photo-23879312.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "premise",
-      "subhead": "순서가 아니라 '손 쓰는 법'이 흡수를 결정한다",
+      "subhead": "기름지다고 다 지성이 아닙니다",
       "body": [
-        "토너는 두드리고 크림은 펴바른다, 대충 알고 있다.",
-        "그런데 세럼은? 로션은? 매번 손이 멈춘다.",
-        "단계마다 쓰는 법이 다른 이유가 있다.",
-        "오늘 4단계 정답을 한 번에 정리한다."
+        "세럼을 골라야 하는데 내 피부타입을 모른다.",
+        "유분이 올라온다고 지성이라 믿고 강한 제품을 써왔을 수 있다.",
+        "수분이 부족해도 기름이 분비된다 — 그게 수분부족지성이다.",
+        "오늘 테스트 5단계로 내 타입을 정리한다."
       ],
       "image_query": "",
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
@@ -37,16 +37,16 @@
       "slide_num": 3,
       "type": "content",
       "number": "01",
-      "subhead": "토너 — 손바닥으로 두드린다",
+      "subhead": "테스트 준비: 세안만 한다",
       "body": [
-        "500원 동전 크기, 손바닥에 덜어 얼굴 전체 두드린다.",
-        "각질층이 물기 있을 때 눌러주면 흡수율이 오른다."
+        "세안 후 아무것도 바르지 않고 30분 기다린다.",
+        "스킨·로션·세럼 전부 금지. 맨 얼굴 상태가 기준이다."
       ],
-      "caption": "화장솜은 토너를 절반 이상 흡수한다.",
+      "caption": "세안 직후 상태는 타입 판독 불가.",
       "image_queries": [
-        "man hands face patting dark moody",
-        "male skincare toner application editorial",
-        "men hands cheek dark studio closeup"
+        "man washing face dark bathroom moody",
+        "male face water dark editorial",
+        "men skincare minimal dark studio"
       ],
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
@@ -54,67 +54,67 @@
       "slide_num": 4,
       "type": "content",
       "number": "02",
-      "subhead": "세럼 — 두드리되 30초 기다린다",
+      "subhead": "30분 뒤, 부위별로 체크",
       "body": [
-        "나이아신아마이드·레티놀 등 고농도 성분, 2방울로 충분하다.",
-        "도포 후 30초 대기. 다음 제품이 덮으면 침투가 막힌다."
+        "T존(이마·코)과 볼·눈 밑을 손가락으로 따로 짚어본다.",
+        "전체가 아니라 부위별 차이가 타입을 가른다."
       ],
-      "caption": "세럼은 얇게, 겹치지 않게.",
+      "caption": "볼이 건조한데 T존만 보고 지성이라 오판하는 경우가 많다.",
       "image_queries": [
-        "man serum dropper face dark closeup moody",
-        "male skincare serum application editorial dark",
-        "men face hands dark studio serum"
+        "man touching face dark closeup moody",
+        "male skin texture close up dark editorial",
+        "men face check mirror dark moody"
       ],
-      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/29433729/pexels-photo-29433729.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "03",
-      "subhead": "로션 — 펴바른 뒤 가볍게 마무리",
+      "subhead": "5가지 타입 판정 기준",
       "body": [
-        "500원 동전 크기, 안쪽→바깥 방향으로 펴바른다.",
-        "지성이면 로션으로 마무리, 건성이면 크림까지 추가한다."
+        "T존+볼 모두 번들 → 지성 / 둘 다 당김 → 건성 / T존만 번들 → 복합",
+        "번들+당김 동시 → 수분부족지성 / 붉어지거나 따끔 → 민감"
       ],
-      "caption": "시간 없으면 세럼 다음 이 단계만 해도 된다.",
+      "caption": "수분부족지성에 강한 클렌저 쓰면 더 번들거린다.",
       "image_queries": [
-        "man applying lotion face dark editorial moody",
-        "male face hands moisturizer dark studio",
-        "men skincare lotion dark closeup"
+        "man face dark studio editorial skin",
+        "male grooming dark moody portrait",
+        "men skincare dark cinematic closeup"
       ],
-      "image_url": "https://images.pexels.com/photos/38721568/pexels-photo-38721568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7479965/pexels-photo-7479965.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
       "type": "content",
       "number": "04",
-      "subhead": "크림 — 체온으로 밀착시킨다",
+      "subhead": "타입은 계절마다 바뀐다",
       "body": [
-        "쌀알 2개 크기, 손바닥에 비벼 38°C로 데운 뒤 눌러준다.",
-        "두드리면 크림이 벗겨진다. 누르기로 막을 완성한다."
+        "여름 지성도 겨울엔 복합·건성으로 바뀌는 경우가 흔하다.",
+        "계절 바뀔 때마다 이 테스트를 다시 해서 제품을 교체한다."
       ],
-      "caption": "크림은 두드리면 떠서 효과가 반감된다.",
+      "caption": "루틴보다 타입 재확인이 먼저다.",
       "image_queries": [
-        "man face hands pressing cream dark moody",
-        "male skincare cream application dark editorial",
-        "men hands face closeup dark studio"
+        "man dark moody editorial face winter",
+        "male portrait dark studio seasonal",
+        "men grooming cinematic dark editorial"
       ],
-      "image_url": "https://images.pexels.com/photos/37711449/pexels-photo-37711449.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/9947775/pexels-photo-9947775.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 7,
       "type": "content",
       "number": "05",
-      "subhead": "오늘 정리한 것",
+      "subhead": "타입별 첫 번째 제품 선택",
       "body": [
-        "토너 두드림 → 세럼 두드림+30초 → 로션 펴바름 → 크림 누르기.",
-        "이 루틴, 매일 이런 기준으로 올라온다."
+        "지성·복합 → BHA 성분 토너 / 건성 → 판테놀·세라마이드 크림 우선",
+        "수분부족지성 → 오일프리 수분크림, 강한 클렌저는 지금 당장 빼라."
       ],
-      "caption": "단계마다 손 쓰는 법이 달랐다.",
+      "caption": "타입이 바뀌면 제품도 바꿔야 한다. 저장해두면 기준이 생긴다. @bodetail_official",
       "image_queries": [
-        "man dark studio portrait skincare editorial",
-        "male grooming dark moody face portrait",
-        "men editorial dark bathroom mirror closeup"
+        "man skincare products dark flat lay moody",
+        "male grooming serum dark editorial",
+        "men skincare dark cinematic detail closeup"
       ],
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
@@ -122,14 +122,14 @@
       "type": "closing",
       "image_url": "",
       "next_preview": {
-        "title": "남자 토너 티어리스트",
-        "sub": "가격대별 5종 비교"
+        "title": "피부타입별 첫 세럼 5",
+        "sub": "지성·건성·복합·민감·트러블"
       },
       "slide_num": 8
     }
   ],
   "next_preview": {
-    "title": "남자 토너 티어리스트",
-    "sub": "가격대별 5종 비교"
+    "title": "피부타입별 첫 세럼 5",
+    "sub": "지성·건성·복합·민감·트러블"
   }
 }
