@@ -1,6 +1,6 @@
 {
   "video": "normalized.mp4",
-  "duration": 10.87,
+  "duration": 72.17,
   "canvas": {
     "w": 1080,
     "h": 1920
@@ -8,23 +8,403 @@
   "font_size": 60,
   "subtitles": [
     {
-      "text_en": "Stop doing pushups like this...",
-      "text_ko": "그렇게 푸시업 하지 마라...",
+      "text_en": "Protein Bars",
+      "text_ko": "프로틴 바",
       "start": 0.0,
-      "end": 3.27,
+      "end": 1.81,
+      "box_x": 385,
+      "box_y": 820,
+      "box_w": 310,
+      "box_h": 117
+    },
+    {
+      "text_en": "Yogurt does it better",
+      "text_ko": "요거트가 훨씬 낫다",
+      "start": 1.81,
+      "end": 3.61,
+      "box_x": 267,
+      "box_y": 820,
+      "box_w": 545,
+      "box_h": 117
+    },
+    {
+      "text_en": "less calories and",
+      "text_ko": "칼로리도 더 적고",
+      "start": 3.61,
+      "end": 5.41,
+      "box_x": 295,
+      "box_y": 820,
+      "box_w": 489,
+      "box_h": 117
+    },
+    {
+      "text_en": "Protein Cookies",
+      "text_ko": "프로틴 쿠키",
+      "start": 5.41,
+      "end": 7.21,
+      "box_x": 357,
+      "box_y": 820,
+      "box_w": 365,
+      "box_h": 117
+    },
+    {
+      "text_en": "Not Buy",
+      "text_ko": "사지 마라",
+      "start": 7.21,
+      "end": 9.02,
+      "box_x": 385,
+      "box_y": 820,
+      "box_w": 310,
+      "box_h": 117
+    },
+    {
+      "text_en": "350 calories",
+      "text_ko": "350칼로리나 된다",
+      "start": 9.02,
+      "end": 10.82,
+      "box_x": 275,
+      "box_y": 820,
+      "box_w": 530,
+      "box_h": 117
+    },
+    {
+      "text_en": "that's a dessert",
+      "text_ko": "그냥 디저트다",
+      "start": 10.83,
+      "end": 12.62,
+      "box_x": 330,
+      "box_y": 820,
+      "box_w": 420,
+      "box_h": 117
+    },
+    {
+      "text_en": "protein in it",
+      "text_ko": "단백질이 얼마나 들었겠어",
+      "start": 12.62,
+      "end": 14.43,
+      "box_x": 302,
+      "box_y": 820,
+      "box_w": 476,
+      "box_h": 190
+    },
+    {
+      "text_en": "Protein Spread",
+      "text_ko": "프로틴 스프레드",
+      "start": 14.44,
+      "end": 16.24,
+      "box_x": 302,
+      "box_y": 820,
+      "box_w": 476,
+      "box_h": 117
+    },
+    {
+      "text_en": "It's full of polyols",
+      "text_ko": "폴리올 덩어리다",
+      "start": 16.24,
+      "end": 18.05,
+      "box_x": 302,
+      "box_y": 820,
+      "box_w": 476,
+      "box_h": 117
+    },
+    {
+      "text_en": "and it actually amounts",
+      "text_ko": "실제로 따져보면",
+      "start": 18.05,
+      "end": 19.84,
+      "box_x": 302,
+      "box_y": 820,
+      "box_w": 476,
+      "box_h": 117
+    },
+    {
+      "text_en": "Protein Yogurt",
+      "text_ko": "프로틴 요거트",
+      "start": 19.84,
+      "end": 21.65,
+      "box_x": 330,
+      "box_y": 820,
+      "box_w": 420,
+      "box_h": 117
+    },
+    {
+      "text_en": "They add protein to it",
+      "text_ko": "단백질 넣은 건 맞는데",
+      "start": 21.65,
+      "end": 23.45,
+      "box_x": 233,
+      "box_y": 820,
+      "box_w": 614,
+      "box_h": 117
+    },
+    {
+      "text_en": "but it's mostly marketing",
+      "text_ko": "마케팅이 대부분이다",
+      "start": 23.45,
+      "end": 25.26,
+      "box_x": 247,
+      "box_y": 820,
+      "box_w": 586,
+      "box_h": 117
+    },
+    {
+      "text_en": "and high in protein",
+      "text_ko": "단백질은 확실히 높다",
+      "start": 25.26,
+      "end": 27.06,
+      "box_x": 240,
+      "box_y": 820,
+      "box_w": 600,
+      "box_h": 117
+    },
+    {
+      "text_en": "Yep that's a",
+      "text_ko": "맞아 이게 바로",
+      "start": 27.06,
+      "end": 28.87,
+      "box_x": 323,
+      "box_y": 820,
+      "box_w": 434,
+      "box_h": 117
+    },
+    {
+      "text_en": "It literally replaces",
+      "text_ko": "진짜로 대체된다",
+      "start": 28.87,
+      "end": 30.67,
+      "box_x": 302,
+      "box_y": 820,
+      "box_w": 476,
+      "box_h": 117
+    },
+    {
+      "text_en": "with a 351",
+      "text_ko": "351칼로리짜리로",
+      "start": 30.67,
+      "end": 32.48,
+      "box_x": 282,
+      "box_y": 820,
+      "box_w": 516,
+      "box_h": 117
+    },
+    {
+      "text_en": "best swaps in here",
+      "text_ko": "여기서 제일 잘 바꾼 게",
+      "start": 32.48,
+      "end": 34.28,
+      "box_x": 226,
+      "box_y": 820,
+      "box_w": 627,
+      "box_h": 117
+    },
+    {
+      "text_en": "Protein Granola",
+      "text_ko": "프로틴 그래놀라",
+      "start": 34.28,
+      "end": 36.09,
+      "box_x": 302,
+      "box_y": 820,
+      "box_w": 476,
+      "box_h": 117
+    },
+    {
+      "text_en": "it's still very calorific",
+      "text_ko": "칼로리는 여전히 높다",
+      "start": 36.09,
+      "end": 37.89,
+      "box_x": 240,
+      "box_y": 820,
+      "box_w": 600,
+      "box_h": 117
+    },
+    {
+      "text_en": "packed with sugar",
+      "text_ko": "당도 잔뜩 들었고",
+      "start": 37.89,
+      "end": 39.7,
+      "box_x": 295,
+      "box_y": 820,
+      "box_w": 489,
+      "box_h": 117
+    },
+    {
+      "text_en": "extra protein to it",
+      "text_ko": "단백질 좀 더 넣은 거",
+      "start": 39.7,
+      "end": 41.5,
+      "box_x": 254,
+      "box_y": 820,
+      "box_w": 572,
+      "box_h": 117
+    },
+    {
+      "text_en": "much of a difference",
+      "text_ko": "큰 차이는 없다",
+      "start": 41.5,
+      "end": 43.3,
+      "box_x": 323,
+      "box_y": 820,
+      "box_w": 434,
+      "box_h": 117
+    },
+    {
+      "text_en": "Protein Crisps",
+      "text_ko": "프로틴 크리스프",
+      "start": 43.3,
+      "end": 45.11,
+      "box_x": 302,
+      "box_y": 820,
+      "box_w": 476,
+      "box_h": 117
+    },
+    {
+      "text_en": "the macros might",
+      "text_ko": "수치만 보면 괜찮아 보이지만",
+      "start": 45.11,
+      "end": 46.91,
       "box_x": 267,
       "box_y": 820,
       "box_w": 545,
       "box_h": 190
     },
     {
-      "text_en": "Do half reps instead (caption)",
-      "text_ko": "대신 하프 렙으로 해라",
-      "start": 4.34,
-      "end": 10.87,
-      "box_x": 233,
+      "text_en": "but it's highly",
+      "text_ko": "사실 문제가 있다",
+      "start": 46.91,
+      "end": 48.71,
+      "box_x": 295,
       "box_y": 820,
-      "box_w": 614,
+      "box_w": 489,
+      "box_h": 117
+    },
+    {
+      "text_en": "is you'll end up",
+      "text_ko": "결국 더 많이 먹게 된다",
+      "start": 48.71,
+      "end": 50.52,
+      "box_x": 226,
+      "box_y": 820,
+      "box_w": 627,
+      "box_h": 117
+    },
+    {
+      "text_en": "Protein Shake",
+      "text_ko": "프로틴 쉐이크",
+      "start": 50.52,
+      "end": 52.32,
+      "box_x": 330,
+      "box_y": 820,
+      "box_w": 420,
+      "box_h": 117
+    },
+    {
+      "text_en": "Obviously I'm buying it",
+      "text_ko": "당연히 산다",
+      "start": 52.32,
+      "end": 54.12,
+      "box_x": 357,
+      "box_y": 820,
+      "box_w": 365,
+      "box_h": 117
+    },
+    {
+      "text_en": "Concentrate",
+      "text_ko": "농축 유청 단백질",
+      "start": 54.12,
+      "end": 55.93,
+      "box_x": 295,
+      "box_y": 820,
+      "box_w": 489,
+      "box_h": 117
+    },
+    {
+      "text_en": "it's fantastic",
+      "text_ko": "진짜 좋다",
+      "start": 55.93,
+      "end": 57.73,
+      "box_x": 385,
+      "box_y": 820,
+      "box_w": 310,
+      "box_h": 117
+    },
+    {
+      "text_en": "in the supermarket",
+      "text_ko": "마트에서 살 수 있는",
+      "start": 57.73,
+      "end": 59.54,
+      "box_x": 261,
+      "box_y": 820,
+      "box_w": 558,
+      "box_h": 117
+    },
+    {
+      "text_en": "that you double check",
+      "text_ko": "성분표 꼭 확인해라",
+      "start": 59.54,
+      "end": 61.34,
+      "box_x": 267,
+      "box_y": 820,
+      "box_w": 545,
+      "box_h": 117
+    },
+    {
+      "text_en": "Protein Pancake Mix",
+      "text_ko": "프로틴 팬케이크 믹스",
+      "start": 61.34,
+      "end": 63.14,
+      "box_x": 240,
+      "box_y": 820,
+      "box_w": 600,
+      "box_h": 117
+    },
+    {
+      "text_en": "why not",
+      "text_ko": "왜 안 사겠어",
+      "start": 63.14,
+      "end": 64.94,
+      "box_x": 350,
+      "box_y": 820,
+      "box_w": 379,
+      "box_h": 117
+    },
+    {
+      "text_en": "Whey Protein",
+      "text_ko": "웨이 프로틴",
+      "start": 64.94,
+      "end": 66.75,
+      "box_x": 357,
+      "box_y": 820,
+      "box_w": 365,
+      "box_h": 117
+    },
+    {
+      "text_en": "it comes out great",
+      "text_ko": "결과도 훌륭하다",
+      "start": 66.75,
+      "end": 68.56,
+      "box_x": 302,
+      "box_y": 820,
+      "box_w": 476,
+      "box_h": 117
+    },
+    {
+      "text_en": "Make sure to",
+      "text_ko": "꼭 챙겨라",
+      "start": 68.56,
+      "end": 70.36,
+      "box_x": 385,
+      "box_y": 820,
+      "box_w": 310,
+      "box_h": 117
+    },
+    {
+      "text_en": "follow for more",
+      "text_ko": "팔로우하고 더 챙겨가라",
+      "start": 70.36,
+      "end": 72.17,
+      "box_x": 212,
+      "box_y": 1380,
+      "box_w": 655,
       "box_h": 117
     }
   ]
