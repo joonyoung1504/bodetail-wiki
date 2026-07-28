@@ -1,120 +1,127 @@
 {
-  "section_label": "오늘의 지식",
+  "section_label": "오늘의 PICK",
   "vol": "VOL.01",
-  "caption_full": "피부 타입 모르면서 세럼부터 고르고 있진 않나요.\n기름진다고 지성이 아닐 수 있습니다. 수분이 부족해도 유분이 나옵니다.\n\n1️⃣ 세안 후 30분 기다리기\n2️⃣ T존·볼 부위별 체크\n3️⃣ 5가지 타입 판정 기준\n4️⃣ 계절마다 타입이 바뀐다\n5️⃣ 타입별 첫 번째 제품\n\n저장해두면 계절 바뀔 때마다 기준이 생깁니다. @bodetail_official\n\n다음 편 — 피부타입별 첫 세럼 5",
-  "hashtags": "#bodetail #남자피부타입 #남자스킨케어 #피부타입테스트 #지성피부 #건성피부 #복합피부 #수분부족지성 #민감피부 #남자그루밍 #남성뷰티 #스킨케어루틴 #남자기초케어 #피부관리 #그루밍",
+  "caption_full": "첫 세럼에서 가장 많이 하는 실수는 베스트셀러를 그냥 사는 것.\n\n✔ 지성·복합성 — 토리든 다이브인: 15,900원 / 5중 히알루론산, 유분 제로\n✔ 건성·속건조 — 웰라쥬 히알루로닉 블루: 23,000원 / 100ml, 세안 직후 첫 번째로\n✔ 여드름·트러블 — 파티온 노스카나인: 18,000원 / 나이아신아마이드+징크 콤보\n✔ 민감·장벽 약화 — 넘버즈인 3번 세럼: 23,800원 / 판테놀+세라마이드, 자기 전 집중\n✔ 타입 모를 때 — VT 리들샷 100: 30,000원 / 주 2~3회, 흡수율 부스터\n\n가격을 저장해두면 다음 올리브영 세일 때 바로 담을 수 있어요.\n\n다음 편 — 지성·건성별 크림 티어",
+  "hashtags": "#bodetail #남자스킨케어 #남자세럼추천 #피부타입별세럼 #올리브영세럼 #토리든다이브인 #파티온노스카나인 #넘버즈인 #VT리들샷 #남자기초케어 #남자그루밍 #스킨케어루틴 #올리브영추천 #남자피부관리 #세럼추천",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "세안 후 30분, 피부가 말한다",
+      "headline_sub": "첫 세럼, 타입 틀리면 다 헛수고",
       "headline_main": [
-        "피부타입",
-        "5가지"
+        "피부타입별",
+        "첫 세럼 5"
       ],
-      "headline_serif": "30분 테스트로 오늘 끝낸다",
+      "headline_serif": "이달의 추천 5선",
       "image_queries": [
-        "man dark studio portrait close up face",
-        "male editorial moody skin closeup dark background",
-        "men face dark cinematic portrait"
+        "men skincare serum dark moody flatlay",
+        "male grooming product cinematic ink black",
+        "skincare serum bottle close up dark editorial"
       ],
-      "image_url": "https://images.pexels.com/photos/23879312/pexels-photo-23879312.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/8490173/pexels-photo-8490173.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
-      "type": "premise",
-      "subhead": "기름지다고 다 지성이 아닙니다",
+      "type": "pick",
+      "number": "01",
+      "skin_type": "지성·복합성",
+      "product_name": "토리든 다이브인 히알루론산 세럼",
+      "price": "15,900원 / 50ml · 2026-07 기준",
+      "stars": 5,
+      "one_line": "지복합 국민 1순위",
       "body": [
-        "세럼을 골라야 하는데 내 피부타입을 모른다.",
-        "유분이 올라온다고 지성이라 믿고 강한 제품을 써왔을 수 있다.",
-        "수분이 부족해도 기름이 분비된다 — 그게 수분부족지성이다.",
-        "오늘 테스트 5단계로 내 타입을 정리한다."
+        "5중 저분자 히알루론산, 유분 0, 물처럼 흡수",
+        "지성·복합성 최적. 극건성엔 보습력 부족할 수 있음"
       ],
-      "image_query": "",
-      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "caption": "4년 연속 올리브영 어워즈 1위. 이유 있는 스테디셀러.",
+      "image_queries": [
+        "water serum drop dark background macro",
+        "hyaluronic acid serum bottle moody cinematic",
+        "men skincare lightweight serum dark editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/7020268/pexels-photo-7020268.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 3,
-      "type": "content",
-      "number": "01",
-      "subhead": "테스트 준비: 세안만 한다",
+      "type": "pick",
+      "number": "02",
+      "skin_type": "건성·속건조",
+      "product_name": "웰라쥬 리얼 히알루로닉 블루 세럼",
+      "price": "23,000원 / 100ml · 2026-07 기준",
+      "stars": 4,
+      "one_line": "건성 속건조 해결사",
       "body": [
-        "세안 후 아무것도 바르지 않고 30분 기다린다.",
-        "스킨·로션·세럼 전부 금지. 맨 얼굴 상태가 기준이다."
+        "히알루론산 원액 100% 부스터형, 100ml 대용량",
+        "세안 직후 가장 먼저 바르는 게 핵심. 끈적임 있음"
       ],
-      "caption": "세안 직후 상태는 타입 판독 불가.",
+      "caption": "수분 세럼 한 방울이 뒤에 오는 크림 흡수율까지 바꾼다.",
       "image_queries": [
-        "man washing face dark bathroom moody",
-        "male face water dark editorial",
-        "men skincare minimal dark studio"
+        "blue serum bottle dark moody close up",
+        "moisturizing serum drop skin dark background",
+        "men dry skin care product editorial dark"
       ],
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
-      "type": "content",
-      "number": "02",
-      "subhead": "30분 뒤, 부위별로 체크",
+      "type": "pick",
+      "number": "03",
+      "skin_type": "여드름·지성 트러블",
+      "product_name": "파티온 노스카나인 트러블 세럼",
+      "price": "18,000원 / 50ml · 2026-07 기준",
+      "stars": 4,
+      "one_line": "트러블 진정 1등",
       "body": [
-        "T존(이마·코)과 볼·눈 밑을 손가락으로 따로 짚어본다.",
-        "전체가 아니라 부위별 차이가 타입을 가른다."
+        "나이아신아마이드+징크 복합. 주 5회 이상 사용 권장",
+        "트러블 흔적·여드름성에 최적. 건성엔 보습 따로 필요"
       ],
-      "caption": "볼이 건조한데 T존만 보고 지성이라 오판하는 경우가 많다.",
+      "caption": "트러블 세럼 1위. 단, 건성이라면 보습 크림을 꼭 덧바를 것.",
       "image_queries": [
-        "man touching face dark closeup moody",
-        "male skin texture close up dark editorial",
-        "men face check mirror dark moody"
+        "acne serum dark moody editorial product",
+        "niacinamide serum bottle ink black background",
+        "men oily skin care product cinematic dark"
       ],
-      "image_url": "https://images.pexels.com/photos/29433729/pexels-photo-29433729.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/4210657/pexels-photo-4210657.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
-      "type": "content",
-      "number": "03",
-      "subhead": "5가지 타입 판정 기준",
+      "type": "pick",
+      "number": "04",
+      "skin_type": "민감성·장벽 약화",
+      "product_name": "넘버즈인 3번 보들보들 결 세럼",
+      "price": "23,800원 / 80ml · 2026-07 기준",
+      "stars": 4,
+      "one_line": "장벽 재건 결 세럼",
       "body": [
-        "T존+볼 모두 번들 → 지성 / 둘 다 당김 → 건성 / T존만 번들 → 복합",
-        "번들+당김 동시 → 수분부족지성 / 붉어지거나 따끔 → 민감"
+        "판테놀+세라마이드 기반, 자기 전 2~3방울 집중케어",
+        "민감·환절기 장벽 약화에 최적. 여름 지성엔 무거울 수 있음"
       ],
-      "caption": "수분부족지성에 강한 클렌저 쓰면 더 번들거린다.",
+      "caption": "자기 전 3방울. 다음 날 아침 피부결이 달라진 걸 손끝으로 확인하게 된다.",
       "image_queries": [
-        "man face dark studio editorial skin",
-        "male grooming dark moody portrait",
-        "men skincare dark cinematic closeup"
+        "sensitive skin serum dark gold product shot",
+        "ceramide serum bottle dark cinematic close up",
+        "barrier repair skincare men editorial moody"
       ],
-      "image_url": "https://images.pexels.com/photos/7479965/pexels-photo-7479965.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/19949079/pexels-photo-19949079.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
-      "type": "content",
-      "number": "04",
-      "subhead": "타입은 계절마다 바뀐다",
-      "body": [
-        "여름 지성도 겨울엔 복합·건성으로 바뀌는 경우가 흔하다.",
-        "계절 바뀔 때마다 이 테스트를 다시 해서 제품을 교체한다."
-      ],
-      "caption": "루틴보다 타입 재확인이 먼저다.",
-      "image_queries": [
-        "man dark moody editorial face winter",
-        "male portrait dark studio seasonal",
-        "men grooming cinematic dark editorial"
-      ],
-      "image_url": "https://images.pexels.com/photos/9947775/pexels-photo-9947775.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-    },
-    {
-      "slide_num": 7,
-      "type": "content",
+      "type": "pick",
       "number": "05",
-      "subhead": "타입별 첫 번째 제품 선택",
+      "skin_type": "내 타입 모를 때 — 무난한 첫 선택",
+      "product_name": "VT 리들샷 100 세럼",
+      "price": "30,000원 / 50ml · 2026-07 기준",
+      "stars": 3,
+      "one_line": "흡수율 먼저 올리는 법",
       "body": [
-        "지성·복합 → BHA 성분 토너 / 건성 → 판테놀·세라마이드 크림 우선",
-        "수분부족지성 → 오일프리 수분크림, 강한 클렌저는 지금 당장 빼라."
+        "천연 스피큘 성분이 각질층 통로를 열어 뒤 제품 흡수 극대화",
+        "주 2~3회 야간 한정. 매일 쓰면 자극 누적, 민감성엔 비추"
       ],
-      "caption": "타입이 바뀌면 제품도 바꿔야 한다. 저장해두면 기준이 생긴다. @bodetail_official",
+      "caption": "세럼 뭘 써야 할지 모를 땐 흡수율부터. 순서가 효과를 결정한다.",
       "image_queries": [
-        "man skincare products dark flat lay moody",
-        "male grooming serum dark editorial",
-        "men skincare dark cinematic detail closeup"
+        "spicule serum dark editorial product cinematic",
+        "men skincare booster serum dark ink background",
+        "korean skincare first serum dark moody flatlay"
       ],
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
@@ -122,14 +129,14 @@
       "type": "closing",
       "image_url": "",
       "next_preview": {
-        "title": "피부타입별 첫 세럼 5",
-        "sub": "지성·건성·복합·민감·트러블"
+        "title": "지성·건성별 크림 티어",
+        "sub": "질감과 지속력 기준"
       },
-      "slide_num": 8
+      "slide_num": 7
     }
   ],
   "next_preview": {
-    "title": "피부타입별 첫 세럼 5",
-    "sub": "지성·건성·복합·민감·트러블"
+    "title": "지성·건성별 크림 티어",
+    "sub": "질감과 지속력 기준"
   }
 }
