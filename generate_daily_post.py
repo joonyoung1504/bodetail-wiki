@@ -228,12 +228,20 @@ QUALITY = """
 PICK_USER = f"""오늘은 제품 추천(PICK) 게시물이야. JSON으로 만들어줘.
 주제: {topic['title_main']} / 섹션: PICK
 {QUALITY}
-★ 실제 존재하는 남성 그루밍 제품만. 확실하지 않은 제품·가격은 쓰지 말고 확실한 것만 써라.
+★★ 제품 선정 기준 (한국 시장 — 반드시 지킬 것)
+   · **올리브영에 실제 입점되어 판매 중인 제품만.** 해외 직구 전용·단종·국내 미출시 제품 금지.
+   · 글로벌 브랜드보다 **한국에서 리뷰 수가 많고 평점이 좋은 제품** 우선 (올리브영 랭킹·리뷰 기준).
+   · **반드시 web_search 도구로 각 제품의 올리브영 판매가와 용량을 검색해 확인한 뒤** 작성할 것.
+   · 검색으로 가격을 확인하지 못한 제품은 목록에서 빼고, 확인된 다른 제품으로 대체한다.
+   · 남성 전용 라인이 아니어도 됨 — 남자가 쓰기 좋은 제품이면 유니섹스·여성 라인도 포함 가능.
 ★ body는 정확히 2줄, 각 줄 26자 이내 = [구체적 강점(성분·용량·지속력 중 수치 포함), 누구에게 맞고 누구에겐 비추인지]
 ★ product_name은 24자 이내 (긴 영문 병기는 생략). one_line 15자 이내.
 ★ 최소 1개 제품에는 단점·주의점을 명시해라. 전부 장점만 나열하면 광고로 읽혀 신뢰를 잃는다.
 ★ 별점(stars)은 3~5 사이에서 실제로 차등을 둬라. 전부 5점 금지.
-★ 가격은 "약 3만원대 / 100ml"처럼 용량과 함께.
+★ 가격 표기 규칙 (엄격)
+   · 원 단위로 정확히 쓴다: "23,900원 / 55ml" — "약 2만원대" 같은 어림 표기 절대 금지.
+   · 검색으로 확인한 **올리브영 판매가** 기준. 정가와 다르면 판매가를 쓴다.
+   · price 필드 끝에 기준 시점을 붙인다 → "23,900원 / 55ml · {DATE[:7]} 기준"
 JSON:
 {{"section_label":"오늘의 PICK","vol":"VOL.01","slides":[
   {{"slide_num":1,"type":"cover","headline_sub":"에디터 한줄","headline_main":["제목1","제목2"],"headline_serif":"이달의 추천 N선","image_queries":["men grooming product dark moody","male skincare luxury dark","men cologne bottle cinematic"]}},
@@ -267,11 +275,35 @@ CONTENT_USER = f"""오늘 게시물을 JSON으로 만들어줘.
    예: subhead "여자보다 두꺼운 각질층" / body "20~30% 두꺼워 흡수가 느리다" + "세안 30초 안에 도포"
 ★ 마지막 본문 장을 '정리' 장으로 만들 경우에도 위 상한 동일 적용 — 4줄 나열 금지, 핵심 2줄로.
 ★ image_queries: man/male/men 필수. 여성·네일아트·반지·꽃 금지. dark/moody 필수.
-★ slides에는 cover와 content 타입만. summary·outro·closing 등 다른 타입 절대 금지 — 마무리 카드는 시스템이 자동 추가.
+★ slides 타입은 cover / premise / content 만. summary·outro·closing 등 금지 — 마무리 카드는 시스템이 자동 추가.
+
+★★ 구조 (벤치마크 계정의 서사 구조를 이식한 것 — 반드시 지킬 것)
+  ① 1장 cover
+  ② **2장은 반드시 type:"premise"** — 사진 없는 도입부. 리스트를 시작하기 전에 "왜 이게 문제인가"를 세운다.
+     · subhead = 전제를 뒤집는 한 문장 (예: "시작에 필요한 건 돈이 아니라 당장의 선택입니다")
+     · body 3~4줄 = 독자가 겪는 상황 → 통념 반박 → "그래서 오늘 N가지를 정리했습니다"로 마무리
+     · premise는 number 없음. body 줄당 30자까지 허용(사진이 없어 여백이 넉넉하다).
+  ③ 3장부터 content — number 01,02,03…
+  ④ **마지막 content 장은 CTA 장**으로 만든다.
+     · subhead = 오늘 내용을 한 줄로 회수 (예: "상담료 없이 받은 관리법")
+     · body 2줄 = [오늘 정리한 것의 가치를 숫자로 환기] + [팔로우하면 뭘 계속 받는지]
+     · 강요형 금지. "매일 이런 게 올라옵니다" 정도의 담백한 톤.
+
+★★ 절차는 화살표 한 줄로 압축해라 — 스캔 속도가 저장률을 만든다.
+   ✗ "귓불 뒤를 3초 누른다" / "귀 뒤부터 쓸어내린다" / "쇄골로 내린다" (3줄)
+   ○ "귓불 뒤 3초 → 귀 뒤 → 목선 → 쇄골 (한쪽 5번)" (1줄)
+
+★★ caption_full 구조 (저장을 만드는 캡션)
+   1) 후킹 2~3문장 — 독자 상황 공감 + 통념 반박
+   2) 빈 줄
+   3) **전체 목차를 번호 이모지로 나열** (1️⃣~7️⃣, 각 항목은 슬라이드 subhead를 6~12자로 압축)
+   4) 빈 줄
+   5) 저장 유도 한 문장 + @bodetail_official
 JSON:
 {{"section_label":"섹션라벨","vol":"VOL.01","slides":[
   {{"slide_num":1,"type":"cover","headline_sub":"맥락한줄","headline_main":["묵직한","제목"],"headline_serif":"구체약속","image_queries":["man dark studio portrait","male editorial dark","men moody portrait"]}},
-  {{"slide_num":2,"type":"content","number":"01","subhead":"핵심팁제목","body":["내용1","내용2"],"caption":"핵심선언.","image_queries":["man hands dark closeup","male grooming moody","men hands editorial"]}}
+  {{"slide_num":2,"type":"premise","subhead":"전제를 뒤집는 한 문장","body":["상황 공감","통념 반박","그래서 오늘 N가지"],"image_query":""}},
+  {{"slide_num":3,"type":"content","number":"01","subhead":"핵심팁제목","body":["내용1","내용2"],"caption":"핵심선언.","image_queries":["man hands dark closeup","male grooming moody","men hands editorial"]}}
 ],"caption_full":"캡션 (첫줄 후킹·저장유도·요약·@bodetail_official)","hashtags":"#bodetail #남자그루밍 ..."}}"""
 
 # 주제 파일의 content_brief = 그날 반드시 다룰 구체 항목 (품질의 핵심 앵커)
@@ -287,13 +319,29 @@ if CUSTOM_DESC:
     CONTENT_USER += _brief
 
 print("🤖 Claude 콘텐츠 생성 중...")
-msg = client.messages.create(
-    model="claude-sonnet-4-6", max_tokens=8000,
-    system=SYSTEM,
-    messages=[{"role":"user","content": PICK_USER if is_pick else CONTENT_USER}]
-)
-raw = msg.content[0].text.strip()
+def _msg_text(m):
+    """웹 검색을 쓰면 content에 tool 블록이 섞이므로 text 블록만 이어붙인다."""
+    return "\n".join(b.text for b in m.content if getattr(b, "type", "") == "text").strip()
+
+_kw = dict(model="claude-sonnet-4-6", max_tokens=8000, system=SYSTEM,
+           messages=[{"role":"user","content": PICK_USER if is_pick else CONTENT_USER}])
+if is_pick:
+    # 제품 추천은 실제 올리브영 판매가 확인이 필요 → 웹 검색 도구 사용
+    try:
+        print("🔎 올리브영 제품·가격 검색 중...")
+        msg = client.messages.create(**_kw,
+            tools=[{"type":"web_search_20250305","name":"web_search","max_uses":10}])
+    except Exception as e:
+        print(f"⚠️ 웹 검색 사용 불가({type(e).__name__}: {e}) → 검색 없이 생성 (가격 정확도 낮음)")
+        msg = client.messages.create(**_kw)
+else:
+    msg = client.messages.create(**_kw)
+
+raw = _msg_text(msg)
 raw = re.sub(r'^```json\s*','',raw); raw = re.sub(r'\s*```$','',raw)
+if not raw.startswith("{"):          # 검색 설명 등 앞뒤 텍스트 제거
+    _s, _e = raw.find("{"), raw.rfind("}")
+    if _s != -1 and _e != -1: raw = raw[_s:_e+1]
 content = json.loads(raw)
 
 # ── 다음 편 예고: 실제로 다음에 나올 주제를 조회해 주입 (항상 정확) ──
@@ -492,7 +540,7 @@ def fetch_for(slide: dict, fallback_q: str, slide_num: int) -> Image.Image | Non
 print("📸 슬라이드별 이미지 수집 중...")
 slides_data    = content.get("slides",[])
 cover_data     = next((s for s in slides_data if s["type"]=="cover"), {})
-content_slides = [s for s in slides_data if s["type"] in ("content","pick")]
+content_slides = [s for s in slides_data if s["type"] in ("content","pick","premise")]
 
 topic_fb = f"{topic.get('image_search','editorial men')} dark"
 cover_data["_photo"] = fetch_for(cover_data, topic_fb, 1)
@@ -703,6 +751,29 @@ def render_pick(slide_data):
         for cl in cap_lines: ptext(draw,(MAR_X+22,ty),cl,cf,WHITE); ty+=lh
     draw_sig(draw); return img
 
+def render_premise(slide_data):
+    """도입부 슬라이드 — 사진 없이 다크 배경 + 전제 문장. 리스트 시작 전 서사를 만든다."""
+    arr=np.zeros((H,W,3),dtype=np.uint8); arr[:]=list(DARK)
+    noise=np.random.randint(-7,7,arr.shape,dtype=np.int16)
+    arr=np.clip(arr.astype(np.int16)+noise,0,255).astype(np.uint8)
+    img=Image.fromarray(arr); draw=ImageDraw.Draw(img)
+    draw_header(draw,content["section_label"],content.get("vol","VOL.01"))
+    max_w=W-MAR_X*2
+    hf=fnt(SANS_BOLD,60); bf=fnt(SANS_REG,38)
+    h_lines=wrap_text(draw,slide_data.get("subhead",""),hf,max_w)
+    b_lines=[]
+    for raw in slide_data.get("body",[]): b_lines+=wrap_text(draw,raw,bf,max_w) if raw else [""]
+    blk=len(h_lines)*int(60*1.30)+54+sum(int(38*0.8) if x=="" else int(38*1.75) for x in b_lines)
+    y=max(MAR_Y+150,(H-blk)//2-40)
+    draw.rectangle([(MAR_X,y-46),(MAR_X+70,y-43)],fill=GOLD)
+    for hl in h_lines: ptext(draw,(MAR_X,y),hl,hf,WHITE); y+=int(60*1.30)
+    y+=54
+    for bl in b_lines:
+        if bl=="": y+=int(38*0.8); continue
+        ptext(draw,(MAR_X,y),bl,bf,BODY_LIGHT); y+=int(38*1.75)
+    draw_sig(draw); return img
+
+
 def render_closing():
     arr=np.zeros((H,W,3),dtype=np.uint8); arr[:]=list(DARK)
     noise=np.random.randint(-8,8,arr.shape,dtype=np.int16)
@@ -755,7 +826,7 @@ rendered.append(("01_커버", render_cover(cover_data)))
 slide_idx=2
 for s in content_slides:
     stype=s.get("type","content")
-    img=render_pick(s) if stype=="pick" else render_content(s)
+    img=render_pick(s) if stype=="pick" else (render_premise(s) if stype=="premise" else render_content(s))
     rendered.append((f"{slide_idx:02d}_{s.get('number',str(slide_idx))}", img))
     slide_idx+=1
 rendered.append((f"{slide_idx:02d}_마무리", render_closing()))
@@ -784,7 +855,8 @@ for s in _cover_slides + content_slides:   # PNG 렌더와 동일 슬라이드�
     if "image_url" not in sl:
         sl["image_url"]=""
     export_slides.append(sl)
-export_slides.append({"type":"closing","image_url":""})   # 마무리 카드 항상 추가 (PNG와 1:1)
+export_slides.append({"type":"closing","image_url":"",
+                     "next_preview": content.get("next_preview", {})})   # 마무리 카드 (PNG와 1:1)
 for _i,_s in enumerate(export_slides,1):
     _s["slide_num"]=_i
 post_json={
@@ -793,6 +865,7 @@ post_json={
     "caption_full":  content.get("caption_full",""),
     "hashtags":      content.get("hashtags",""),
     "slides":        export_slides,
+    "next_preview":  content.get("next_preview", {}),
 }
 json_path=latest/"post_content.json"
 json_path.write_text(json.dumps(post_json,ensure_ascii=False,indent=2),encoding="utf-8")
