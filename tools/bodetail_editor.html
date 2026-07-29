@@ -75,6 +75,10 @@ input[type=file]{display:none;}
   line-height:1.2;box-shadow:0 0 0 2px rgba(176,132,74,0);transition:box-shadow .12s;overflow:hidden;
 }
 .subbox.active{box-shadow:0 0 0 2.5px var(--gold-b);}
+.subbox.st-outline{background:transparent!important;color:#fff!important;border-radius:0;
+  text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 2px 4px rgba(0,0,0,.9);}
+.subbox.st-dark{background:rgba(10,10,10,.92)!important;color:#fff!important;border-radius:2px;}
+.subbox.pinned{outline:1.5px dashed rgba(176,132,74,.55);outline-offset:2px;}
 .subbox.dragging{cursor:grabbing;opacity:.88;}
 .subbox.hidden{opacity:0;pointer-events:none;}
 .subbox .handle{position:absolute;display:none;z-index:10;}
@@ -282,7 +286,9 @@ input[type=file]{display:none;}
     <input type="file" id="r-videoFile" accept="video/*">
     <button class="btn ghost" onclick="r_exportJSON()">③ 내보내기</button>
     <button class="btn ghost" onclick="r_addSub()">+ 자막 추가</button>
-    <span class="hint">드래그=이동 · 핸들=크기 · 저장버튼으로 시간 확정</span>
+    <button class="btn ghost" onclick="r_addPinned()">📌 고정 헤드라인</button>
+    <button class="btn" id="rc-btn" onclick="r_toggleCenter()" style="background:#2a5a2c;color:#cde8cd;">⊹ 가운데 고정: ON</button>
+    <span class="hint">가운데 고정 ON=세로만 이동 · ↕Y/↔W 일괄로 전체 정렬 · 저장버튼으로 시간 확정</span>
   </div>
   <div class="r-layout">
     <div class="r-stage">
@@ -491,13 +497,13 @@ document.getElementById('r-videoFile').addEventListener('change',e=>{
   rv.addEventListener('loadedmetadata',()=>{rsc.max=rv.duration;rtl.textContent=`0.0s / ${rv.duration.toFixed(1)}s`;r_renderBoxes();},{once:true});
 });
 
-function r_renderAll(){r_renderList();r_renderBoxes();}
+function r_renderAll(){if(R_CENTER)r_centerAll();r_renderList();r_renderBoxes();}
 
 function r_renderBoxes(){
   rvw.querySelectorAll('.subbox').forEach(el=>el.remove());
   R_SUBS.forEach((s,i)=>{
     const box=document.createElement('div');
-    box.className='subbox';box.dataset.idx=i;
+    box.className='subbox'+(s.style&&s.style!=='box'?' st-'+s.style:'')+(s.pinned?' pinned':'');box.dataset.idx=i;
     box.style.left=(s.box_x*rsx())+'px';box.style.top=(s.box_y*rsy())+'px';
     box.style.width=(s.box_w*rsx())+'px';box.style.height=(s.box_h*rsy())+'px';
     box.style.fontSize=Math.max(7,(R_DATA&&R_DATA.font_size||60)*rsy()*0.82)+'px';
@@ -512,10 +518,29 @@ function r_renderBoxes(){
   r_syncVis();
 }
 
+let R_CENTER = true;                      // 가운데 고정 모드 (기본 ON)
+function r_canvasW(){ return (R_DATA && R_DATA.canvas && R_DATA.canvas.w) || 1080; }
+function r_centerOne(i){                  // 캔버스 기준 좌우 대칭
+  const s=R_SUBS[i]; if(!s) return;
+  s.box_x = Math.round((r_canvasW() - s.box_w)/2);
+}
+function r_centerAll(){ R_SUBS.forEach((s,i)=>r_centerOne(i)); }
+function r_toggleCenter(){
+  R_CENTER = !R_CENTER;
+  const b=document.getElementById('rc-btn');
+  if(R_CENTER){
+    r_centerAll(); r_renderBoxes();
+    b.textContent='⊹ 가운데 고정: ON';
+    b.style.background='#2a5a2c'; b.style.color='#cde8cd';
+  }else{
+    b.textContent='⊹ 가운데 고정: OFF';
+    b.style.background='transparent'; b.style.color='#9a958c';
+  }
+}
 function r_makeDrag(box,i){
   let sx,sy,ox,oy,d=false;
   box.addEventListener('mousedown',e=>{if(e.target.classList.contains('handle'))return;d=true;box.classList.add('dragging');r_setActive(i);sx=e.clientX;sy=e.clientY;ox=parseFloat(box.style.left);oy=parseFloat(box.style.top);e.preventDefault();});
-  window.addEventListener('mousemove',e=>{if(!d)return;let nx=ox+(e.clientX-sx),ny=oy+(e.clientY-sy);nx=Math.max(0,Math.min(nx,rvw.clientWidth-box.offsetWidth));ny=Math.max(0,Math.min(ny,rvw.clientHeight-box.offsetHeight));box.style.left=nx+'px';box.style.top=ny+'px';R_SUBS[i].box_x=Math.round(nx/rsx());R_SUBS[i].box_y=Math.round(ny/rsy());});
+  window.addEventListener('mousemove',e=>{if(!d)return;let nx=ox+(e.clientX-sx),ny=oy+(e.clientY-sy);ny=Math.max(0,Math.min(ny,rvw.clientHeight-box.offsetHeight));box.style.top=ny+'px';R_SUBS[i].box_y=Math.round(ny/rsy());if(R_CENTER){r_centerOne(i);box.style.left=(R_SUBS[i].box_x*rsx())+'px';}else{nx=Math.max(0,Math.min(nx,rvw.clientWidth-box.offsetWidth));box.style.left=nx+'px';R_SUBS[i].box_x=Math.round(nx/rsx());}});
   window.addEventListener('mouseup',()=>{if(d){d=false;box.classList.remove('dragging');}});
 }
 
@@ -523,7 +548,7 @@ function r_makeResize(box,i,cls){
   const h=box.querySelector('.handle.'+cls);
   let s0,o0w,o0h,o0l,o0t,res=false;
   h.addEventListener('mousedown',e=>{res=true;r_setActive(i);s0=(cls==='hl'||cls==='hr')?e.clientX:e.clientY;o0w=box.offsetWidth;o0h=box.offsetHeight;o0l=parseFloat(box.style.left);o0t=parseFloat(box.style.top);e.preventDefault();e.stopPropagation();});
-  window.addEventListener('mousemove',e=>{if(!res)return;const d=(cls==='hl'||cls==='hr')?(e.clientX-s0):(e.clientY-s0);if(cls==='hr'){const nw=Math.max(40,Math.min(o0w+d,rvw.clientWidth-o0l));box.style.width=nw+'px';R_SUBS[i].box_w=Math.round(nw/rsx());}else if(cls==='hl'){const nw=Math.max(40,o0w-d);const nl=Math.max(0,o0l+(o0w-nw));box.style.left=nl+'px';box.style.width=nw+'px';R_SUBS[i].box_x=Math.round(nl/rsx());R_SUBS[i].box_w=Math.round(nw/rsx());}else if(cls==='hb'){const nh=Math.max(20,Math.min(o0h+d,rvw.clientHeight-o0t));box.style.height=nh+'px';R_SUBS[i].box_h=Math.round(nh/rsy());}else if(cls==='ht'){const nh=Math.max(20,o0h-d);const nt=Math.max(0,o0t+(o0h-nh));box.style.top=nt+'px';box.style.height=nh+'px';R_SUBS[i].box_y=Math.round(nt/rsy());R_SUBS[i].box_h=Math.round(nh/rsy());}});
+  window.addEventListener('mousemove',e=>{if(!res)return;const d=(cls==='hl'||cls==='hr')?(e.clientX-s0):(e.clientY-s0);if(cls==='hr'||cls==='hl'){const raw=(cls==='hr')?(o0w+d):(o0w-d);const nw=Math.max(40,Math.min(raw,rvw.clientWidth));box.style.width=nw+'px';R_SUBS[i].box_w=Math.round(nw/rsx());if(R_CENTER){r_centerOne(i);box.style.left=(R_SUBS[i].box_x*rsx())+'px';}else if(cls==='hl'){const nl=Math.max(0,o0l+(o0w-nw));box.style.left=nl+'px';R_SUBS[i].box_x=Math.round(nl/rsx());}}else if(cls==='hb'){const nh=Math.max(20,Math.min(o0h+d,rvw.clientHeight-o0t));box.style.height=nh+'px';R_SUBS[i].box_h=Math.round(nh/rsy());}else if(cls==='ht'){const nh=Math.max(20,o0h-d);const nt=Math.max(0,o0t+(o0h-nh));box.style.top=nt+'px';box.style.height=nh+'px';R_SUBS[i].box_y=Math.round(nt/rsy());R_SUBS[i].box_h=Math.round(nh/rsy());}});
   window.addEventListener('mouseup',()=>{res=false;});
 }
 
@@ -532,7 +557,7 @@ function r_syncVis(){
   rvw.querySelectorAll('.subbox').forEach(box=>{
     const i=+box.dataset.idx;if(!R_SUBS[i]){box.classList.add('hidden');return;}
     const s=R_SUBS[i];const inRange=(t>=s.start&&t<s.end);const isActive=(i===R_ACTIVE);
-    const show=s.saved?inRange:(inRange||isActive);
+    const show=s.pinned?true:(s.saved?inRange:(inRange||isActive));
     box.classList.toggle('hidden',!show);
   });
 }
@@ -560,7 +585,21 @@ function r_renderList(){
         <button class="btn-jump" data-i="${i}">▶ 이 위치로</button>
         <button class="btn-save" data-i="${i}">✔ 저장</button>
       </div>
-      <div class="seg-actions"><button class="mini del" data-i="${i}">삭제</button></div>`;
+      <div class="seg-actions" style="border-top:1px dashed rgba(255,255,255,.08);padding-top:6px;margin-top:4px;">
+        <select class="mini stysel" data-i="${i}" style="background:var(--ink);color:#cbb894;">
+          <option value="box"${(s.style||'box')==='box'?' selected':''}>흰 박스</option>
+          <option value="outline"${s.style==='outline'?' selected':''}>외곽선(배경X)</option>
+          <option value="dark"${s.style==='dark'?' selected':''}>검은 박스</option>
+        </select>
+        <button class="mini pinbtn" data-i="${i}" style="${s.pinned?'background:#5a4a2a;color:#f0d9a0;border-color:#8a6a3a;':''}">${s.pinned?'📌 고정중':'고정'}</button>
+        <button class="mini bulksty" data-i="${i}" title="이 스타일을 전체 자막에 적용">스타일 일괄</button>
+      </div>
+      <div class="seg-actions">
+        <button class="mini bulky" data-i="${i}" title="이 자막의 세로 위치(Y)를 모든 자막에 적용">↕ Y 일괄</button>
+        <button class="mini bulkw" data-i="${i}" title="이 자막의 가로 폭(W)을 모든 자막에 적용">↔ W 일괄</button>
+        <button class="mini bulkall" data-i="${i}" title="Y·H·W를 모두 적용">⬛ 전체 일괄</button>
+        <button class="mini del" data-i="${i}">삭제</button>
+      </div>`;
     rsl.appendChild(seg);
   });
   rsl.querySelectorAll('textarea.rko').forEach(t=>{
@@ -571,6 +610,27 @@ function r_renderList(){
   rsl.querySelectorAll('input.ren').forEach(inp=>inp.addEventListener('input',e=>{R_SUBS[+e.target.dataset.i].end=parseFloat(e.target.value)||0;R_SUBS[+e.target.dataset.i].saved=false;r_refreshSaved(+e.target.dataset.i);r_syncVis();}));
   rsl.querySelectorAll('.btn-jump').forEach(b=>b.addEventListener('click',e=>{const i=+e.target.dataset.i;r_setActive(i);rv.currentTime=Math.max(0,R_SUBS[i].start);r_syncVis();}));
   rsl.querySelectorAll('.btn-save').forEach(b=>b.addEventListener('click',e=>{const i=+e.target.dataset.i;R_SUBS[i].saved=true;r_syncVis();r_refreshSaved(i);}));
+  function r_bulk(i,keys,label){
+    const src=R_SUBS[i], vals=keys.map(k=>`${k.replace('box_','').toUpperCase()}=${Math.round(src[k])}`).join(', ');
+    if(!confirm(`자막 ${i+1}의 ${label} 값(${vals})을\n전체 자막 ${R_SUBS.length}개에 적용할까요?\n\n※ 적용 후 개별로 다시 조정할 수 있습니다.`))return;
+    R_SUBS.forEach((s,j)=>{ if(j===i)return; keys.forEach(k=>{ s[k]=src[k]; }); });
+    if(R_CENTER)r_centerAll();
+    r_renderBoxes();
+    const btn=rsl.querySelector(`.bulk${label==='세로 위치'?'y':label==='가로 폭'?'w':'all'}[data-i="${i}"]`);
+    if(btn){const t=btn.textContent;btn.textContent='✔ 적용됨';btn.style.color='#6abf69';
+      setTimeout(()=>{btn.textContent=t;btn.style.color='';},1400);}
+  }
+  rsl.querySelectorAll('.stysel').forEach(sel=>sel.addEventListener('change',e=>{
+    const i=+e.target.dataset.i; R_SUBS[i].style=e.target.value; r_renderBoxes();}));
+  rsl.querySelectorAll('.pinbtn').forEach(b=>b.addEventListener('click',e=>{
+    const i=+e.target.dataset.i; R_SUBS[i].pinned=!R_SUBS[i].pinned; r_renderList(); r_renderBoxes();}));
+  rsl.querySelectorAll('.bulksty').forEach(b=>b.addEventListener('click',e=>{
+    const i=+e.target.dataset.i, v=R_SUBS[i].style||'box';
+    if(!confirm(`자막 ${i+1}의 스타일(${v})을 전체 ${R_SUBS.length}개에 적용할까요?`))return;
+    R_SUBS.forEach(s=>{s.style=v;}); r_renderList(); r_renderBoxes();}));
+  rsl.querySelectorAll('.bulky').forEach(b=>b.addEventListener('click',e=>r_bulk(+e.target.dataset.i,['box_y'],'세로 위치')));
+  rsl.querySelectorAll('.bulkw').forEach(b=>b.addEventListener('click',e=>r_bulk(+e.target.dataset.i,['box_w'],'가로 폭')));
+  rsl.querySelectorAll('.bulkall').forEach(b=>b.addEventListener('click',e=>r_bulk(+e.target.dataset.i,['box_y','box_h','box_w'],'위치·크기')));
   rsl.querySelectorAll('.del').forEach(b=>b.addEventListener('click',e=>{const i=+e.target.dataset.i;if(confirm(`자막 ${i+1} 삭제?`)){R_SUBS.splice(i,1);R_ACTIVE=-1;r_renderAll();}}));
 }
 
@@ -584,15 +644,24 @@ function r_refreshSaved(i){
 rv.addEventListener('timeupdate',()=>{if(!rsc.matches(':active'))rsc.value=rv.currentTime;rtl.textContent=`${rv.currentTime.toFixed(1)}s / ${(rv.duration||0).toFixed(1)}s`;r_syncVis();});
 rsc.addEventListener('input',()=>{rv.currentTime=parseFloat(rsc.value);r_syncVis();});
 
+function r_addPinned(){
+  const CWv=(R_DATA&&R_DATA.canvas&&R_DATA.canvas.w)||CW;
+  const dur=(R_DATA&&R_DATA.duration)||(rv&&rv.duration)||60;
+  R_SUBS.unshift({text_en:'',text_ko:'상단 고정 헤드라인',start:0,end:dur,
+    box_x:Math.round((CWv-980)/2),box_y:300,box_w:980,box_h:150,
+    style:'dark',pinned:true,saved:false});
+  if(!R_DATA)R_DATA={canvas:{w:CW,h:CH},font_size:60,subtitles:R_SUBS};
+  R_ACTIVE=0; r_renderAll();
+}
 function r_addSub(){
-  R_SUBS.push({text_en:'',text_ko:'새 자막',start:0,end:2,box_x:240,box_y:300,box_w:600,box_h:130,saved:false});
+  R_SUBS.push({text_en:'',text_ko:'새 자막',start:0,end:2,box_x:240,box_y:300,box_w:600,box_h:130,style:'box',pinned:false,saved:false});
   if(!R_DATA)R_DATA={canvas:{w:CW,h:CH},font_size:60,subtitles:R_SUBS};
   r_renderAll();
 }
 
 function r_exportJSON(){
   if(!R_DATA){alert('먼저 JSON을 불러오세요.');return;}
-  R_DATA.subtitles=R_SUBS.map(s=>{const{saved,...rest}=s;return rest;});
+  R_DATA.subtitles=R_SUBS.map(s=>{const{saved,...rest}=s;rest.style=rest.style||'box';rest.pinned=!!rest.pinned;return rest;});
   const blob=new Blob([JSON.stringify(R_DATA,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='subtitles.json';a.click();a.remove();
 }
