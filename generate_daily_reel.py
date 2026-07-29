@@ -359,15 +359,35 @@ def layout_subtitle(seg):
 # 11. 자막 PNG 렌더 (둥근 흰박스 + 검은글씨)
 # ══════════════════════════════════════════════════════════════
 def render_subtitle_png(seg, idx) -> Path:
-    b=seg["box"]; font=fnt(KO_SUB_FONT_FILE,KO_SUB_SIZE)
+    """자막 스타일 3종
+       box     — 흰 배경 + 검은 글씨 (기본)
+       outline — 배경 없이 흰 글씨 + 검은 외곽선
+       dark    — 검은 배경 + 흰 글씨 (상단 고정 헤드라인용)
+    """
+    b=seg["box"]; style=(seg.get("style") or "box").lower()
+    font=fnt(KO_SUB_FONT_FILE,KO_SUB_SIZE)
     img=Image.new("RGBA",(b["w"],b["h"]),(0,0,0,0))
     d=ImageDraw.Draw(img)
-    d.rounded_rectangle([(0,0),(b["w"]-1,b["h"]-1)],radius=BOX_RADIUS,fill=(255,255,255,255))
+
+    if style=="box":
+        d.rounded_rectangle([(0,0),(b["w"]-1,b["h"]-1)],radius=BOX_RADIUS,fill=(255,255,255,255))
+        fill=(15,15,15,255); stroke_w=0; stroke_c=None
+    elif style=="dark":
+        d.rectangle([(0,0),(b["w"]-1,b["h"]-1)],fill=(10,10,10,235))
+        fill=(255,255,255,255); stroke_w=0; stroke_c=None
+    else:  # outline
+        fill=(255,255,255,255)
+        stroke_w=max(3,int(KO_SUB_SIZE*0.09)); stroke_c=(0,0,0,255)
+
     line_h=int(KO_SUB_SIZE*LINE_SPACING)
     y=BOX_PAD_Y
     for line in seg["lines"]:
         w=d.textlength(line,font=font)
-        d.text(((b["w"]-w)//2,y),line,font=font,fill=(15,15,15,255))
+        pos=((b["w"]-w)//2,y)
+        if stroke_w:
+            d.text(pos,line,font=font,fill=fill,stroke_width=stroke_w,stroke_fill=stroke_c)
+        else:
+            d.text(pos,line,font=font,fill=fill)
         y+=line_h
     p=OUT/f"sub_{idx:02d}.png"; img.save(p,"PNG")
     return p
@@ -390,6 +410,8 @@ def save_subtitles_json(timed, dur, video_rel):
             "text_ko": s.get("text_ko",""),
             "start": s["start"], "end": s["end"],
             "box_x": b["x"], "box_y": b["y"], "box_w": b["w"], "box_h": b["h"],
+            "style": s.get("style","box"),      # box | outline | dark
+            "pinned": bool(s.get("pinned",False)),  # true면 영상 내내 고정 표시
         })
     (OUT/"subtitles.json").write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
     return data
@@ -606,8 +628,11 @@ def build_reel_B(normalized, timed, sub_pngs, outro_img, wordmark_img) -> Path:
     for k,seg in enumerate(timed):
         inp=k+2
         b=seg["box"]; nxt=f"v{k+2}"
-        fc.append(f"[{last}][{inp}:v]overlay={b['x']}:{b['y']}:"
-                  f"enable='between(t,{seg['start']:.2f},{seg['end']:.2f})'[{nxt}]")
+        if seg.get("pinned"):          # 고정 자막 — 시간 조건 없이 전 구간 표시
+            fc.append(f"[{last}][{inp}:v]overlay={b['x']}:{b['y']}[{nxt}]")
+        else:
+            fc.append(f"[{last}][{inp}:v]overlay={b['x']}:{b['y']}:"
+                      f"enable='between(t,{seg['start']:.2f},{seg['end']:.2f})'[{nxt}]")
         last=nxt
     filter_complex=";".join(fc)
 
@@ -723,6 +748,8 @@ if MODE=="B":
                 "box_x": int(s["box_x"]), "box_y": int(s["box_y"]),
             }
             if s.get("box_w"): item["box_w"]=int(s["box_w"])
+            item["style"]  = (s.get("style") or "box").lower()      # box|outline|dark
+            item["pinned"] = bool(s.get("pinned", False))            # 전 구간 고정 표시
             timed.append(item)
         # 캡션/썸네일은 편집본에 있으면 쓰고 없으면 생성
         content = edited.get("content") or {}
