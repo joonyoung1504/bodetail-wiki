@@ -3,8 +3,7 @@ name: 리버니 네일 데일리 게시물
 # ※ GitHub 무료 러너 특성상 몇 분 지연될 수 있음(보통 09:00~09:15 도착)
 # 매일 자동 실행: 새 주제로 생성 → 카드 렌더 → content.json을 메일 발송(이미지 메일은 중단)
 on:
-  schedule:
-    - cron: '0 0 * * *'
+  
   workflow_dispatch:
     inputs:
       topic_override:
