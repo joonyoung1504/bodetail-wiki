@@ -1,0 +1,134 @@
+{
+  "section_label": "오늘의 디테일",
+  "vol": "VOL.01",
+  "caption_full": "스킨케어 시작했는데 효과가 없다면, 제품보다 피부 구조를 먼저 보세요.\n여자 루틴을 그대로 쓰면 절반은 헛수고일 수 있습니다.\n\n1️⃣ 피지 분비량, 여성의 2배\n2️⃣ 각질층 20~30% 두꺼워 흡수가 느리다\n3️⃣ 면도가 매일 피부 장벽을 깎는다\n4️⃣ 남성 전용 제품이 꼭 필요한지\n\n이 카드 저장해두면 루틴 세울 때 기준이 생겨요. @bodetail_official\n\n다음 편 — 내 피부타입, 30분이면 안다",
+  "hashtags": "#bodetail #남자피부 #남자스킨케어 #남자그루밍 #스킨케어루틴 #피부관리 #남성피부 #그루밍 #피지관리 #면도후관리 #남자기초케어 #피부구조 #스킨케어팁 #남자뷰티 #기초스킨케어",
+  "slides": [
+    {
+      "slide_num": 1,
+      "type": "cover",
+      "headline_sub": "같은 루틴으로 안 되는 이유",
+      "headline_main": [
+        "피부",
+        "4가지 차이"
+      ],
+      "headline_serif": "남자 피부, 구조부터 다르다",
+      "image_queries": [
+        "man dark studio portrait moody closeup face",
+        "male editorial dark skin texture moody",
+        "men grooming dark dramatic portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/16577924/pexels-photo-16577924.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 2,
+      "type": "premise",
+      "subhead": "여자 루틴을 그대로 쓰면 절반은 헛수고입니다",
+      "body": [
+        "스킨케어를 시작했는데 효과가 없다면 제품보다 피부 구조가 문제일 수 있습니다.",
+        "남성 피부는 여성과 호르몬·구조·장벽 환경이 실질적으로 다릅니다.",
+        "그래서 오늘 4가지 차이와 각각의 실행법을 정리했습니다."
+      ],
+      "image_query": "",
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 3,
+      "type": "content",
+      "number": "01",
+      "subhead": "피지 분비량, 여성의 2배",
+      "body": [
+        "테스토스테론이 피지선을 자극해 2배 많이 분비된다.",
+        "세안은 BHA(살리실산) 성분 클렌저로, 주 2~3회."
+      ],
+      "caption": "클렌저 성분이 루틴을 가른다.",
+      "image_queries": [
+        "man face dark moody closeup skin pores editorial",
+        "male skin texture dark studio portrait",
+        "men face closeup dramatic lighting moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/9100224/pexels-photo-9100224.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 4,
+      "type": "content",
+      "number": "02",
+      "subhead": "각질층, 여성보다 20~30% 두껍다",
+      "body": [
+        "여성보다 각질층이 20~30% 두꺼워 흡수가 느리다.",
+        "세안 30초 안에 도포해야 흡수율이 올라간다."
+      ],
+      "caption": "세안 직후 30초가 핵심이다.",
+      "image_queries": [
+        "man applying skincare dark moody closeup",
+        "male hands face cream dark editorial",
+        "men grooming skincare dark studio moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/16672782/pexels-photo-16672782.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 5,
+      "type": "content",
+      "number": "03",
+      "subhead": "면도가 매일 장벽을 깎는다",
+      "body": [
+        "면도날이 각질층 상단 0.02mm를 반복 제거한다.",
+        "면도 직후 판테놀·세라마이드 성분 토너를 먼저 바른다."
+      ],
+      "caption": "면도 후 첫 제품이 장벽을 결정한다.",
+      "image_queries": [
+        "man shaving dark moody bathroom editorial",
+        "male face razor dark dramatic closeup",
+        "men grooming shaving dark studio portrait"
+      ],
+      "image_url": "https://images.pexels.com/photos/22890185/pexels-photo-22890185.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 6,
+      "type": "content",
+      "number": "04",
+      "subhead": "남성 전용 제품이 꼭 필요할까",
+      "body": [
+        "성분 기준으로는 필수 아니다. pH 5.5 이하면 충분하다.",
+        "단, 향 강한 여성 제품은 피지 분비를 자극할 수 있다."
+      ],
+      "caption": "라벨보다 성분표가 기준이다.",
+      "image_queries": [
+        "man skincare products dark moody flat lay editorial",
+        "male grooming bottles dark dramatic studio",
+        "men cosmetics dark ink moody editorial"
+      ],
+      "image_url": "https://images.pexels.com/photos/36779956/pexels-photo-36779956.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "slide_num": 7,
+      "type": "content",
+      "number": "04+",
+      "subhead": "오늘 4가지, 루틴에 바로 쓴다",
+      "body": [
+        "피지·각질·면도·성분 — 구조를 알면 루틴이 간결해진다.",
+        "매주 이런 디테일을 정리합니다. 저장해두면 기준이 생깁니다."
+      ],
+      "caption": "디테일이 루틴의 격을 만든다.",
+      "image_queries": [
+        "man dark editorial portrait moody confident",
+        "male grooming dark studio dramatic portrait",
+        "men dark ink editorial fashion moody"
+      ],
+      "image_url": "https://images.pexels.com/photos/7320183/pexels-photo-7320183.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    },
+    {
+      "type": "closing",
+      "image_url": "",
+      "next_preview": {
+        "title": "내 피부타입, 30분이면 안다",
+        "sub": "자가진단 4단계"
+      },
+      "slide_num": 8
+    }
+  ],
+  "next_preview": {
+    "title": "내 피부타입, 30분이면 안다",
+    "sub": "자가진단 4단계"
+  }
+}
