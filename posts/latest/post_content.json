@@ -1,33 +1,34 @@
 {
-  "section_label": "오늘의 디테일",
+  "section_label": "오늘의 지식",
   "vol": "VOL.01",
-  "caption_full": "스킨케어 시작했는데 효과가 없다면, 제품보다 피부 구조를 먼저 보세요.\n여자 루틴을 그대로 쓰면 절반은 헛수고일 수 있습니다.\n\n1️⃣ 피지 분비량, 여성의 2배\n2️⃣ 각질층 20~30% 두꺼워 흡수가 느리다\n3️⃣ 면도가 매일 피부 장벽을 깎는다\n4️⃣ 남성 전용 제품이 꼭 필요한지\n\n이 카드 저장해두면 루틴 세울 때 기준이 생겨요. @bodetail_official\n\n다음 편 — 내 피부타입, 30분이면 안다",
-  "hashtags": "#bodetail #남자피부 #남자스킨케어 #남자그루밍 #스킨케어루틴 #피부관리 #남성피부 #그루밍 #피지관리 #면도후관리 #남자기초케어 #피부구조 #스킨케어팁 #남자뷰티 #기초스킨케어",
+  "caption_full": "피부타입 안다고 생각했는데, 루틴 바꿀 때마다 흔들린다면 판정 기준 자체가 없던 거다.\n느낌이 아니라 '세안 후 30분, 부위별 상태'로 읽어야 한다.\n\n1️⃣ 판정 준비 — 세안 후 30분 공백\n2️⃣ T존 vs 볼 부위별 체크\n3️⃣ 수분부족지성·민감성 오해 해소\n4️⃣ 계절에 따라 타입은 바뀐다\n5️⃣ 타입별 첫 번째 교체 제품\n\n지금 쓰는 클렌저·보습제가 맞는지 확인할 때 꺼내 쓰세요. 저장해두면 기준이 생깁니다. @bodetail_official\n\n다음 편 — 피부타입별 첫 세럼 5",
+  "hashtags": "#bodetail #남자피부타입 #남자스킨케어 #피부타입판정 #남자그루밍 #남자루틴 #복합성피부 #지성피부 #건성피부 #수분부족지성 #민감성피부 #남자기초케어 #남자뷰티 #스킨케어루틴 #그루밍",
   "slides": [
     {
       "slide_num": 1,
       "type": "cover",
-      "headline_sub": "같은 루틴으로 안 되는 이유",
+      "headline_sub": "지금 쓰는 제품, 내 피부에 맞는가",
       "headline_main": [
-        "피부",
-        "4가지 차이"
+        "피부타입",
+        "5가지 판정"
       ],
-      "headline_serif": "남자 피부, 구조부터 다르다",
+      "headline_serif": "30분이면 충분하다",
       "image_queries": [
-        "man dark studio portrait moody closeup face",
-        "male editorial dark skin texture moody",
+        "man dark studio portrait close up skin",
+        "male editorial moody face skin texture dark",
         "men grooming dark dramatic portrait"
       ],
-      "image_url": "https://images.pexels.com/photos/16577924/pexels-photo-16577924.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/4584395/pexels-photo-4584395.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 2,
       "type": "premise",
-      "subhead": "여자 루틴을 그대로 쓰면 절반은 헛수고입니다",
+      "subhead": "피부타입은 느낌이 아니라 조건으로 읽는다",
       "body": [
-        "스킨케어를 시작했는데 효과가 없다면 제품보다 피부 구조가 문제일 수 있습니다.",
-        "남성 피부는 여성과 호르몬·구조·장벽 환경이 실질적으로 다릅니다.",
-        "그래서 오늘 4가지 차이와 각각의 실행법을 정리했습니다."
+        "클렌징 후 '당기면 건성, 번들거리면 지성'이라고 배웠다면 절반만 맞다.",
+        "수분이 부족해도 피지가 과잉 분비되고, 민감한 피부가 지성처럼 보이기도 한다.",
+        "잘못 읽은 타입이 루틴 전체를 어긋나게 만든다.",
+        "오늘은 세안 후 30분, 부위별 상태로 타입을 판정하는 기준 5가지를 정리했다."
       ],
       "image_query": "",
       "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
@@ -36,99 +37,99 @@
       "slide_num": 3,
       "type": "content",
       "number": "01",
-      "subhead": "피지 분비량, 여성의 2배",
+      "subhead": "판정 준비 — 세안 후 30분 공백",
       "body": [
-        "테스토스테론이 피지선을 자극해 2배 많이 분비된다.",
-        "세안은 BHA(살리실산) 성분 클렌저로, 주 2~3회."
+        "세안 후 아무것도 바르지 않고 30분 그대로 둔다.",
+        "공조·냉난방 켠 실내에서 피부가 스스로 회복하는 상태를 본다."
       ],
-      "caption": "클렌저 성분이 루틴을 가른다.",
+      "caption": "첨가물 없이 피부 본연의 반응만 읽는다.",
       "image_queries": [
-        "man face dark moody closeup skin pores editorial",
-        "male skin texture dark studio portrait",
-        "men face closeup dramatic lighting moody"
+        "man washing face dark bathroom moody",
+        "male grooming sink dark editorial",
+        "men face cleansing dark studio"
       ],
-      "image_url": "https://images.pexels.com/photos/9100224/pexels-photo-9100224.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/37711447/pexels-photo-37711447.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 4,
       "type": "content",
       "number": "02",
-      "subhead": "각질층, 여성보다 20~30% 두껍다",
+      "subhead": "부위별 체크 — T존 vs 볼",
       "body": [
-        "여성보다 각질층이 20~30% 두꺼워 흡수가 느리다.",
-        "세안 30초 안에 도포해야 흡수율이 올라간다."
+        "T존 번들 + 볼 당김 → 복합성. T존·볼 모두 번들 → 지성.",
+        "T존·볼 모두 당기고 잔주름 느낌 → 건성. 30분 후 판정이 기준이다."
       ],
-      "caption": "세안 직후 30초가 핵심이다.",
+      "caption": "볼이 기준이다. T존은 누구나 약간 번들거린다.",
       "image_queries": [
-        "man applying skincare dark moody closeup",
-        "male hands face cream dark editorial",
-        "men grooming skincare dark studio moody"
+        "man face close up skin dark moody studio",
+        "male skin texture editorial dark portrait",
+        "men face detail dark dramatic lighting"
       ],
-      "image_url": "https://images.pexels.com/photos/16672782/pexels-photo-16672782.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/6337528/pexels-photo-6337528.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 5,
       "type": "content",
       "number": "03",
-      "subhead": "면도가 매일 장벽을 깎는다",
+      "subhead": "흔한 오해 — 기름지면 다 지성이 아니다",
       "body": [
-        "면도날이 각질층 상단 0.02mm를 반복 제거한다.",
-        "면도 직후 판테놀·세라마이드 성분 토너를 먼저 바른다."
+        "수분부족지성: 볼이 당기면서 T존은 번들거린다. 보습이 먼저다.",
+        "민감성: 30분 내 붉어지거나 열감·가려움 → 타입보다 진정이 우선이다."
       ],
-      "caption": "면도 후 첫 제품이 장벽을 결정한다.",
+      "caption": "번들거림과 지성을 동일시하면 루틴이 어긋난다.",
       "image_queries": [
-        "man shaving dark moody bathroom editorial",
-        "male face razor dark dramatic closeup",
-        "men grooming shaving dark studio portrait"
+        "man skin close up redness moody dark",
+        "male face detail editorial dark studio skin",
+        "men grooming skincare dark portrait close up"
       ],
-      "image_url": "https://images.pexels.com/photos/22890185/pexels-photo-22890185.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/5938576/pexels-photo-5938576.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 6,
       "type": "content",
       "number": "04",
-      "subhead": "남성 전용 제품이 꼭 필요할까",
+      "subhead": "계절에 따라 타입은 바뀐다",
       "body": [
-        "성분 기준으로는 필수 아니다. pH 5.5 이하면 충분하다.",
-        "단, 향 강한 여성 제품은 피지 분비를 자극할 수 있다."
+        "여름 지성이 겨울엔 복합·건성으로 전환된다. 연 2회 재판정이 기준이다.",
+        "타입이 바뀌면 클렌저·보습제부터 교체한다. 루틴 전체는 그 다음이다."
       ],
-      "caption": "라벨보다 성분표가 기준이다.",
+      "caption": "6개월마다 같은 방법으로 다시 읽어라.",
       "image_queries": [
-        "man skincare products dark moody flat lay editorial",
-        "male grooming bottles dark dramatic studio",
-        "men cosmetics dark ink moody editorial"
+        "man winter skin dark moody editorial portrait",
+        "male grooming seasonal dark studio",
+        "men face dramatic dark lighting close up skin"
       ],
-      "image_url": "https://images.pexels.com/photos/36779956/pexels-photo-36779956.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/5217922/pexels-photo-5217922.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "slide_num": 7,
       "type": "content",
-      "number": "04+",
-      "subhead": "오늘 4가지, 루틴에 바로 쓴다",
+      "number": "05",
+      "subhead": "오늘 판정했다면, 다음 한 가지만",
       "body": [
-        "피지·각질·면도·성분 — 구조를 알면 루틴이 간결해진다.",
-        "매주 이런 디테일을 정리합니다. 저장해두면 기준이 생깁니다."
+        "지성·복합 → 폼 클렌저 + 논코메도제닉 보습. 건성 → 크림 클렌저로 바꾼다.",
+        "이 카드, 제품 바꿀 때 기준표로 꺼내 쓰면 된다."
       ],
-      "caption": "디테일이 루틴의 격을 만든다.",
+      "caption": "매주 남자 피부·루틴 기준이 올라옵니다.",
       "image_queries": [
-        "man dark editorial portrait moody confident",
-        "male grooming dark studio dramatic portrait",
-        "men dark ink editorial fashion moody"
+        "man dark studio portrait editorial grooming product",
+        "male skincare product dark moody flat lay",
+        "men grooming routine dark editorial still life"
       ],
-      "image_url": "https://images.pexels.com/photos/7320183/pexels-photo-7320183.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      "image_url": "https://images.pexels.com/photos/7321553/pexels-photo-7321553.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
     },
     {
       "type": "closing",
       "image_url": "",
       "next_preview": {
-        "title": "내 피부타입, 30분이면 안다",
-        "sub": "자가진단 4단계"
+        "title": "피부타입별 첫 세럼 5",
+        "sub": "지성·건성·복합·민감·트러블"
       },
       "slide_num": 8
     }
   ],
   "next_preview": {
-    "title": "내 피부타입, 30분이면 안다",
-    "sub": "자가진단 4단계"
+    "title": "피부타입별 첫 세럼 5",
+    "sub": "지성·건성·복합·민감·트러블"
   }
 }
