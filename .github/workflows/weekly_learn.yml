@@ -1,8 +1,7 @@
 name: bodetail 주간 성과 학습
 
 on:
-  schedule:
-    - cron: '0 12 * * 0'   # 매주 일요일 21:00 KST
+    # 매주 일요일 21:00 KST
   workflow_dispatch:
 
 permissions:
