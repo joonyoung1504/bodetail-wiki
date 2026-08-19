@@ -1,0 +1,35 @@
+name: bodetail 주간 성과 학습
+
+on:
+    # 매주 일요일 21:00 KST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  learn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: 패키지 설치
+        run: pip install anthropic requests
+      - name: 인스타 인사이트 수집 (토큰 있을 때만)
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: python scripts/fetch_ig_insights.py
+      - name: 성과 분석 → 학습 규칙 갱신
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTROPIC_API_KEY }}
+        run: python scripts/learn_from_results.py
+      - name: 커밋
+        run: |
+          git config --local user.email "bot@bodetail.com"
+          git config --local user.name "bodetail-bot"
+          git add content/
+          git diff --staged --quiet || git commit -m "🧠 $(date +'%Y-%m-%d') 주간 성과 학습"
+          git push

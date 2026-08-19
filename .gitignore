@@ -1,0 +1,13 @@
+reels/latest_ai/
+_aiwork/
+
+# 위키 볼트에서는 바이너리 산출물을 추적하지 않는다 (2026-08-19)
+posts/
+posts_nail/
+reels/
+videos/
+assets_brand/
+__pycache__/
+*.pyc
+*.mp4
+*.mp3

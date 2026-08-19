@@ -1,0 +1,132 @@
+name: 🎨 AI 릴스 조립 (힉스필드)
+
+on:
+  push:
+    paths:
+      - 'videos/ai_reel/**'
+  workflow_dispatch:
+    inputs:
+      sub_y:
+        description: '자막 세로 위치 (기본 1180)'
+        required: false
+        default: ''
+      sub_size:
+        description: '자막 크기 (기본 58)'
+        required: false
+        default: ''
+      bgm_vol:
+        description: 'BGM 볼륨 (기본 0.18)'
+        required: false
+        default: ''
+      archive:
+        description: '날짜별 아카이브 사본 (1=생성, 기본 미생성)'
+        required: false
+        default: ''
+      target_lufs:
+        description: '통합 음량 LUFS (기본 -14, 인스타 기준)'
+        required: false
+        default: ''
+      fill_mode:
+        description: '클립이 짧을 때: auto(감속+역재생) / slow / freeze'
+        required: false
+        default: ''
+
+# 같은 브랜치에서 새 푸시가 오면 진행 중인 렌더를 취소하고 최신 상태로 1회만 실행.
+# 이게 없으면 두 번 나눠 올릴 때 워크플로가 겹쳐 git 충돌로 실패한다.
+concurrency:
+  group: ai-reel-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    # ubuntu-latest 는 어느 날 조용히 바뀐다(ffmpeg/폰트 버전 변경 → 렌더 결과 변화).
+    # 버전을 고정해 재현 가능한 빌드를 보장한다.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: ffmpeg + 한글 폰트 설치
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fonts-noto-cjk-extra --no-install-recommends
+          fc-cache -f > /dev/null
+          echo "폰트: $(fc-list | grep -ci 'noto.*cjk')개"
+          echo "── 렌더 환경(재현성 확인용) ──"
+          ffmpeg -version | head -1
+          echo "CPU 코어: $(nproc)"
+
+      - name: 조립
+        env:
+          SUB_Y:   ${{ github.event.inputs.sub_y }}
+          SUB_SIZE: ${{ github.event.inputs.sub_size }}
+          BGM_VOL: ${{ github.event.inputs.bgm_vol }}
+          ARCHIVE: ${{ github.event.inputs.archive }}
+          TARGET_LUFS: ${{ github.event.inputs.target_lufs }}
+          FILL_MODE: ${{ github.event.inputs.fill_mode }}
+        run: python assemble_ai_reel.py
+
+      # 커밋과 별개로 아티팩트로도 받을 수 있게 (저장소 용량 걱정될 때 유용)
+      - name: 아티팩트 업로드
+        if: hashFiles('reels/latest_ai/reel_ai.mp4') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: bodetail-ai-reel
+          path: reels/latest_ai/
+          retention-days: 30
+
+      # ⚠️ 결과물(mp4)은 git에 커밋하지 않는다.
+      #    git은 삭제해도 히스토리에 바이너리를 영구 보관하므로,
+      #    매 실행마다 커밋하면 저장소가 계속 불어난다.
+      #    완성본은 위 "아티팩트 업로드"에서 받는다.
+      # 우리 작업은 "입력 파일 삭제"뿐이므로 리베이스가 필요 없다.
+      # 매 시도마다 원격 최신 상태에서 다시 시작하면 충돌 자체가 성립하지 않고,
+      # 중간 상태가 꼬여 데드락에 빠질 여지도 없다(멱등 연산).
+      # ※ 렌더 결과물은 .gitignore 대상이라 reset --hard 에도 지워지지 않으며,
+      #    앞 단계에서 이미 아티팩트로 업로드가 끝났다.
+      - name: 입력 파일 정리 (결과물은 커밋하지 않음)
+        run: |
+          set -u
+          git config user.name  "bodetail-bot"
+          git config user.email "bot@bodetail.com"
+          BR="${GITHUB_REF_NAME}"
+          for i in 1 2 3; do
+            git fetch --quiet origin "$BR"
+            git reset --quiet --hard "origin/$BR"      # 항상 원격 최신에서 출발
+            rm -f videos/ai_reel/clip_*.mp4  videos/ai_reel/clip_*.MP4 \
+                  videos/ai_reel/voice_*.mp3 videos/ai_reel/voice_*.wav \
+                  videos/ai_reel/voice_*.m4a videos/ai_reel/script.txt \
+                  videos/ai_reel/bgm.* 2>/dev/null || true
+            git add -A videos/ai_reel
+            if git diff --staged --quiet; then
+              echo "✅ 정리할 입력 파일 없음 (이미 정리됨)"
+              exit 0
+            fi
+            git commit --quiet -m "🧹 $(date +%Y-%m-%d) AI 릴스 입력 정리"
+            if git push --quiet origin "HEAD:$BR"; then
+              echo "✅ 입력 파일 정리 완료"
+              exit 0
+            fi
+            echo "⏳ 다른 워크플로와 푸시가 겹침 — 원격 최신 상태로 재시도 ($i/3)"
+            sleep 5
+          done
+          echo "::error::입력 파일 정리 실패 — videos/ai_reel/ 의 clip_*, voice_*, script.txt 를 수동으로 삭제하세요."
+          exit 1
+
+      - name: 요약
+        if: always()
+        run: |
+          echo "## 🎨 AI 릴스 조립" >> $GITHUB_STEP_SUMMARY
+          if [ -f reels/latest_ai/reel_ai.mp4 ]; then
+            echo "- ✅ reel_ai.mp4 ($(du -h reels/latest_ai/reel_ai.mp4 | cut -f1)) — 자막 포함" >> $GITHUB_STEP_SUMMARY
+            echo "- 📥 **이 페이지 하단 Artifacts 에서 다운로드하세요** (저장소에는 커밋되지 않습니다)" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat reels/latest_ai/info.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ 생성 실패 — 위 '조립' 단계 로그를 확인하세요" >> $GITHUB_STEP_SUMMARY
+          fi
