@@ -6,13 +6,16 @@ WIKI-RULES.md/CLAUDE.md에 문장으로만 적혀 있던 규칙을 실제로 강
 1. decisions/ 폴더 파일 삭제 차단 (deprecated 태그 여부와 무관 — 삭제 자체를 금지)
 2. decisions/ 파일 내용이 deprecated 태그 없이 대부분(80% 이상) 삭제되면 차단
 3. 스테이징된 .md 파일에 frontmatter summary 필드가 없으면 경고(차단 아님)
-4. 커밋에 50개 이상 파일이 포함되면 CLAUDE.md 예외조항 확인 y/n 프롬프트
+4. posts/latest/post_content.json의 표지 headline이 잠금값과 다르면 차단
+   (posts/는 .gitignore 대상이라 스테이징 여부와 무관하게 매 커밋마다 검사)
+5. 커밋에 50개 이상 파일이 포함되면 CLAUDE.md 예외조항 확인 y/n 프롬프트
 
 exit 0 = 커밋 진행, exit 1 = 커밋 차단.
 """
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 # Windows 콘솔 기본 코드페이지(cp949 등)로 한글 출력이 깨지는 것 방지
 if hasattr(sys.stdout, "reconfigure"):
@@ -147,6 +150,24 @@ def check_summary_warnings(entries):
     return warnings
 
 
+def check_post_headline_consistency():
+    """posts/latest/post_content.json의 표지 headline이 잠금값(_locked_headline)과
+    일치하는지 scripts/check_post_consistency.py로 검사한다.
+
+    posts/ 는 .gitignore 대상이라 '스테이징된 파일'만 보는 방식으로는 이 검사를
+    걸 수 없다 — 그래서 git 상태와 무관하게 매 커밋마다 무조건 한 번 실행한다.
+    반환: (통과여부, 출력텍스트)
+    """
+    checker = Path(__file__).resolve().parent / "check_post_consistency.py"
+    if not checker.exists():
+        return True, ""
+    result = subprocess.run(
+        [sys.executable, str(checker)],
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+    return result.returncode == 0, (result.stdout + result.stderr).strip()
+
+
 def check_bulk_change(entries):
     count = len(entries)
     if count < BULK_CHANGE_THRESHOLD:
@@ -167,6 +188,15 @@ def main():
 
     problems = check_decisions_integrity(entries)
     warnings = check_summary_warnings(entries)
+
+    headline_ok, headline_output = check_post_headline_consistency()
+    if headline_output:
+        print(headline_output)
+    if not headline_ok:
+        problems.append(
+            "[표지 headline 불일치] posts/latest/post_content.json\n"
+            "    위 scripts/check_post_consistency.py 출력을 참고하세요."
+        )
 
     if warnings:
         print("⚠ summary 필드 누락 (경고만, 커밋은 계속 진행됩니다):")

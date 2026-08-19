@@ -10,7 +10,7 @@ generate_daily_post.py  — bodetail 일일 게시물 완전 자동화 v7
 =====================================================================
 """
 
-import os, json, re, requests, io
+import os, json, re, requests, io, sys
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 import numpy as np
@@ -242,9 +242,11 @@ PICK_USER = f"""오늘은 제품 추천(PICK) 게시물이야. JSON으로 만들
    · 원 단위로 정확히 쓴다: "23,900원 / 55ml" — "약 2만원대" 같은 어림 표기 절대 금지.
    · 검색으로 확인한 **올리브영 판매가** 기준. 정가와 다르면 판매가를 쓴다.
    · price 필드 끝에 기준 시점을 붙인다 → "23,900원 / 55ml · {DATE[:7]} 기준"
+★★ headline_main(표지 큰 제목)은 쓰지 마라 — 시스템이 topics_30.json의 title_main으로 자동 고정한다.
+   너는 headline_sub(부제 한 줄)와 headline_serif(구체 약속)만 써라.
 JSON:
 {{"section_label":"오늘의 PICK","vol":"VOL.01","slides":[
-  {{"slide_num":1,"type":"cover","headline_sub":"에디터 한줄","headline_main":["제목1","제목2"],"headline_serif":"이달의 추천 N선","image_queries":["men grooming product dark moody","male skincare luxury dark","men cologne bottle cinematic"]}},
+  {{"slide_num":1,"type":"cover","headline_sub":"에디터 한줄","headline_serif":"이달의 추천 N선","image_queries":["men grooming product dark moody","male skincare luxury dark","men cologne bottle cinematic"]}},
   {{"slide_num":2,"type":"pick","number":"01","product_name":"제품명(브랜드 포함)","price":"가격대","stars":4,"one_line":"한줄픽(15자이내)","body":["포인트1","포인트2"],"caption":"핵심 선언.","image_queries":["men face cream luxury dark","male skincare product moody","men grooming cream dark"]}}
 ],"caption_full":"캡션","hashtags":"#bodetail #남자그루밍 ..."}}
 ★ slides에는 cover와 pick 타입만. summary·outro·closing 등 다른 타입 절대 금지 — 마무리 카드는 시스템이 자동 추가."""
@@ -252,7 +254,9 @@ JSON:
 CONTENT_USER = f"""오늘 게시물을 JSON으로 만들어줘.
 주제: {topic['title_main']} / 섹션: {topic['section']} / 후킹: {topic['hook_type']} / 슬라이드: {topic['num_slides']}
 {QUALITY}
-★ 제목: 선언적·묵직하게. 숫자 포함. 커버 headline_main 한줄 8자이내.
+★★ 표지 headline_main(큰 제목)은 절대 쓰지 마라 — 시스템이 topics_30.json의 title_main으로
+   자동 고정하고, 네가 뭘 쓰든 무시하고 덮어쓴다. 과거 "표지 제목이 다음 편 예고와 어긋난다"는
+   사고가 있었던 자리라 코드 레벨에서 강제한다. 너는 headline_sub(부제 한 줄)만 써라.
 ★★ 분량 상한 (가독성 — 어기면 카드가 글자로 뒤덮여 아무도 안 읽는다)
    · subhead: 반드시 한 줄, 18자 이내. "—"로 두 문장 잇지 말 것. (✗ "피지가 2배 많다 — 클렌저 선택부터 갈린다" → ○ "피지가 2배, 클렌저부터 다르다")
    · body: 정확히 2줄. 각 줄 26자 이내. 3줄 이상 금지.
@@ -301,7 +305,7 @@ CONTENT_USER = f"""오늘 게시물을 JSON으로 만들어줘.
    5) 저장 유도 한 문장 + @bodetail_official
 JSON:
 {{"section_label":"섹션라벨","vol":"VOL.01","slides":[
-  {{"slide_num":1,"type":"cover","headline_sub":"맥락한줄","headline_main":["묵직한","제목"],"headline_serif":"구체약속","image_queries":["man dark studio portrait","male editorial dark","men moody portrait"]}},
+  {{"slide_num":1,"type":"cover","headline_sub":"맥락한줄","headline_serif":"구체약속","image_queries":["man dark studio portrait","male editorial dark","men moody portrait"]}},
   {{"slide_num":2,"type":"premise","subhead":"전제를 뒤집는 한 문장","body":["상황 공감","통념 반박","그래서 오늘 N가지"],"image_query":""}},
   {{"slide_num":3,"type":"content","number":"01","subhead":"핵심팁제목","body":["내용1","내용2"],"caption":"핵심선언.","image_queries":["man hands dark closeup","male grooming moody","men hands editorial"]}}
 ],"caption_full":"캡션 (첫줄 후킹·저장유도·요약·@bodetail_official)","hashtags":"#bodetail #남자그루밍 ..."}}"""
@@ -343,6 +347,38 @@ if not raw.startswith("{"):          # 검색 설명 등 앞뒤 텍스트 제거
     _s, _e = raw.find("{"), raw.rfind("}")
     if _s != -1 and _e != -1: raw = raw[_s:_e+1]
 content = json.loads(raw)
+
+# ══════════════════════════════════════════════════════════════
+# 3-1. 표지 headline 고정 (A안) — Claude가 재작성 못 하게 코드로 강제
+# ══════════════════════════════════════════════════════════════
+# 미해결 이슈였던 "표지 헤드라인 ≠ 다음편 예고 제목" 불일치의 근본 원인은
+# Claude가 headline_main을 매번 자유롭게 재작성하던 것. 프롬프트 지시만으론
+# 강제가 안 되므로(모델이 안 지키면 그만) 여기서 코드 레벨로 덮어쓴다.
+# 이후 아무 코드도 headline_main을 다시 건드리지 않는다 — 이게 유일한 진입점.
+def enforce_cover_headline(content, topic):
+    """cover 슬라이드의 headline_main을 topics_30.json의 title_main으로 강제 고정한다."""
+    cover = next((s for s in content.get("slides", []) if s.get("type") == "cover"), None)
+    if cover is None:
+        print("❌ cover 슬라이드가 없습니다 — 게시물을 내보낼 수 없습니다.")
+        sys.exit(1)
+    cover["headline_main"] = topic["title_main"]
+    return cover
+
+
+def assert_cover_headline_matches(content, topic):
+    """post_content.json을 내보내기 직전 최종 검증 — 어떤 경로로든 headline_main이
+    title_main과 달라졌다면(버그·다른 코드의 재대입 등) 파일을 쓰지 않고 중단한다."""
+    cover = next((s for s in content.get("slides", []) if s.get("type") == "cover"), None)
+    actual = cover.get("headline_main") if cover else None
+    expected = topic["title_main"]
+    if cover is None or actual != expected:
+        print("❌ 표지 headline 검증 실패 — 게시물을 내보내지 않습니다.")
+        print(f"   기대(title_main): {expected!r}")
+        print(f"   실제(headline_main): {actual!r}")
+        sys.exit(1)
+
+
+enforce_cover_headline(content, topic)
 
 # ── 다음 편 예고: 실제로 다음에 나올 주제를 조회해 주입 (항상 정확) ──
 _total_t = len(schedule["topics"])
@@ -821,6 +857,9 @@ def render_closing():
 # ══════════════════════════════════════════════════════════════
 # 8. 슬라이드 조합 & 저장
 # ══════════════════════════════════════════════════════════════
+# 최종 게이트 — 여기를 통과 못 하면 PNG도 post_content.json도 한 글자도 안 써진다.
+assert_cover_headline_matches(content, topic)
+
 rendered=[]
 rendered.append(("01_커버", render_cover(cover_data)))
 slide_idx=2
@@ -864,6 +903,11 @@ post_json={
     "vol":           content.get("vol",""),
     "caption_full":  content.get("caption_full",""),
     "hashtags":      content.get("hashtags",""),
+    # 표지 headline의 정답값을 결과물에 같이 못박아둔다. generate_daily_post.py 실행
+    # 시점에는 항상 headline_main과 동일하지만(위 assert가 보장), 이후 에디터
+    # (tools/bodetail_editor.html) 등으로 사람이 headline을 손으로 바꿔도 이 값은
+    # 안 바뀌므로 scripts/check_post_consistency.py가 그 변조를 잡아낼 수 있다.
+    "_locked_headline": topic["title_main"],
     "slides":        export_slides,
     "next_preview":  content.get("next_preview", {}),
 }
