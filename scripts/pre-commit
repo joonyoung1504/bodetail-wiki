@@ -1,0 +1,17 @@
+#!/bin/sh
+# 얇은 래퍼 — 실제 검사 로직은 scripts/pre-commit-check.py (git이 버전관리함)
+#
+# 이 파일 자체는 .git/hooks/ 안에 있지 않아 git이 추적한다. 실제 훅으로 쓰려면
+# scripts/install-hooks.sh 로 .git/hooks/pre-commit 에 설치해야 한다.
+# (.git/hooks/ 안의 파일은 git이 관리하지 않아 clone해도 안 따라오기 때문)
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+PYTHON="$(command -v python3 2>/dev/null || command -v python 2>/dev/null)"
+
+if [ -z "$PYTHON" ]; then
+    echo "⚠ python(3)을 찾을 수 없어 pre-commit 검사를 건너뜁니다 (python 설치를 확인하세요)." >&2
+    exit 0
+fi
+
+"$PYTHON" "$REPO_ROOT/scripts/pre-commit-check.py"
+exit $?

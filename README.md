@@ -6,6 +6,10 @@ tags: [layer/meta]
 
 보디테일 브랜드 런칭을 위한 지식 베이스. LLM과 협업해 제품·브랜드·시장·운영 정보를 관리한다.
 
+> **새 PC에서 이 저장소를 clone했다면 가장 먼저 `bash scripts/install-hooks.sh`를 실행하세요.**
+> decisions/ 삭제 방지 등 위키 규칙을 강제하는 pre-commit 훅이 설치됩니다 (`.git/hooks/`는 git이
+> 추적하지 않아 clone에 안 따라옴).
+
 ---
 
 ## 폴더 구조
