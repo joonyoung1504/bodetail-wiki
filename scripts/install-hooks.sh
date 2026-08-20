@@ -24,3 +24,10 @@ chmod +x "$DEST"
 
 echo "pre-commit 훅 설치 완료 → $DEST"
 echo "검사 로직: scripts/pre-commit-check.py (이 파일을 고치면 재설치 없이 바로 반영됩니다)"
+
+if ! python3 -c "import yaml" 2>/dev/null && ! python -c "import yaml" 2>/dev/null; then
+    echo ""
+    echo "⚠ PyYAML이 안 보입니다. ontology/invariants.yaml 기반 검사가 동작하려면:"
+    echo "    python -m pip install -r scripts/requirements.txt"
+    echo "  (없어도 훅 자체는 죽지 않고 경고만 띄우고 통과시킵니다 — fail-open)"
+fi

@@ -2,7 +2,12 @@
 summary: "OEM 4사 비교 — 라온하제 20ml 롤온 1,500개 잠정 결정, 샘플 진행 단계"
 tags: [ops, OEM, 제조, 라온하제, 샘플, MOQ, layer/exec]
 created: 2026-06-17
-updated: 2026-06-17
+updated: 2026-08-20
+relations:
+  - type: supersedes
+    target: ops/OEM-협의-현황
+  - type: derived_from
+    target: raw/04_oem
 ---
 
 # OEM 업체 비교

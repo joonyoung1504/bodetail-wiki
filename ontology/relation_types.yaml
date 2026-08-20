@@ -1,0 +1,102 @@
+# ontology/relation_types.yaml
+#
+# 이 위키의 노트 사이에서 실제로 쓰는 "타입 있는 관계" 정의.
+# 노트 frontmatter의 relations: 필드는 이 목록에 있는 type만 쓸 수 있다.
+# 사용법·frontmatter 형식은 WIKI-RULES.md §8 참조. 순회·영향분석은 scripts/impact.py.
+#
+# 필드
+#   id            관계 타입 이름 (frontmatter relations[].type 값)
+#   description   무슨 관계인지
+#   direction     "unidirectional"(A→B만 의미 있음) | "bidirectional"(양쪽 다 성립)
+#   cardinality   한 노트가 이 타입으로 가질 수 있는 관계 수 (예: "1:1", "1:N", "N:N")
+#   on_change     원본(target)이 바뀌었을 때, 이 관계를 가진 노트(출처)에 어떤 검토가
+#                 필요한지. impact.py가 그대로 출력해준다.
+#   propagates    scripts/impact.py가 이 타입을 따라 depth를 더 전파할지 여부.
+#                 (예: A supersedes B, B가 다시 C를 supersede했다면 A는 사실상 C도
+#                 대체한 것 → 전파 의미 있음. complements는 참고 링크일 뿐이라 전파 안 함)
+
+schema_version: 1
+
+relation_types:
+  - id: supersedes
+    description: >
+      이 노트가 target 노트를 대체한다. target은 더 이상 최신 판단 근거가 아니다
+      (완전히 폐기됐거나, 최소한 이 노트 쪽이 우선한다).
+    direction: unidirectional
+    cardinality: "1:N"   # 한 노트가 여러 개를 대체할 수 있음 (거의 없지만 허용)
+    on_change: >
+      이 노트(대체하는 쪽)가 바뀌면 target(대체된 쪽)은 원칙적으로 재검토 불필요 —
+      이미 낡은 노트이기 때문. 반대로 target이 실수로 다시 수정된다면(예: 누가
+      deprecated 스텁인 줄 모르고 내용을 채움) 이 노트와 내용이 어긋나므로 검토 필요.
+    propagates: true
+
+  - id: depends_on
+    description: >
+      이 노트의 내용 일부가 target 노트의 내용을 전제로 성립한다. target이 바뀌면
+      이 노트도 맞는지 다시 봐야 한다.
+    direction: unidirectional
+    cardinality: "N:N"
+    on_change: >
+      target이 바뀌면 이 노트에서 target을 전제로 쓴 부분을 다시 확인한다. 예:
+      brand/브랜드-정체성.md의 컬러 팔레트 섹션은 brand/DESIGN-bodetail-B-realphoto.md의
+      colors: 값에 depends_on — DESIGN 쪽 컬러가 바뀌면 브랜드-정체성.md의 팔레트
+      섹션도 갱신해야 한다.
+    propagates: true
+
+  - id: may_invalidate
+    description: >
+      이 노트가 담은 사실·발견이 target 노트의 어떤 결정/가정을 무효화할 수 있다.
+      skuradar류 프로젝트의 relations.yaml에 있는 "가정이 틀리면 결론도 틀리다"
+      패턴과 동일한 목적.
+    direction: unidirectional
+    cardinality: "N:N"
+    on_change: >
+      이 노트(가정을 깨는 새 정보)가 새로 생기거나 바뀌면, target의 해당 결정
+      항목이 여전히 유효한지 사람이 판단해야 한다. 자동으로 target을 고치지 않는다
+      — "무효화 가능성이 있다"는 신호일 뿐, 확정 아님. 예:
+      decisions/사지방기간-시행착오-교훈.md(실제로는 Ollama 하이브리드가 아니라
+      GitHub Actions+힉스필드로 갔다는 발견)가 decisions/주요-의사결정.md의
+      "Claude Code 단일 → Ollama 하이브리드" 항목을 may_invalidate한다.
+    propagates: false   # 무효화 "가능성"은 한 단계만 보면 됨 — 연쇄 추정은 과함
+
+  - id: derived_from
+    description: >
+      이 노트는 target(대개 raw/의 원본 자료)을 정리·가공해서 만들어졌다.
+    direction: unidirectional
+    cardinality: "N:1"   # 여러 정리 노트가 하나의 raw 원본에서 파생 가능
+    on_change: >
+      target(원본)이 나중에 수정/보강되면(예: raw/ 파일에 후속 대화 내용 추가),
+      이 노트가 그 내용을 반영했는지 확인해야 한다. 반대 방향(이 노트만 바뀌는 것)은
+      원본에 영향 없음 — raw/는 원칙적으로 불변(WIKI-RULES.md raw/ 규칙).
+    propagates: false   # raw/는 여러 노트의 공통 조상이라 전파하면 부채질만 커짐
+
+  - id: implements
+    description: >
+      이 노트가 설명하는 코드/시스템/규칙이 target 노트(대개 decisions/의 결정)를
+      실제로 구현한다.
+    direction: unidirectional
+    cardinality: "N:N"
+    on_change: >
+      target(결정)이 바뀌면 이 노트가 설명하는 구현이 그 결정과 여전히 일치하는지
+      확인해야 한다 — 결정은 바뀌었는데 코드/문서는 옛날 결정대로인 상태가 가장
+      위험한 드리프트. 예: marketing_auto/MA_05_데일리포스트생성기.md가
+      decisions/표지헤드라인-강제고정.md를 implements — 그 결정이 수정되면
+      generate_daily_post.py 코드가 실제로 그 수정을 반영했는지 봐야 한다.
+    propagates: true
+
+  - id: complements
+    description: >
+      두 노트가 같은 대상을 다른 각도에서 다룬다. 어느 쪽도 다른 쪽을 대체하지
+      않고, 서로 참고만 하면 된다 — 5개 기본 타입(supersedes/depends_on/
+      may_invalidate/derived_from/implements)만으로는 이 "대등한 보완" 관계를
+      표현할 수 없어서 실제 사례(세르칸 벤치마크 두 노트)를 보고 추가했다.
+    direction: bidirectional
+    cardinality: "N:N"
+    on_change: >
+      **검토 불필요.** 이게 이 타입의 핵심 — "관련은 있지만 재검토를 강제할
+      정도는 아닌" 링크를 depends_on과 구분하기 위한 타입. impact.py 결과에서
+      complements는 참고 목록으로만 표시되고 조치 필요 항목에서 빠진다. 예:
+      market/세르칸-벤치마킹-분석.md(계정 프로필·실측 데이터)와
+      content/벤치마크-세르칸-미넨스.md(카드뉴스 구조 장치)는 같은 계정을
+      다른 층위에서 다룰 뿐 서로 대체하지 않는다.
+    propagates: false

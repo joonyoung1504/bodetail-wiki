@@ -1,2 +1,3 @@
 anthropic>=0.40.0
 watchdog>=4.0.0
+pyyaml>=6.0   # scripts/pre-commit-check.py가 ontology/invariants.yaml을 읽는 데 필요

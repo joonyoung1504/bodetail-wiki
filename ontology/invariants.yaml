@@ -1,0 +1,95 @@
+# ontology/invariants.yaml
+#
+# 이 저장소에서 실제로 강제되는 검증 규칙의 단일 목록.
+# scripts/pre-commit-check.py 가 이 파일을 읽어 순서대로 실행한다.
+# 새 규칙을 추가하려면: 아래에 항목 하나 추가 + scripts/checks/<id를 소문자·
+# 하이픈→언더스코어로 바꾼 이름>.py 에 `def check(entries) -> list[str]` 작성.
+# (예: id가 INV-DEC-DELETE면 scripts/checks/inv_dec_delete.py)
+#
+# 필드
+#   id            고유 식별자. 다른 곳에서 이미 쓰인 번호(예: INV-P1)가 있으면 이어받는다.
+#   description   이 규칙이 막는/경고하는 것 한 줄
+#   target        이 규칙이 적용되는 대상 (경로 패턴 또는 범위 서술)
+#   severity      block(문제 발견 시 커밋 차단) | warn(경고만, 커밋은 진행)
+#   origin        어떤 사고·결정에서 이 규칙이 나왔는지. **반드시 채운다.**
+#                 CLAUDE.md 규칙: "이유 없는 규칙은 나중에 아무도 못 지운다."
+#                 비어있거나 "미상"으로 시작하면 pre-commit이 경고를 띄운다(차단은 아님).
+#   related_note  이 규칙의 배경을 설명하는 위키 노트 (있으면)
+
+schema_version: 1
+
+invariants:
+  - id: INV-DEC-DELETE
+    description: >
+      decisions/ 폴더의 .md 파일은 삭제하거나 decisions/ 밖으로 이동할 수 없다.
+      deprecated 태그 여부와 무관하게 항상 적용된다.
+    target: "decisions/**/*.md"
+    severity: block
+    origin: >
+      2026-08-19 대화 — "운영 규칙(문서 삭제 금지·사업맥락 일치 등)이 CLAUDE.md에
+      문장으로만 있어 LLM이 안 지키면 그만"이라는 지적에서 팔란티어 Ontology의
+      Action Type 개념을 도입해 pre-commit 훅으로 실제 강제하기로 함(commit 2e63408).
+      원칙 자체의 뿌리는 WIKI-RULES.md 2026-06-17 초기 설계의 "지우지 않는다" /
+      deprecated 리다이렉트 관행이며, market/경쟁사-분석.md·decisions/브랜드-포지셔닝-결정.md·
+      ops/OEM-협의-현황.md가 그 실제 선례(삭제 대신 리다이렉트 스텁으로 남김).
+    related_note: decisions/사지방기간-시행착오-교훈
+
+  - id: INV-DEC-WIPE
+    description: >
+      decisions/ 파일 내용이 원본 대비 80% 이상 삭제됐는데 deprecated 태그가 없으면
+      "사실상 삭제"로 간주해 차단한다.
+    target: "decisions/**/*.md"
+    severity: block
+    origin: >
+      INV-DEC-DELETE와 같은 문제의식(2026-08-19, commit 2e63408) — 파일을 완전히
+      지우는 것뿐 아니라 내용을 통째로 비우는 것도 같은 위험이라 같은 커밋에서
+      함께 도입했다. 삭제/이동은 git status로 즉시 보이지만 "내용만 비우기"는
+      diff를 안 보면 놓치기 쉬워서 별도 규칙으로 분리했다.
+    related_note: decisions/사지방기간-시행착오-교훈
+
+  - id: INV-META-SUMMARY
+    description: >
+      .md 파일 frontmatter에 summary 필드가 없으면 경고한다(커밋은 막지 않음).
+    target: "**/*.md"
+    severity: warn
+    origin: >
+      WIKI-RULES.md §1(2026-06-17 초기 설계)에 "모든 노트는 summary를 반드시
+      포함한다"는 문장 규칙으로만 있던 것을, 2026-08-19 pre-commit 훅 도입 시
+      실제 검증으로 전환했다(commit 2e63408). block이 아니라 warn인 이유:
+      CLAUDE.md·README.md·WIKI-RULES.md 같은 layer/meta 노트는 애초에 summary
+      없이 운영돼 왔고, 이걸 갑자기 block으로 걸면 기존 노트 다수가 막힌다 —
+      점진적 정리 대상으로 남겨둔다.
+    related_note: WIKI-RULES.md
+
+  - id: INV-OPS-BULK
+    description: >
+      커밋에 50개 이상 파일이 포함되면 CLAUDE.md "자동 실행의 예외" 조항을
+      확인했는지 y/n으로 확인받는다. 비대화형 환경에서는 안전하게 차단한다.
+    target: "커밋 전체 (스테이징된 파일 수 기준)"
+    severity: block
+    origin: >
+      2026-08-19 — 사지방 기간(2026-07~08) 자동화 코드 275개 커밋을 병합하며,
+      CLAUDE.md 규칙("모든 작업을 승인 없이 자동 실행")을 문자 그대로 따랐다면
+      확인 없이 수백MB 바이너리를 그대로 받았을 뻔한 사례. 이후 CLAUDE.md에
+      "자동 실행의 예외" 조항을 신설했고, 같은 날 pre-commit 훅으로 강제까지
+      연결했다(commit 2e63408).
+    related_note: decisions/사지방기간-시행착오-교훈
+
+  - id: INV-P1
+    description: >
+      게시물 표지 headline_main은 content/topics_30.json의 title_main과 정확히
+      일치해야 한다 — Claude가 표지 문구를 재작성해도 안 되고, 에디터로 사람이
+      손을 대도 안 된다.
+    target: "posts/latest/post_content.json"
+    severity: block
+    origin: >
+      raw/2026-07~08_사지방기간_전체기록.md §2-7 — DAY1에서 예고한 "다음 편"
+      제목과 실제 DAY2로 생성된 게시물의 표지 문구가 어긋난 사고를 발견. 원인은
+      title_main이 프롬프트에 참고용으로만 주어지고 표지 문구는 Claude가 매번
+      새로 짓게 되어 있었기 때문. 합의된 해법(A안: headline을 title_main으로
+      고정)을 2026-08-20 코드로 구현(commit 59f429d).
+      "INV-P1"이라는 번호 자체는 이 문제를 다루던 콘텐츠 자동화 저장소의
+      CLAUDE.md 초안(이 위키 CLAUDE.md와 병합 검토 후 삭제됨, commit d33a91f
+      "CLAUDE_추가지침.md 삭제" 참조)이 이미 이 이슈를 "INV-P1 위반"으로 부르고
+      있었던 것을 그대로 이어받았다 — 번호를 새로 붙이지 않고 기존 명명을 존중.
+    related_note: decisions/표지헤드라인-강제고정

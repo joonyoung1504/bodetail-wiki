@@ -2,7 +2,10 @@
 summary: "바디테일 ODM 제품 개발 의뢰서 — 처방·용기·안전기준·MOQ·독점처방 스펙"
 tags: [product, OEM, ODM, 처방, 용기, 안전기준, MOQ, layer/exec]
 created: 2026-06-17
-updated: 2026-06-17
+updated: 2026-08-20
+relations:
+  - type: implements
+    target: decisions/주요-의사결정
 ---
 
 # ODM 제품 개발 의뢰서 (Product Brief)
