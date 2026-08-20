@@ -9,13 +9,17 @@
     python scripts/impact.py "MA_05"              # 부분 일치도 허용
     python scripts/impact.py "MA_05" --depth 1     # 전파 깊이 제한 (기본 3)
 
-동작 원리:
-  1. 저장소의 모든 .md 파일 frontmatter에서 relations: 필드를 읽어 관계 그래프를 만든다.
-     (A가 relations: [{type: X, target: B}] 를 가지면 A --X--> B 간선.)
-  2. "노트가 바뀌면 영향받는 것"은 그 노트를 target으로 가리키는 노트들(역방향 간선)이다.
-  3. depth 1은 항상 전부 보여준다. depth 2 이상은 ontology/relation_types.yaml의
-     propagates: true 인 관계 타입을 통해서만 더 전파한다(무한 확산 방지).
-  4. complements처럼 direction: bidirectional인 타입은 양방향 간선으로 취급한다.
+동작 원리 (2026-08-21 개정 — 양방향 조회):
+  1. 저장소의 모든 .md 파일 frontmatter에서 relations: 필드를 읽어 두 그래프를 만든다.
+       incoming[X] = X를 target으로 가리키는 (source, type) 목록
+       outgoing[X] = X가 source로 가리키는 (type, target) 목록
+     (direction: bidirectional 타입은 incoming 쪽에 양방향으로 합성해 심는다.)
+  2. 조회한 노트가 "target"인 관계(incoming)와 "source"인 관계(outgoing)를 둘 다 본다
+     — 단, 관계 타입의 query_direction이 그 방향을 지원할 때만. 예를 들어 may_invalidate는
+     both라서 두 방향 다 보여주지만, supersedes는 incoming만 유의미해서 outgoing 방향
+     조회에서는 안 보여준다(ontology/relation_types.yaml 참조).
+  3. depth 1은 항상 전부 보여준다. depth 2 이상은 propagates: true 인 관계 타입을 통해
+     서만, 그리고 depth 1에서 쓰인 것과 같은 방향으로만 더 전파한다(무한 확산 방지).
 """
 import argparse
 import re
@@ -62,13 +66,18 @@ def all_notes():
     return notes
 
 
-def build_graph(notes, rel_types):
-    """반환: edges[target] = [(source, type), ...]  (target을 향한 역방향 간선 모음)"""
-    edges = {}
-    unknown = []  # [(note, type)] — relation_types.yaml에 없는 타입을 쓴 곳
+def build_graphs(notes, rel_types):
+    """반환: (incoming, outgoing, unknown_types)
+    incoming[X] = [(source, type), ...]  — X를 target으로 가리키는 관계 (양방향 타입 합성 포함)
+    outgoing[X] = [(type, target), ...]  — X가 source로 가리키는 관계 (선언된 그대로 + 양방향 합성)
+    unknown_types = [(note, type), ...]  — relation_types.yaml에 없는 타입을 쓴 곳
+    """
+    incoming = {}
+    outgoing = {}
+    unknown = []
 
-    def add(src, typ, tgt):
-        edges.setdefault(tgt, []).append((src, typ))
+    def add_incoming(tgt, typ, src):
+        incoming.setdefault(tgt, []).append((src, typ))
 
     for name, path in notes.items():
         text = path.read_text(encoding="utf-8", errors="replace")
@@ -83,17 +92,15 @@ def build_graph(notes, rel_types):
             rt = rel_types.get(typ)
             if rt is None:
                 unknown.append((name, typ))
-            add(name, typ, tgt)
+
+            add_incoming(tgt, typ, name)
+            outgoing.setdefault(name, []).append((typ, tgt))
+
             if rt and rt.get("direction") == "bidirectional":
-                add(tgt, typ, name)
+                add_incoming(name, typ, tgt)
+                outgoing.setdefault(tgt, []).append((typ, name))
 
-    if unknown:
-        print("⚠ ontology/relation_types.yaml에 정의되지 않은 relation type 사용 (경고만, 계속 진행):")
-        for note, typ in unknown:
-            print(f"  - {note}: type={typ!r} — 오타이거나 relation_types.yaml에 추가가 필요합니다.")
-        print()
-
-    return edges
+    return incoming, outgoing, unknown
 
 
 def resolve_note_name(query, notes):
@@ -112,26 +119,45 @@ def resolve_note_name(query, notes):
     sys.exit(1)
 
 
-def analyze(start, edges, rel_types, max_depth):
-    """반환: [(depth, source, type, target)] 리스트. target은 이 사슬을 유발한 상위 노트."""
+def analyze(start, incoming, outgoing, rel_types, max_depth):
+    """반환: [(depth, note, type, via, direction)] 리스트.
+    direction="incoming" → note가 via(=target)를 향해 --type--> 관계를 가짐 (note=source)
+    direction="outgoing" → via(=source)가 note(=target)를 향해 --type--> 관계를 가짐
+    """
     results = []
     visited = {start}
-    frontier = [start]
+    frontier = [(start, "incoming"), (start, "outgoing")]
     depth = 1
     while frontier and depth <= max_depth:
         next_frontier = []
-        for node in frontier:
-            for source, typ in edges.get(node, []):
-                if source in visited:
-                    continue
-                visited.add(source)
-                results.append((depth, source, typ, node))
+        for node, direction in frontier:
+            candidates = incoming.get(node, []) if direction == "incoming" else \
+                [(tgt, typ) for typ, tgt in outgoing.get(node, [])]
+            for other, typ in candidates:
                 rt = rel_types.get(typ, {})
+                allowed = rt.get("query_direction", "incoming")
+                if allowed not in (direction, "both"):
+                    continue
+                if other in visited:
+                    continue
+                visited.add(other)
+                results.append((depth, other, typ, node, direction))
                 if rt.get("propagates"):
-                    next_frontier.append(source)
+                    next_frontier.append((other, direction))
         frontier = next_frontier
         depth += 1
     return results
+
+
+def format_on_change(rt, direction):
+    field = "on_change_incoming" if direction == "incoming" else "on_change_outgoing"
+    text = (rt.get(field) or "").strip()
+    if not text:
+        return ""
+    one_line = " ".join(text.split())
+    if len(one_line) > 140:
+        one_line = one_line[:140].rsplit(" ", 1)[0] + " …"
+    return one_line
 
 
 def main():
@@ -144,32 +170,37 @@ def main():
     notes = all_notes()
     start = resolve_note_name(args.note, notes)
 
-    edges = build_graph(notes, rel_types)
-    results = analyze(start, edges, rel_types, args.depth)
+    incoming, outgoing, unknown = build_graphs(notes, rel_types)
+
+    if unknown:
+        print("⚠ ontology/relation_types.yaml에 정의되지 않은 relation type 사용 (경고만, 계속 진행):")
+        for note, typ in unknown:
+            print(f"  - {note}: type={typ!r} — 오타이거나 relation_types.yaml에 추가가 필요합니다.")
+        print()
+
+    results = analyze(start, incoming, outgoing, rel_types, args.depth)
 
     print(f"'{start}'가 바뀌면 검토가 필요한 노트\n")
 
     if not results:
-        print("  (relations: 로 이 노트를 가리키는 노트가 없습니다 — 영향 없음, 또는 관계가 아직 기록 안 됨)")
+        print("  (relations: 로 이 노트를 가리키거나, 이 노트가 가리키는 노트가 없습니다")
+        print("   — 영향 없음, 또는 관계가 아직 기록 안 됨)")
         return
 
     by_depth = {}
-    for depth, source, typ, via in results:
-        by_depth.setdefault(depth, []).append((source, typ, via))
+    for depth, note, typ, via, direction in results:
+        by_depth.setdefault(depth, []).append((note, typ, via, direction))
 
     for depth in sorted(by_depth):
         print(f"[depth {depth}]")
-        for source, typ, via in by_depth[depth]:
+        for note, typ, via, direction in by_depth[depth]:
             rt = rel_types.get(typ, {})
-            on_change = (rt.get("on_change") or "").strip()
-            arrow_target = via if depth == 1 else f"{via} (전파 경유)"
-            print(f"  {source}")
-            print(f"    --{typ}--> {arrow_target}")
+            relation_line = f"{note} --{typ}--> {via}" if direction == "incoming" else f"{via} --{typ}--> {note}"
+            print(f"  {note}   [{direction}]")
+            print(f"    {relation_line}")
+            on_change = format_on_change(rt, direction)
             if on_change:
-                one_line = " ".join(on_change.split())
-                if len(one_line) > 110:
-                    one_line = one_line[:110].rsplit(" ", 1)[0] + " …"
-                print(f"    조치: {one_line}")
+                print(f"    조치: {on_change}")
         print()
 
     total = len(results)
