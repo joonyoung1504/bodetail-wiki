@@ -45,6 +45,26 @@ def load_invariants():
     return data.get("invariants", [])
 
 
+VALID_SEVERITIES = {"block", "warn"}
+
+
+def validate_severities(invariants):
+    """severity가 block/warn이 아니면 조용히 warn으로 취급하지 않고 즉시 커밋을 막는다.
+    이 파일 전체가 '규칙이 실제로 지켜지는지'를 보장하는 장치인데, 그 장치 자체의
+    설정 오타를 조용히 넘기면 차단이 경고로 격하되는 걸 아무도 모르게 된다."""
+    bad = []
+    for inv in invariants:
+        severity = inv.get("severity")
+        if severity not in VALID_SEVERITIES:
+            bad.append((inv.get("id", "?"), severity))
+    if bad:
+        print("❌ ontology/invariants.yaml 오류 — severity 값이 'block'/'warn' 중 하나가 아닙니다:")
+        for inv_id, severity in bad:
+            print(f"  - {inv_id}: severity={severity!r}")
+        print("  이 규칙 오타났으니 고치고 다시 커밋하세요. (severity는 반드시 block 또는 warn)")
+        sys.exit(1)
+
+
 def check_origins(invariants):
     """origin 필드가 비어있거나 '미상'으로 시작하면 경고(차단 아님).
     CLAUDE.md 규칙: 이유 없는 규칙은 나중에 아무도 못 지운다."""
@@ -90,6 +110,7 @@ def main():
     if not invariants:
         sys.exit(0)
 
+    validate_severities(invariants)
     check_origins(invariants)
 
     blocking = []   # [(id, description, problems)]

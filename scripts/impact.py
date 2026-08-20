@@ -65,6 +65,7 @@ def all_notes():
 def build_graph(notes, rel_types):
     """반환: edges[target] = [(source, type), ...]  (target을 향한 역방향 간선 모음)"""
     edges = {}
+    unknown = []  # [(note, type)] — relation_types.yaml에 없는 타입을 쓴 곳
 
     def add(src, typ, tgt):
         edges.setdefault(tgt, []).append((src, typ))
@@ -79,10 +80,19 @@ def build_graph(notes, rel_types):
             tgt = rel.get("target")
             if not typ or not tgt:
                 continue
-            add(name, typ, tgt)
             rt = rel_types.get(typ)
+            if rt is None:
+                unknown.append((name, typ))
+            add(name, typ, tgt)
             if rt and rt.get("direction") == "bidirectional":
                 add(tgt, typ, name)
+
+    if unknown:
+        print("⚠ ontology/relation_types.yaml에 정의되지 않은 relation type 사용 (경고만, 계속 진행):")
+        for note, typ in unknown:
+            print(f"  - {note}: type={typ!r} — 오타이거나 relation_types.yaml에 추가가 필요합니다.")
+        print()
+
     return edges
 
 
