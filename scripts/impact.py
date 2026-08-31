@@ -56,13 +56,23 @@ def frontmatter(text):
 
 
 def all_notes():
-    """저장소의 모든 .md 파일을 {노트명(확장자 없는 상대경로): Path} 로 반환."""
+    """저장소의 모든 .md 파일 + raw/의 비-.md 원본(.txt/.html)을
+    {노트명(확장자 없는 상대경로): Path} 로 반환.
+
+    raw/에는 정리된 .md뿐 아니라 정리 전 원본(.txt/.html)도 있고, derived_from
+    관계가 이런 원본을 target으로 가리키는 게 정상이다(예: raw/src_laonhase_mail.txt).
+    .md만 스캔하면 relations: 에는 정확히 기록되는데 이 도구로는 그 노드를 조회할
+    방법이 없어지는 버그가 있었다(2026-08-21 raw/ 관계 제안 테스트 중 발견).
+    """
     notes = {}
-    for p in REPO_ROOT.rglob("*.md"):
-        if any(part in IGNORE_DIRS for part in p.parts):
-            continue
-        rel = p.relative_to(REPO_ROOT).as_posix()[:-3]  # .md 제거
-        notes[rel] = p
+    patterns = ["*.md", "raw/*.txt", "raw/*.html", "raw/*.htm"]
+    for pattern in patterns:
+        for p in REPO_ROOT.rglob(pattern):
+            if any(part in IGNORE_DIRS for part in p.parts):
+                continue
+            rel = p.relative_to(REPO_ROOT).as_posix()
+            rel = rel[: -len(p.suffix)]  # 확장자 제거 (.md/.txt/.html/.htm)
+            notes[rel] = p
     return notes
 
 

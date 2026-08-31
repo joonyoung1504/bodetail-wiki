@@ -79,17 +79,35 @@ raw/ 폴더에 새 파일이 추가되면 아래를 순서대로 자동 실행:
   - Related Notes: [[관련노트]]
   - Open Questions:
 
-**3단계 — Knowledge Connections 추가**
+**3단계 — relations 제안 (타입 있는 관계)**
+기존 노트들을 훑어보고, 아래 5개 타입 중 해당하는 관계가 있으면 노트(신규든 기존이든)
+frontmatter에 `relations:`로 추가한다. 형식·전체 정의는 WIKI-RULES.md §8,
+`ontology/relation_types.yaml` 참조.
+
+- `derived_from` — 이 노트가 raw/ 원본에서 파생됨 (raw/ 처리 결과물이면 거의 항상 해당)
+- `depends_on` — 이 노트 내용의 일부가 다른 노트를 전제로 성립함
+- `supersedes` — 이 노트가 기존 노트를 대체함
+- `may_invalidate` — 이 노트의 새 사실이 기존 결정의 가정을 무효화할 수 있음
+- `implements` — 이 노트가 설명하는 코드/시스템이 decisions/의 결정을 실제로 구현함
+
+**원칙 — 확신 없으면 만들지 않는다.** 관계가 있을 것 같지만 확신이 안 서면
+`relations:`로 단정하지 말고, 그 노트의 Open Questions(또는 관련 노트 쪽 Open
+Questions)에 "관계 있을 수 있음 — 확인 필요: [[노트명]] (추정 타입: ...)"로 표시만
+하고 넘어간다. **틀린 관계를 만드는 것보다 안 만드는 게 낫다** — 잘못된 `relations:`는
+`scripts/impact.py`가 틀린 영향 목록을 보여주게 만들어서, 관계가 아예 없는 것보다 더
+나쁘다.
+
+**4단계 — Knowledge Connections 추가**
 분류된 노트 맨 아래에 추가:
   ## Knowledge Connections
   - **Related Topics:** [[개념키워드A]], [[개념키워드B]]
   - **Related Notes:** [[기존관련노트]]
   - **Open Questions:** 미확정 사항
 
-**4단계 — 역방향 링크**
+**5단계 — 역방향 링크**
 기존 관련 노트들에도 이 노트로 오는 [[링크]] 추가
 
-**5단계 — git push**
+**6단계 — git push**
 git add . → git commit -m "auto: [파일명] 지식화 완료" → git push
 
 ## 사업 맥락 (항상 참고)

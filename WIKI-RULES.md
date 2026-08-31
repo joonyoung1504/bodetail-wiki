@@ -142,14 +142,19 @@ relations:
 
 ### 관계 타입 요약
 
-| type | 의미 | on_change (원본이 바뀌면) |
+| type | 의미 | query_direction |
 |---|---|---|
-| `supersedes` | 이 노트가 target을 대체함 | target은 원칙적으로 검토 불필요(이미 낡음) |
-| `depends_on` | target이 바뀌면 이 노트도 재검토 | 이 노트에서 target 전제로 쓴 부분 확인 |
-| `may_invalidate` | 이 노트의 발견이 target의 결정을 무효화할 수 있음 | target의 해당 결정이 여전히 유효한지 사람이 판단 |
-| `derived_from` | 이 노트는 target(대개 raw/)에서 파생됨 | target이 보강되면 이 노트가 반영했는지 확인 |
-| `implements` | 이 노트가 설명하는 구현이 target(결정)을 실제로 구현함 | 구현이 target과 여전히 일치하는지 확인 |
-| `complements` | 대등한 보완 관계, 대체 아님 | **검토 불필요** — 참고만 |
+| `supersedes` | 이 노트가 target을 대체함 | incoming |
+| `depends_on` | target이 바뀌면 이 노트도 재검토 | incoming |
+| `may_invalidate` | 이 노트의 발견이 target의 결정을 무효화할 수 있음 | both |
+| `derived_from` | 이 노트는 target(대개 raw/)에서 파생됨 | incoming |
+| `implements` | 이 노트가 설명하는 구현이 target(결정)을 실제로 구현함 | both |
+| `complements` | 대등한 보완 관계, 대체 아님 | incoming (양방향 간선) |
+
+> 2026-08-21부터 `on_change`는 방향별로 `on_change_incoming`/`on_change_outgoing`
+> 두 필드로 분리돼 있다(target 조회 시 vs source 조회 시 다른 안내가 필요해서 —
+> 예: `supersedes`를 한 문단에 섞어 썼다가 안내 문구가 잘려서 실제로 문제가 됐다).
+> 정확한 문구는 위 표가 아니라 `ontology/relation_types.yaml` 원본을 본다.
 
 ### 지금은 전면 적용 안 함
 
@@ -157,6 +162,23 @@ relations:
 현재 관계가 뚜렷한 노트 10~15개에만 시범 적용돼 있다(각 노트 frontmatter에서
 `relations:` 유무로 확인 가능). **새 노트를 만들 때부터** 관계가 명확하면 적는 것을
 기본으로 하고, 기존 노트는 수정하면서 자연스럽게 채워나간다 — 일괄 소급 작업은 하지 않는다.
+
+### raw/ 처리 시 relations 제안 — 2026-08-21 도입
+
+`raw/` 원본을 노트로 정리할 때(CLAUDE.md "raw/ 파일 추가 시 자동 지식화 규칙" 3단계),
+전면 소급 대신 **매번 새 노트를 만들 때마다 자연스럽게 relations를 채워나가는 방식**으로
+10~15개 시범 적용의 한계(전체의 7% 수준)를 서서히 메운다. 처리 대상 원본을 기존 노트와
+대조해 5개 타입 중 해당하는 게 있으면 추가한다:
+
+- 원본을 요약·가공한 노트라면 → 거의 항상 `derived_from`
+- 원본 내용이 기존 결정의 전제를 건드리면 → `depends_on` 또는 `may_invalidate` 검토
+- 원본이 기존 노트를 완전히 대체하는 내용이면 → `supersedes`
+- 원본이 어떤 코드/시스템의 근거라면 → `implements`
+
+**확신 없으면 만들지 않는다.** 애매하면 `relations:`에 단정적으로 넣지 말고, 관련
+노트의 `Open Questions`에 "관계 있을 수 있음 — 확인 필요"로만 표시한다. 틀린 관계
+하나가 `scripts/impact.py` 결과 전체의 신뢰도를 깎는다 — 관계 없음보다 틀린 관계가
+더 나쁘다.
 
 ### 영향 분석·연쇄 수정
 
